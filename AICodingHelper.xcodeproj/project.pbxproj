@@ -8,14 +8,18 @@
 
 /* Begin PBXBuildFile section */
 		BB7FF80F2C2CAA9B000B60C3 /* AICodingHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF80E2C2CAA9B000B60C3 /* AICodingHelperApp.swift */; };
-		BB7FF8112C2CAA9B000B60C3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF8102C2CAA9B000B60C3 /* ContentView.swift */; };
 		BB7FF8132C2CAA9C000B60C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB7FF8122C2CAA9C000B60C3 /* Assets.xcassets */; };
 		BB7FF8162C2CAA9C000B60C3 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB7FF8152C2CAA9C000B60C3 /* Preview Assets.xcassets */; };
-		BB7FF8182C2CAA9C000B60C3 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF8172C2CAA9C000B60C3 /* Persistence.swift */; };
 		BB7FF81B2C2CAA9C000B60C3 /* AICodingHelper.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF8192C2CAA9C000B60C3 /* AICodingHelper.xcdatamodeld */; };
 		BB7FF8262C2CAA9D000B60C3 /* AICodingHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF8252C2CAA9D000B60C3 /* AICodingHelperTests.swift */; };
 		BB7FF8302C2CAA9D000B60C3 /* AICodingHelperUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF82F2C2CAA9D000B60C3 /* AICodingHelperUITests.swift */; };
 		BB7FF8322C2CAA9D000B60C3 /* AICodingHelperUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF8312C2CAA9D000B60C3 /* AICodingHelperUITestsLaunchTests.swift */; };
+		BB7FF8412C2CAB19000B60C3 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF8402C2CAB19000B60C3 /* MainView.swift */; };
+		BB7FF8442C2CAB4E000B60C3 /* CodeEditor in Frameworks */ = {isa = PBXBuildFile; productRef = BB7FF8432C2CAB4E000B60C3 /* CodeEditor */; };
+		BB7FF84B2C2CADA4000B60C3 /* FileTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF84A2C2CADA4000B60C3 /* FileTree.swift */; };
+		BB7FF84D2C2CADE2000B60C3 /* FileNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF84C2C2CADE2000B60C3 /* FileNode.swift */; };
+		BB7FF84F2C2CAE00000B60C3 /* FileSystemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF84E2C2CAE00000B60C3 /* FileSystemView.swift */; };
+		BB7FF8512C2CAE13000B60C3 /* FileNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF8502C2CAE13000B60C3 /* FileNodeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,10 +42,8 @@
 /* Begin PBXFileReference section */
 		BB7FF80B2C2CAA9B000B60C3 /* AICodingHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AICodingHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB7FF80E2C2CAA9B000B60C3 /* AICodingHelperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICodingHelperApp.swift; sourceTree = "<group>"; };
-		BB7FF8102C2CAA9B000B60C3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BB7FF8122C2CAA9C000B60C3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BB7FF8152C2CAA9C000B60C3 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		BB7FF8172C2CAA9C000B60C3 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		BB7FF81A2C2CAA9C000B60C3 /* AICodingHelper.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = AICodingHelper.xcdatamodel; sourceTree = "<group>"; };
 		BB7FF81C2C2CAA9C000B60C3 /* AICodingHelper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AICodingHelper.entitlements; sourceTree = "<group>"; };
 		BB7FF8212C2CAA9D000B60C3 /* AICodingHelperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AICodingHelperTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -49,6 +51,12 @@
 		BB7FF82B2C2CAA9D000B60C3 /* AICodingHelperUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AICodingHelperUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB7FF82F2C2CAA9D000B60C3 /* AICodingHelperUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICodingHelperUITests.swift; sourceTree = "<group>"; };
 		BB7FF8312C2CAA9D000B60C3 /* AICodingHelperUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICodingHelperUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		BB7FF8402C2CAB19000B60C3 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		BB7FF8492C2CACE0000B60C3 /* FileTestingPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = FileTestingPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		BB7FF84A2C2CADA4000B60C3 /* FileTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTree.swift; sourceTree = "<group>"; };
+		BB7FF84C2C2CADE2000B60C3 /* FileNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNode.swift; sourceTree = "<group>"; };
+		BB7FF84E2C2CAE00000B60C3 /* FileSystemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemView.swift; sourceTree = "<group>"; };
+		BB7FF8502C2CAE13000B60C3 /* FileNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNodeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +64,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BB7FF8442C2CAB4E000B60C3 /* CodeEditor in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,10 +108,10 @@
 		BB7FF80D2C2CAA9B000B60C3 /* AICodingHelper */ = {
 			isa = PBXGroup;
 			children = (
+				BB7FF83E2C2CAAF3000B60C3 /* Application */,
 				BB7FF80E2C2CAA9B000B60C3 /* AICodingHelperApp.swift */,
-				BB7FF8102C2CAA9B000B60C3 /* ContentView.swift */,
+				BB7FF8492C2CACE0000B60C3 /* FileTestingPlayground.playground */,
 				BB7FF8122C2CAA9C000B60C3 /* Assets.xcassets */,
-				BB7FF8172C2CAA9C000B60C3 /* Persistence.swift */,
 				BB7FF81C2C2CAA9C000B60C3 /* AICodingHelper.entitlements */,
 				BB7FF8192C2CAA9C000B60C3 /* AICodingHelper.xcdatamodeld */,
 				BB7FF8142C2CAA9C000B60C3 /* Preview Content */,
@@ -135,6 +144,34 @@
 			path = AICodingHelperUITests;
 			sourceTree = "<group>";
 		};
+		BB7FF83E2C2CAAF3000B60C3 /* Application */ = {
+			isa = PBXGroup;
+			children = (
+				BB7FF8452C2CABEF000B60C3 /* FileBrowser */,
+				BB7FF83F2C2CAAFA000B60C3 /* Main */,
+			);
+			path = Application;
+			sourceTree = "<group>";
+		};
+		BB7FF83F2C2CAAFA000B60C3 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				BB7FF8402C2CAB19000B60C3 /* MainView.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		BB7FF8452C2CABEF000B60C3 /* FileBrowser */ = {
+			isa = PBXGroup;
+			children = (
+				BB7FF84C2C2CADE2000B60C3 /* FileNode.swift */,
+				BB7FF84A2C2CADA4000B60C3 /* FileTree.swift */,
+				BB7FF84E2C2CAE00000B60C3 /* FileSystemView.swift */,
+				BB7FF8502C2CAE13000B60C3 /* FileNodeView.swift */,
+			);
+			path = FileBrowser;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -151,6 +188,9 @@
 			dependencies = (
 			);
 			name = AICodingHelper;
+			packageProductDependencies = (
+				BB7FF8432C2CAB4E000B60C3 /* CodeEditor */,
+			);
 			productName = AICodingHelper;
 			productReference = BB7FF80B2C2CAA9B000B60C3 /* AICodingHelper.app */;
 			productType = "com.apple.product-type.application";
@@ -223,6 +263,9 @@
 				Base,
 			);
 			mainGroup = BB7FF8022C2CAA9B000B60C3;
+			packageReferences = (
+				BB7FF8422C2CAB4E000B60C3 /* XCRemoteSwiftPackageReference "CodeEditor" */,
+			);
 			productRefGroup = BB7FF80C2C2CAA9B000B60C3 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -265,10 +308,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BB7FF8182C2CAA9C000B60C3 /* Persistence.swift in Sources */,
+				BB7FF8512C2CAE13000B60C3 /* FileNodeView.swift in Sources */,
 				BB7FF81B2C2CAA9C000B60C3 /* AICodingHelper.xcdatamodeld in Sources */,
-				BB7FF8112C2CAA9B000B60C3 /* ContentView.swift in Sources */,
+				BB7FF8412C2CAB19000B60C3 /* MainView.swift in Sources */,
 				BB7FF80F2C2CAA9B000B60C3 /* AICodingHelperApp.swift in Sources */,
+				BB7FF84B2C2CADA4000B60C3 /* FileTree.swift in Sources */,
+				BB7FF84D2C2CADE2000B60C3 /* FileNode.swift in Sources */,
+				BB7FF84F2C2CAE00000B60C3 /* FileSystemView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -589,6 +635,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BB7FF8422C2CAB4E000B60C3 /* XCRemoteSwiftPackageReference "CodeEditor" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ZeeZide/CodeEditor.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BB7FF8432C2CAB4E000B60C3 /* CodeEditor */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BB7FF8422C2CAB4E000B60C3 /* XCRemoteSwiftPackageReference "CodeEditor" */;
+			productName = CodeEditor;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		BB7FF8192C2CAA9C000B60C3 /* AICodingHelper.xcdatamodeld */ = {
