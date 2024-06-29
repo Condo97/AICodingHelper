@@ -6,3 +6,14 @@
 //
 
 import Foundation
+
+
+class AICodingHelperWebSocketConnector {
+    
+    static func getStream() -> SocketStream {
+        WebSocketClient.connect(
+            url: URL(string: "\(Constants.Networking.WebSocket.aiCodingHelperWebSocketServer)\(Constants.Networking.WebSocket.Endpoints.getChatStream)")!,
+            headers: nil)
+    }
+    
+}

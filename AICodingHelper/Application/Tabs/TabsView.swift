@@ -10,7 +10,8 @@ import SwiftUI
 struct TabsView: View {
     
     @Binding var openTabs: [CodeViewModel]
-    @Binding var selectedTab: CodeViewModel
+    @ObservedObject var selectedTab: CodeViewModel
+    @State var onSelect: (CodeViewModel) -> Void
     
     
     private static let tabsHeight: CGFloat = 60.0
@@ -60,15 +61,16 @@ struct TabsView: View {
                         set: { value in
                             if value {
                                 // If true set selectedTab to openTab
-                                selectedTab = openTab
+//                                selectedTab = openTab
+                                onSelect(openTab)
                             }
                         })
                 }
                 
-                TabView(
-                    title: openTabTitle,
-                    open: openTabOpen,
-                    selected: openTabSelected)
+//                CodeTabView(
+//                    title: openTabTitle,
+//                    open: openTabOpen,
+//                    selected: openTabSelected)
             }
         }
         .frame(height: TabsView.tabsHeight)
@@ -76,11 +78,11 @@ struct TabsView: View {
     
 }
 
-#Preview {
-    
-    TabsView(
-        openTabs: .constant([CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt")]),
-        selectedTab: .constant(CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt"))
-    )
-    
-}
+//#Preview {
+//    
+//    TabsView(
+//        openTabs: .constant([CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt")]),
+//        selectedTab: .constant(CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt"))
+//    )
+//    
+//}

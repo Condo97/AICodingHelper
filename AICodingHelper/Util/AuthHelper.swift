@@ -22,7 +22,7 @@ class AuthHelper {
     static func ensure() async throws -> String {
         // If no authToken, register the user and update the authToken in UserDefaults
         if UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey) == nil {
-            let registerUserResponse = try await ChitChatHTTPSConnector.registerUser()
+            let registerUserResponse = try await AICodingHelperServerHTTPSConnector.registerUser()
             
             UserDefaults.standard.set(registerUserResponse.body.authToken, forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)
         }
@@ -40,28 +40,11 @@ class AuthHelper {
     static func regenerate() async throws -> String {
         UserDefaults.standard.set(nil, forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)
         
-        let registerUserResponse = try await ChitChatHTTPSConnector.registerUser()
+        let registerUserResponse = try await AICodingHelperServerHTTPSConnector.registerUser()
         
         UserDefaults.standard.set(registerUserResponse.body.authToken, forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)
         
         return UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)!
-    }
-    
-    // TODO: Legacy need to delete
-    static func ensure(completion: ((String)->Void)?) {
-        // If no authToken, register the user and update the authToken in UserDefaults
-        if UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey) == nil {
-            ChitChatHTTPSConnector.registerUser(completion: {response in
-                // Set the authToken
-                UserDefaults.standard.set(response.body.authToken, forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)
-                
-                // Call completion block
-                completion?(UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)!)
-            })
-        } else {
-            // Call completion block
-            completion?(UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)!)
-        }
     }
     
 }

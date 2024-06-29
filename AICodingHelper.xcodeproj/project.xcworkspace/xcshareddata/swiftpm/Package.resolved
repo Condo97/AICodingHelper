@@ -1,13 +1,13 @@
 {
-  "originHash" : "415f14ddaa6c1a6bbdcd8800cc7d9e5f3c33977ac2415edf0f7b5cf491356bdb",
+  "originHash" : "2d354ad5d3111b94a4631e3f7fa00ee18683746080ce4d5daf1faddb96c44fc8",
   "pins" : [
     {
       "identity" : "codeeditor",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ZeeZide/CodeEditor.git",
+      "location" : "git@github.com:Condo97/CodeEditor.git",
       "state" : {
-        "revision" : "3a924589c957383693cae6336a29c3ead602ec96",
-        "version" : "1.2.4"
+        "branch" : "main",
+        "revision" : "9e13107830635bd5b816922b1b7406992e48c655"
       }
     },
     {

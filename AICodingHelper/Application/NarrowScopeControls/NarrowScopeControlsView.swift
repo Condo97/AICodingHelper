@@ -21,8 +21,8 @@ struct NarrowScopeControlsView: View {
                     label: Text("//")
                         .font(.system(size: 100.0))
                         .minimumScaleFactor(0.01),
-                    subtitle: "Comment",
-                    hoverDescription: "AI comments your \(scope.name)",
+                    subtitle: .constant("Comment"),
+                    hoverDescription: Binding(get: {"AI comments your \(scope.name)"}, set: {_ in}),
                     action: { onSubmit(.comment) })
                 
                 // Bug Fix
@@ -30,8 +30,8 @@ struct NarrowScopeControlsView: View {
                     label: Image(Constants.ImageName.Actions.bug)
                         .resizable()
                         .aspectRatio(contentMode: .fit),
-                    subtitle: "Bug Fix",
-                    hoverDescription: "AI fixes bugs in your \(scope.name)",
+                    subtitle: .constant("Bug Fix"),
+                    hoverDescription: Binding(get: {"AI fixes bugs in your \(scope.name)"}, set: {_ in}),
                     action: { onSubmit(.bugFix) })
                 
                 // Split
@@ -39,8 +39,8 @@ struct NarrowScopeControlsView: View {
                     label: Image(Constants.ImageName.Actions.split)
                         .resizable()
                         .aspectRatio(contentMode: .fit),
-                    subtitle: "Split",
-                    hoverDescription: "AI separates your \(scope.name)",
+                    subtitle: .constant("Split"),
+                    hoverDescription: Binding(get: {"AI separates your \(scope.name)"}, set: {_ in}),
                     action: { onSubmit(.split) })
                 
                 // Simplify
@@ -48,8 +48,8 @@ struct NarrowScopeControlsView: View {
                     label: Image(Constants.ImageName.Actions.simplify)
                         .resizable()
                         .aspectRatio(contentMode: .fit),
-                    subtitle: "Simplify",
-                    hoverDescription: "AI simplifies your \(scope.name).",
+                    subtitle: .constant("Simplify"),
+                    hoverDescription: Binding(get: {"AI simplifies your \(scope.name)."}, set: {_ in}),
                     action: { onSubmit(.simplify) })
                 
                 // Test
@@ -57,16 +57,16 @@ struct NarrowScopeControlsView: View {
                     label: Image(Constants.ImageName.Actions.createTests)
                         .resizable()
                         .aspectRatio(contentMode: .fit),
-                    subtitle: "Create Tests",
-                    hoverDescription: "AI creates tests for your \(scope.name)",
+                    subtitle: .constant("Create Tests"),
+                    hoverDescription: Binding(get: {"AI creates tests for your \(scope.name)"}, set: {_ in}),
                     action: { onSubmit(.createTests) })
                 
                 // Custom
                 NarrowScopeControlButton(
                     label: Image(systemName: "questionmark.app")
                         .resizable(),
-                    subtitle: "Custom",
-                    hoverDescription: "AI runs with no prompt for your \(scope.name).",
+                    subtitle: .constant("Custom"),
+                    hoverDescription: Binding(get: {"AI runs with no prompt for your \(scope.name)."}, set: {_ in}),
                     action: { onSubmit(.custom) })
             }
         }

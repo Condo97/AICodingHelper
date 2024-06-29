@@ -10,7 +10,7 @@ import Foundation
 
 enum CompletionContentType: String, Codable {
     
-    case text = "TEXT"
-    case imageURL = "IMAGE_URL"
+    case text = "text"
+    case imageURL = "image_url"
     
 }

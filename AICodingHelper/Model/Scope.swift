@@ -6,3 +6,23 @@
 //
 
 import Foundation
+
+enum Scope {
+    case project
+    case directory
+    case file
+    case highlight
+}
+
+extension Scope {
+    
+    var name: String {
+        switch self {
+        case .project: "project"
+        case .directory: "directory"
+        case .file: "file"
+        case .highlight: "highlight"
+        }
+    }
+    
+}

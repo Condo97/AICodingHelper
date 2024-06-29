@@ -1,0 +1,2877 @@
+UtilCollection+Safe.swift//
+//  Collection+Safe.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+// A helper extension to safely access array elements.
+extension Collection {
+    
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+    
+}
+AuthHelper.swift//
+//  AuthHelper.swift
+//  ChitChat
+//
+//  Created by Alex Coundouriotis on 3/30/23.
+//
+
+import Foundation
+
+class AuthHelper {
+    
+    static func get() -> String? {
+        return UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)
+    }
+    
+    /***
+     Ensure - Gets the authToken either from the server or locally
+     
+     throws
+        - If the client cannot get the AuthToken from the server and there is no AuthToken available locally
+     */
+    static func ensure() async throws -> String {
+        // If no authToken, register the user and update the authToken in UserDefaults
+        if UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey) == nil {
+            let registerUserResponse = try await AICodingHelperServerHTTPSConnector.registerUser()
+            
+            UserDefaults.standard.set(registerUserResponse.body.authToken, forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)
+        }
+        
+        return UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)!
+    }
+    
+    /***
+     Regenerate - Deletes current authToken and gets a new one from the server
+     
+     throws
+        - If the client cannot get the AuthToken from the server and there is no AuthToken available locally
+     */
+    @discardableResult
+    static func regenerate() async throws -> String {
+        UserDefaults.standard.set(nil, forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)
+        
+        let registerUserResponse = try await AICodingHelperServerHTTPSConnector.registerUser()
+        
+        UserDefaults.standard.set(registerUserResponse.body.authToken, forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)
+        
+        return UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)!
+    }
+    
+}
+NetworkingSocketStream.swift//
+//  SocketStream.swift
+//  ChitChat
+//
+//  Created by Alex Coundouriotis on 6/17/23.
+//  https://www.donnywals.com/iterating-over-web-socket-messages-with-async-await-in-swift/
+//
+
+import Foundation
+
+class SocketStream: AsyncSequence {
+    typealias WebSocketStream = AsyncThrowingStream<URLSessionWebSocketTask.Message, Error>
+    
+    typealias AsyncIterator = WebSocketStream.Iterator
+    typealias Element = URLSessionWebSocketTask.Message
+
+    private var continuation: WebSocketStream.Continuation?
+    private let task: URLSessionWebSocketTask
+
+    private lazy var stream: WebSocketStream = {
+        return WebSocketStream { continuation in
+            self.continuation = continuation
+            waitForNextValue()
+        }
+    }()
+
+    private func waitForNextValue() {
+        guard task.closeCode == .invalid else {
+            continuation?.finish()
+            return
+        }
+
+        task.receive(completionHandler: { [weak self] result in
+            guard let continuation = self?.continuation else {
+                return
+            }
+            
+            do {
+                let message = try result.get()
+                continuation.yield(message)
+                self?.waitForNextValue()
+            } catch {
+                continuation.finish(throwing: error)
+            }
+        })
+    }
+    
+    init(task: URLSessionWebSocketTask) {
+        self.task = task
+        task.resume()
+    }
+    
+    deinit {
+        continuation?.finish()
+    }
+    
+    func makeAsyncIterator() -> AsyncIterator {
+        return stream.makeAsyncIterator()
+    }
+    
+    func send(_ message: Element) async throws {
+        try await task.send(message)
+    }
+
+    func cancel() async throws {
+        task.cancel(with: .goingAway, reason: nil)
+        continuation?.finish()
+    }
+}
+
+WebSocketClient.swift//
+//  WebSocketClient.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+class WebSocketClient {
+    
+    static func connect(url: URL, headers: [String: String]?) -> SocketStream {
+        var urlRequest = URLRequest(url: url)
+        
+        headers?.forEach({k, v in
+            urlRequest.addValue(v, forHTTPHeaderField: k)
+        })
+        
+        let socketConnection = URLSession.shared.webSocketTask(with: urlRequest)
+        
+        return SocketStream(task: socketConnection)
+    }
+    
+}
+HTTPSClient.swift//
+//  HTTPSClient.swift
+//  ChitChat
+//
+//  Created by Alex Coundouriotis on 3/29/23.
+//
+
+import Foundation
+
+class HTTPSClient {
+    
+    static func post(url: URL, body: Codable, headers: [String: String]?) async throws -> (Data, URLResponse) {
+        // Try encoding body object to JSON
+        let bodyData = try JSONEncoder().encode(body)
+        
+        // Create the request object
+        var request = URLRequest(url: url)
+        
+        // Set request method and body
+        request.httpMethod = "POST"
+        request.httpBody = bodyData
+        
+        // Set headers if not nil
+        if headers != nil {
+            headers!.forEach({k, v in
+                request.setValue(v, forHTTPHeaderField: k)
+            })
+        }
+        
+        // Get the shared URL Session
+        let session = URLSession.shared
+        let (data, response) = try await session.data(for: request)
+        
+        return (data, response)
+    }
+    
+    
+    // TODO: Remove because this is now legacy
+    static func post(url: URL, body: Codable, headers: [String: String]?, completion: @escaping (Data?, Error?)->Void) throws {
+        // Try encoding body object to JSON
+        let bodyData = try JSONEncoder().encode(body)
+        
+        // Create the request object
+        var request = URLRequest(url: url)
+        
+        // Set request method and body
+        request.httpMethod = "POST"
+        request.httpBody = bodyData
+        
+        // Set headers if not nil
+        if headers != nil {
+            headers!.forEach({k, v in
+                request.setValue(v, forHTTPHeaderField: k)
+            })
+        }
+        
+        // Get the shared URL Session
+        let session = URLSession.shared
+        let task = session.dataTask(with: request, completionHandler: {data, response, error in
+            // Print error message here first
+            if let error = error {
+                print("HTTPSClient Post - Error getting response")
+                print(error)
+            }
+            
+            // Completion block
+            completion(data, error)
+        })
+        
+        task.resume()
+    }
+    
+//    static func get(url: URL, headers: [String: String]?) async throws -> (Data, URLResponse) {
+//        // Create the request object
+//        var request = URLRequest(url: url)
+//        
+//        // Set request method and body
+//        request.httpMethod = "GET"
+//        
+//        // Set headers if not nil
+//        if headers != nil {
+//            headers!.forEach({k, v in
+//                request.setValue(v, forHTTPHeaderField: k)
+//            })
+//        }
+//        
+//        // Get the shared URL Session
+//        let session = URLSession.shared
+//        let (data, response) = try await session.data(for: request)
+//        
+//        return (data, response)
+//    }
+    
+}
+AICodingHelper ServerAICodingHelperServerHTTPSConnector.swift//
+//  AICodingHelperServerHTTPSConnector.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+class AICodingHelperServerHTTPSConnector {
+    
+    static func registerUser() async throws -> RegisterUserResponse {
+        let (data, response) = try await HTTPSClient.post(
+            url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.registerUser)")!,
+            body: BlankRequest(),
+            headers: nil)
+        
+        do {
+            let registerUserResponse = try JSONDecoder().decode(RegisterUserResponse.self, from: data)
+            
+            return registerUserResponse
+        } catch {
+            // Catch as StatusResponse
+            let statusResponse = try JSONDecoder().decode(StatusResponse.self, from: data)
+            
+            // Regenerate AuthToken if necessary
+            if statusResponse.success == 5 {
+                Task {
+                    do {
+                        try await AuthHelper.regenerate()
+                    } catch {
+                        print("Error regenerating authToken in HTTPSConnector... \(error)")
+                    }
+                }
+            }
+            
+            throw error
+        }
+    }
+    
+}
+ResponseRegisterUserResponse.swift//
+//  RegisterUserResponse.swift
+//  ChitChat
+//
+//  Created by Alex Coundouriotis on 3/29/23.
+//
+
+import Foundation
+
+struct RegisterUserResponse: Codable {
+    
+    struct Body: Codable {
+        
+        var authToken: String
+        
+        enum CodingKeys: String, CodingKey {
+            case authToken
+        }
+        
+    }
+    
+    var body: Body
+    var success: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case body = "Body"
+        case success = "Success"
+    }
+    
+}
+OAIChatCompletionDelta.swift//
+//  ChatCompletionDelta.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+struct ChatCompletionDelta: Codable {
+    
+    let role: String?
+    let content: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case role, content
+    }
+    
+}
+ChatCompletionUsage.swift//
+//  ChatCompletionUsage.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+struct ChatCompletionUsage: Codable {
+    
+    let completionTokens: Int?
+    let promptTokens: Int?
+    let totalTokens: Int?
+
+    private enum CodingKeys: String, CodingKey {
+        case completionTokens = "completion_tokens", promptTokens = "prompt_tokens", totalTokens = "total_tokens"
+    }
+    
+}
+ChatCompletionChunk.swift//
+//  ChatCompletionChunk.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+struct ChatCompletionChunk: Codable {
+    
+    let id: String
+    let object: String
+    let created: Int
+    let model: String
+    let systemFingerprint: String?
+    let choices: [ChatCompletionChoice]
+    let serviceTier: String?
+    let usage: ChatCompletionUsage?
+
+    private enum CodingKeys: String, CodingKey {
+        case id, object, created, model, systemFingerprint = "system_fingerprint", choices, serviceTier = "service_tier", usage
+    }
+    
+}
+ChatCompletionChoice.swift//
+//  ChatCompletionChoice.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+struct ChatCompletionChoice: Codable {
+    
+    let index: Int
+    let delta: ChatCompletionDelta
+    let finishReason: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case index, delta, finishReason = "finish_reason"
+    }
+    
+}
+StatusResponse.swift//
+//  StatusREsponse.swift
+//  ChitChat
+//
+//  Created by Alex Coundouriotis on 8/9/23.
+//
+
+import Foundation
+
+
+struct StatusResponse: Codable {
+    
+    var success: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case success = "Success"
+    }
+    
+}
+
+GetChatResponse.swift//
+//  GetChatResponse.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+struct GetChatResponse: Codable {
+    
+    struct Body: Codable {
+        
+        let oaiResponse: ChatCompletionChunk
+        
+        enum CodingKeys: String, CodingKey {
+            case oaiResponse
+        }
+        
+    }
+    
+    let body: Body
+    let success: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case body = "Body"
+        case success = "Success"
+    }
+    
+}
+AICodingHelperWebSocketConnector.swift//
+//  AICodingHelperWebSocketConnector.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+class AICodingHelperWebSocketConnector {
+    
+    static func getStream() -> SocketStream {
+        WebSocketClient.connect(
+            url: URL(string: "\(Constants.Networking.WebSocket.aiCodingHelperWebSocketServer)\(Constants.Networking.WebSocket.Endpoints.getChatStream)")!,
+            headers: nil)
+    }
+    
+}
+RequestBlankRequest.swift//
+//  BlankRequest.swift
+//  ChitChat
+//
+//  Created by Alex Coundouriotis on 3/30/23.
+//
+
+import Foundation
+
+struct BlankRequest: Codable {
+    
+}
+OAIOAIChatCompletionRequest.swift//
+//  OAIChatCompletionRequest.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+struct OAIChatCompletionRequest: Codable {
+    
+    var model: String
+    var maxTokens: Int?
+    var n: Int?
+    var temperature: Double?
+    var stream: Bool
+    var messages: [OAIChatCompletionRequestMessage]
+    
+    enum CodingKeys: String, CodingKey {
+        case model, maxTokens = "max_tokens", n, temperature, stream, messages
+    }
+    
+}
+OAIChatCompletionRequestMessageContentType.swift//
+//  OAIChatCompletionRequestMessageContentType.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+enum OAIChatCompletionRequestMessageContentType: Codable {
+    
+    case text(OAIChatCompletionRequestMessageContentText)
+    case imageURL(OAIChatCompletionRequestMessageContentImageURL)
+
+    private enum CodingKeys: String, CodingKey {
+        case type, text, imageURL = "image_url"
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(CompletionContentType.self, forKey: .type)
+
+        switch type {
+        case .text:
+            let textContent = try OAIChatCompletionRequestMessageContentText(from: decoder)
+            self = .text(textContent)
+        case .imageURL:
+            let imageURLContent = try OAIChatCompletionRequestMessageContentImageURL(from: decoder)
+            self = .imageURL(imageURLContent)
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        switch self {
+        case .text(let textContent):
+            try textContent.encode(to: encoder)
+        case .imageURL(let imageURLContent):
+            try imageURLContent.encode(to: encoder)
+        }
+    }
+    
+}
+InputImageDetail.swift//
+//  InputImageDetail.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+enum InputImageDetail: String, Codable {
+    
+    case low
+    case high
+    case auto
+    
+}
+OAIChatCompletionRequestMessageContentImageURL.swift//
+//  OAIChatCompletionRequestMessageContentImageURL.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+struct OAIChatCompletionRequestMessageContentImageURL: OAIChatCompletionRequestMessageContent {
+    
+    struct ImageURL: Codable {
+        
+        let url: String
+        let detail: InputImageDetail
+        
+        enum CodingKeys: String, CodingKey {
+            case url
+            case detail
+        }
+        
+    }
+    
+    let type: CompletionContentType = .imageURL
+    let imageURL: String
+
+    private enum CodingKeys: String, CodingKey {
+        case type, imageURL = "image_url"
+    }
+    
+}
+OAIChatCompletionRequestMessageContentText.swift//
+//  OAIChatCompletionRequestMessageContentText.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+struct OAIChatCompletionRequestMessageContentText: OAIChatCompletionRequestMessageContent {
+    
+    let type: CompletionContentType = .text
+    let text: String
+    
+}
+OAIChatCompletionRequestMessageContent.swift//
+//  OAIChatCompletionRequestMessageContent.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+protocol OAIChatCompletionRequestMessageContent: Codable {
+    
+    var type: CompletionContentType { get }
+    
+}
+OAIChatCompletionRequestMessage.swift//
+//  OAIChatCompletionRequestMessage.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+struct OAIChatCompletionRequestMessage: Codable {
+    
+    var role: CompletionRole
+    var content: [OAIChatCompletionRequestMessageContentType]
+    
+    enum CodingKeys: String, CodingKey {
+        case role
+        case content
+    }
+    
+}
+CompletionRole.swift//
+//  CompletionRole.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+enum CompletionRole: String, Codable {
+    
+    case system
+    case user
+    case assistant
+    
+}
+CompletionContentType.swift//
+//  CompletionContentType.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+enum CompletionContentType: String, Codable {
+    
+    case text = "text"
+    case imageURL = "image_url"
+    
+}
+GetChatRequest.swift//
+//  GetChatRequest.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+struct GetChatRequest: Encodable {
+    
+    var authToken: String
+    var chatCompletionRequest: OAIChatCompletionRequest
+    
+    enum CodingKeys: String, CodingKey {
+        case authToken
+        case chatCompletionRequest
+    }
+    
+}
+ConstantsConstants.swift//
+//  Constants.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import Foundation
+
+struct Constants {
+    
+    struct ImageName {
+        
+        struct Actions {
+            
+            static let bug = "Bug"
+            static let simplify = "Simplify"
+            static let split = "Split"
+            static let createTests = "Create Tests"
+            
+        }
+        
+    }
+    
+    struct Networking {
+        
+        struct HTTPS {
+            
+            struct Endpoints {
+                
+                static let registerUser = "/registerUser"
+                
+            }
+            
+            static let aiCodingHelperServer = "https://chitchatserver.com:9500/v1"
+            
+        }
+        
+        struct WebSocket {
+            
+            struct Endpoints {
+                
+                static let getChatStream = "/streamChat"
+                
+            }
+            
+#if DEBUG
+            static let aiCodingHelperWebSocketServer = "wss://chitchatserver.com:9500/v1"//"wss://chitchatserver.com:2000/v1"
+#else
+            static let aiCodingHelperWebSocketServer = "wss://chitchatserver.com:9500/v1"
+#endif
+            
+        }
+        
+    }
+    
+    struct UserDefaults {
+        
+        static let userDefaultStoredAuthTokenKey = "authTokenKey"
+        
+    }
+    
+}
+Colors.swift//
+//  Colors.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import Foundation
+import SwiftUI
+
+struct Colors {
+    
+    static let foreground = Color("Foreground")
+    static let foregroundText = Color("Foreground Text")
+    static let secondary = Color("Secondary")
+    static let secondaryText = foregroundText
+    static let background = Color("Background")
+    static let backgroundText = foregroundText
+    static let element = Color("Element")
+    static let elementText = Color("Element Text")
+    
+}
+Assets.xcassetsImagesContents.json{
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+ActionsSplit.imagesetContents.json{
+  "images" : [
+    {
+      "filename" : "Arrows Out.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "template-rendering-intent" : "template"
+  }
+}
+Arrows Out.pngBug.imageseticons8-bug-480.pngContents.json{
+  "images" : [
+    {
+      "filename" : "icons8-bug-480.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "template-rendering-intent" : "template"
+  }
+}
+Contents.json{
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+Simplify.imagesetArrows In.pngContents.json{
+  "images" : [
+    {
+      "filename" : "Arrows In.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "template-rendering-intent" : "template"
+  }
+}
+Create Tests.imagesetContents.json{
+  "images" : [
+    {
+      "filename" : "icons8-test-tube-500-2.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "template-rendering-intent" : "template"
+  }
+}
+icons8-test-tube-500-2.pngAppIcon.appiconsetContents.json{
+  "images" : [
+    {
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "16x16"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "16x16"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "32x32"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "32x32"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "128x128"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "128x128"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "256x256"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "256x256"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "512x512"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "512x512"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+AccentColor.colorsetContents.json{
+  "colors" : [
+    {
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+ColorsElement.colorsetContents.json{
+  "colors" : [
+    {
+      "color" : {
+        "color-space" : "display-p3",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0xFF",
+          "green" : "0x94",
+          "red" : "0x5C"
+        }
+      },
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "color" : {
+        "color-space" : "display-p3",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0xFF",
+          "green" : "0xFF",
+          "red" : "0xFF"
+        }
+      },
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+Background.colorsetContents.json{
+  "colors" : [
+    {
+      "color" : {
+        "color-space" : "display-p3",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0xB3",
+          "green" : "0xB3",
+          "red" : "0xB3"
+        }
+      },
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "color" : {
+        "color-space" : "display-p3",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0xFF",
+          "green" : "0xFF",
+          "red" : "0xFF"
+        }
+      },
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+Element Text.colorsetContents.json{
+  "colors" : [
+    {
+      "color" : {
+        "color-space" : "display-p3",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0xFF",
+          "green" : "0xFF",
+          "red" : "0xFF"
+        }
+      },
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "color" : {
+        "color-space" : "display-p3",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0xFF",
+          "green" : "0xFF",
+          "red" : "0xFF"
+        }
+      },
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+Foreground Text.colorsetContents.json{
+  "colors" : [
+    {
+      "color" : {
+        "color-space" : "display-p3",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0x00",
+          "green" : "0x00",
+          "red" : "0x00"
+        }
+      },
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "color" : {
+        "color-space" : "display-p3",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0xFF",
+          "green" : "0xFF",
+          "red" : "0xFF"
+        }
+      },
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+Contents.json{
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+Foreground.colorsetContents.json{
+  "colors" : [
+    {
+      "color" : {
+        "color-space" : "display-p3",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0xFF",
+          "green" : "0xFF",
+          "red" : "0xFF"
+        }
+      },
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "color" : {
+        "color-space" : "display-p3",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0xFF",
+          "green" : "0xFF",
+          "red" : "0xFF"
+        }
+      },
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+Secondary.colorsetContents.json{
+  "colors" : [
+    {
+      "color" : {
+        "color-space" : "display-p3",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0xEB",
+          "green" : "0xEB",
+          "red" : "0xEB"
+        }
+      },
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "color" : {
+        "color-space" : "display-p3",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0xFF",
+          "green" : "0xFF",
+          "red" : "0xFF"
+        }
+      },
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+Contents.json{
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+Preview ContentPreview Assets.xcassetsContents.json{
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+AICodingHelperApp.swift//
+//  AICodingHelperApp.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import SwiftUI
+
+@main
+struct AICodingHelperApp: App {
+    
+
+    var body: some Scene {
+        WindowGroup {
+            MainView()
+                .task {
+                    do {
+                        try await AuthHelper.ensure()
+                    } catch {
+                        // TODO: Handle Errors
+                        print("Error ensuring authToken in AICodingHelperApp... \(error)")
+                    }
+                }
+        }
+    }
+    
+}
+AICodingHelper.xcdatamodeldAICodingHelper.xcdatamodelcontents<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="false" userDefinedModelVersionIdentifier="">
+    <entity name="Item" representedClassName="Item" syncable="YES" codeGenerationType="class">
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+    </entity>
+    <elements>
+        <element name="Item" positionX="-63" positionY="-18" width="128" height="44"/>
+    </elements>
+</model>FileTestingPlayground.playgroundResourcesMyView.xib<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13115" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13115"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+        <capability name="system font weights other than Regular or Bold" minToolsVersion="7.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner"/>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="c22-O7-iKe">
+            <rect key="frame" x="0.0" y="0.0" width="480" height="272"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LjM-KA-OXy">
+                    <rect key="frame" x="153" y="116" width="175" height="39"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Hello World!" id="YLl-lC-HlH">
+                        <font key="font" metaFont="systemUltraLight" size="32"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+            </subviews>
+        </customView>
+    </objects>
+</document>
+Contents.swiftimport SwiftUI
+import Combine
+import PlaygroundSupport
+import Foundation
+
+// MARK: - Models and View Models
+class FileTree: ObservableObject {
+    @Published var rootNode: FileNode
+    
+    init(rootDirectory: String) {
+        let expandedPath = NSString(string: rootDirectory).expandingTildeInPath
+        rootNode = FileNode(path: expandedPath)
+        rootNode.discoverChildren()
+    }
+}
+
+class FileNode: ObservableObject, Identifiable {
+    let id = UUID()
+    let name: String
+    let path: String
+    
+    @Published var isExpanded: Bool = false
+    @Published var children: [FileNode] = []
+    
+    var isDirectory: Bool {
+        var isDir: ObjCBool = false
+        FileManager.default.fileExists(atPath: path, isDirectory: &isDir)
+        return isDir.boolValue
+    }
+    
+    init(path: String) {
+        self.path = path
+        self.name = (path as NSString).lastPathComponent
+    }
+    
+    func toggleExpansion() {
+        if isDirectory {
+            isExpanded.toggle()
+            if isExpanded && children.isEmpty {
+                discoverChildren()
+            }
+        }
+    }
+    
+    func discoverChildren() {
+        guard isDirectory else { return }
+        do {
+            let contents = try FileManager.default.contentsOfDirectory(atPath: path)
+            children = contents.map { FileNode(path: (self.path as NSString).appendingPathComponent($0)) }
+                .sorted { $0.isDirectory && !$1.isDirectory }
+        } catch {
+            print("Error reading contents of directory: \(error)")
+        }
+    }
+}
+
+// MARK: - Views
+struct FileSystemView: View {
+    @StateObject private var fileTree: FileTree
+    
+    init(directory: String) {
+        _fileTree = StateObject(wrappedValue: FileTree(rootDirectory: directory))
+    }
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 2) {
+                FileNodeView(node: fileTree.rootNode, level: 0)
+            }
+            .padding()
+        }
+        .frame(minWidth: 200, minHeight: 400)
+    }
+}
+
+struct FileNodeView: View {
+    @ObservedObject var node: FileNode
+    let level: Int
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                if node.isDirectory {
+                    Image(systemName: node.isExpanded ? "arrowtriangle.down.fill" : "arrowtriangle.right.fill")
+                        .onTapGesture {
+                            node.toggleExpansion()
+                        }
+                        .padding(.trailing, 2)
+                } else {
+                    Image(systemName: "doc.fill")
+                        .foregroundColor(.blue)
+                        .padding(.trailing, 2)
+                }
+                Text(node.name)
+            }
+            .padding(.leading, CGFloat(level) * 15)
+            .padding(.vertical, 2)
+            
+            if node.isExpanded {
+                ForEach(node.children) { childNode in
+                    FileNodeView(node: childNode, level: level + 1)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Entry Point
+struct ContentView: View {
+    var body: some View {
+        // Make sure to replace this path with the desired directory path
+        FileSystemView(directory: "~/Downloads/test_dir")
+    }
+}
+
+// MARK: - Set up for Playground
+PlaygroundPage.current.setLiveView(ContentView())
+contents.xcplayground<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<playground version='5.0' target-platform='macos' buildActiveScheme='true' importAppTypes='true'>
+    <timeline fileName='timeline.xctimeline'/>
+</playground>ModelScope.swift//
+//  Scope.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import Foundation
+
+enum Scope {
+    case project
+    case directory
+    case file
+    case highlight
+}
+
+extension Scope {
+    
+    var name: String {
+        switch self {
+        case .project: "project"
+        case .directory: "directory"
+        case .file: "file"
+        case .highlight: "highlight"
+        }
+    }
+    
+}
+ActionType.swift//
+//  ActionType.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import Foundation
+
+enum ActionType {
+    
+    case comment
+    case bugFix
+    case split
+    case simplify
+    case createTests
+    case custom
+    
+}
+
+
+extension ActionType {
+    
+    var name: String {
+        switch self {
+        case .comment:
+            "comment"
+        case .bugFix:
+            "bug fix"
+        case .split:
+            "split"
+        case .simplify:
+            "simplify"
+        case .createTests:
+            "create tests"
+        case .custom:
+            "custom"
+        }
+    }
+    
+    var aiPrompt: String {
+        switch self {
+        case .comment:
+            "Comment the following code."
+        case .bugFix:
+            "Bug fix the following code."
+        case .split:
+            "Split the following code into smaller components."
+        case .simplify:
+            "Simplify the following code"
+        case .createTests:
+            "Create tests for the following code"
+        case .custom:
+            ""
+        }
+    }
+    
+}
+GPTModels.swift//
+//  GPTModels.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import Foundation
+
+
+enum GPTModels: String {
+    
+    case GPT3_5 = "gpt-3.5-turbo"
+    case GPT4o = "gpt-4o"
+    
+}
+
+ApplicationTabsCodeTabView.swift////
+////  CodeTabView.swift
+////  AICodingHelper
+////
+////  Created by Alex Coundouriotis on 6/29/24.
+////
+//
+//import SwiftUI
+//
+//struct CodeTabView: View {
+//    
+//    @ObservedObject var codeViewModel: CodeViewModel
+//    var onSelect: () -> Void
+//    
+//    
+//    var openTabTitle: Binding<String> {
+//        Binding(
+//            get: {
+//                // Open tab title is last path component of url with openTab filepath
+//                if let filepath = openTab.filepath {
+//                    return URL(fileURLWithPath: filepath).lastPathComponent
+//                }
+//                
+//                // Default if filepath cannot be unwrapped
+//                return "*No Filename*"
+//            },
+//            set: { value in
+//                // No set actions
+//            })
+//    }
+//    
+//    var openTabOpen: Binding<Bool> {
+//        Binding(
+//            get: {
+//                // Always true if in openTabs
+//                true
+//            },
+//            set: { value in
+//                if !value {
+//                    // If false remove openTab from openTabs
+//                    openTabs.removeAll(where: {$0 === openTab})
+//                    
+//                    // TODO: Maybe remove all tabs with nil filepaths? Or should that be done somewhere else? Maybe onChange of openTabs or something
+//                }
+//            })
+//    }
+//    
+//    var openTabSelected: Binding<Bool> {
+//        Binding(
+//            get: {
+//                // Conditional if openTab equals selectedTab
+//                openTab === selectedTab
+//            },
+//            set: { value in
+//                if value {
+//                    // If true call didSelectTab
+//                    didSelectTab
+//                }
+//            })
+//    }
+//    
+//    
+//    var body: some View {
+//        TabView(
+//            title: <#T##Binding<String>#>,
+//            open: <#T##Binding<Bool>#>,
+//            selected: <#T##Binding<Bool>#>)
+//    }
+//    
+//}
+//
+//#Preview {
+//    CodeTabView(
+//        codeViewModel: CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt"),
+//    )
+//}
+TabView.swift//
+//  CodeTabView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/29/24.
+//
+
+import SwiftUI
+
+struct CodeTabView: View {
+    
+    @ObservedObject var codeViewModel: CodeViewModel
+    var onSelect: () -> Void
+    var onClose: () -> Void
+    
+//    @Binding var title: String
+//    @Binding var open: Bool
+//    @Binding var selected: Bool
+    
+    var title: String {
+        URL(fileURLWithPath: codeViewModel.filepath ?? "").lastPathComponent
+    }
+    
+    
+    var body: some View {
+        Button(action: {
+            onSelect()
+        }) {
+            HStack {
+                // Title
+                Text(title)
+                
+                // Close Button
+                Button(action: {
+                    onClose()
+                }) {
+                    Image(systemName: "xmark")
+                        .imageScale(.medium)
+                }
+                .buttonStyle(BorderlessButtonStyle())
+            }
+            .padding([.leading, .trailing])
+            .background(
+                RoundedRectangle(cornerRadius: 2.0)
+//                    .fill(selected ? Colors.foreground : Colors.secondary)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+}
+
+//#Preview {
+//    
+//    CodeTabView(
+//        title: .constant("Tab"),
+//        open: .constant(true),
+//        selected: .constant(true)
+//    )
+//    
+//}
+TabsView.swift//
+//  TabsView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/29/24.
+//
+
+import SwiftUI
+
+struct TabsView: View {
+    
+    @Binding var openTabs: [CodeViewModel]
+    @ObservedObject var selectedTab: CodeViewModel
+    @State var onSelect: (CodeViewModel) -> Void
+    
+    
+    private static let tabsHeight: CGFloat = 60.0
+    
+    
+    var body: some View {
+        ScrollView(.horizontal) {
+            ForEach(openTabs) { openTab in
+                var openTabTitle: Binding<String> {
+                    Binding(
+                        get: {
+                            // Open tab title is last path component of url with openTab filepath
+                            if let filepath = openTab.filepath {
+                                return URL(fileURLWithPath: filepath).lastPathComponent
+                            }
+                            
+                            // Default if filepath cannot be unwrapped
+                            return "*No Filename*"
+                        },
+                        set: { value in
+                            // No set actions
+                        })
+                }
+                
+                var openTabOpen: Binding<Bool> {
+                    Binding(
+                        get: {
+                            // Always true if in openTabs
+                            true
+                        },
+                        set: { value in
+                            if !value {
+                                // If false remove openTab from openTabs
+                                openTabs.removeAll(where: {$0 === openTab})
+                                
+                                // TODO: Maybe remove all tabs with nil filepaths? Or should that be done somewhere else? Maybe onChange of openTabs or something
+                            }
+                        })
+                }
+                
+                var openTabSelected: Binding<Bool> {
+                    Binding(
+                        get: {
+                            // Conditional if openTab equals selectedTab
+                            openTab === selectedTab
+                        },
+                        set: { value in
+                            if value {
+                                // If true set selectedTab to openTab
+//                                selectedTab = openTab
+                                onSelect(openTab)
+                            }
+                        })
+                }
+                
+//                CodeTabView(
+//                    title: openTabTitle,
+//                    open: openTabOpen,
+//                    selected: openTabSelected)
+            }
+        }
+        .frame(height: TabsView.tabsHeight)
+    }
+    
+}
+
+//#Preview {
+//    
+//    TabsView(
+//        openTabs: .constant([CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt")]),
+//        selectedTab: .constant(CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt"))
+//    )
+//    
+//}
+NarrowScopeControlsNarrowScopeControlsView.swift//
+//  NarrowScopeControlsView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import SwiftUI
+
+struct NarrowScopeControlsView: View {
+    
+    @Binding var scope: Scope
+    var onSubmit: (_ actionType: ActionType) -> Void
+    
+    
+    var body: some View {
+        VStack {
+            HStack {
+                // Comment
+                NarrowScopeControlButton(
+                    label: Text("//")
+                        .font(.system(size: 100.0))
+                        .minimumScaleFactor(0.01),
+                    subtitle: .constant("Comment"),
+                    hoverDescription: Binding(get: {"AI comments your \(scope.name)"}, set: {_ in}),
+                    action: { onSubmit(.comment) })
+                
+                // Bug Fix
+                NarrowScopeControlButton(
+                    label: Image(Constants.ImageName.Actions.bug)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit),
+                    subtitle: .constant("Bug Fix"),
+                    hoverDescription: Binding(get: {"AI fixes bugs in your \(scope.name)"}, set: {_ in}),
+                    action: { onSubmit(.bugFix) })
+                
+                // Split
+                NarrowScopeControlButton(
+                    label: Image(Constants.ImageName.Actions.split)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit),
+                    subtitle: .constant("Split"),
+                    hoverDescription: Binding(get: {"AI separates your \(scope.name)"}, set: {_ in}),
+                    action: { onSubmit(.split) })
+                
+                // Simplify
+                NarrowScopeControlButton(
+                    label: Image(Constants.ImageName.Actions.simplify)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit),
+                    subtitle: .constant("Simplify"),
+                    hoverDescription: Binding(get: {"AI simplifies your \(scope.name)."}, set: {_ in}),
+                    action: { onSubmit(.simplify) })
+                
+                // Test
+                NarrowScopeControlButton(
+                    label: Image(Constants.ImageName.Actions.createTests)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit),
+                    subtitle: .constant("Create Tests"),
+                    hoverDescription: Binding(get: {"AI creates tests for your \(scope.name)"}, set: {_ in}),
+                    action: { onSubmit(.createTests) })
+                
+                // Custom
+                NarrowScopeControlButton(
+                    label: Image(systemName: "questionmark.app")
+                        .resizable(),
+                    subtitle: .constant("Custom"),
+                    hoverDescription: Binding(get: {"AI runs with no prompt for your \(scope.name)."}, set: {_ in}),
+                    action: { onSubmit(.custom) })
+            }
+        }
+    }
+    
+}
+
+#Preview {
+    
+    NarrowScopeControlsView(scope: .constant(.file)) { actionType in
+        
+    }
+    
+}
+NarrowScopeControlButton.swift//
+//  NarrowScopeControlButton.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import SwiftUI
+
+struct NarrowScopeControlButton<Content: View>: View {
+    
+    var label: Content
+    @Binding var subtitle: String
+    @Binding var hoverDescription: String
+    var action: () -> Void
+    
+    
+    var body: some View {
+        Button(action: {
+            action()
+        }) {
+            VStack {
+                label
+                    .frame(width: 28.0, height: 28.0)
+                
+                Text(subtitle)
+                    .lineLimit(2)
+            }
+            .frame(width: 80.0, height: 80.0)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .help(hoverDescription)
+    }
+    
+}
+
+#Preview {
+    
+    NarrowScopeControlButton(
+        label: Text("//")
+            .font(.system(size: 100.0))
+            .minimumScaleFactor(0.01),
+        subtitle: .constant("Comment"),
+        hoverDescription: .constant("Analyzes all comments"),
+        action: {
+            
+        }
+    )
+    
+}
+FileBrowserFileSystemView.swift//
+//  FileSystemView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import Foundation
+import SwiftUI
+
+struct FileSystemView: View {
+    
+    @Binding var directory: String
+    @Binding var selectedPath: String?
+    @Binding var openedFile: String?
+    
+    @StateObject private var fileTree: FileTree
+    
+    init(directory: Binding<String>, selectedPath: Binding<String?>, openedFile: Binding<String?>) {
+        self._directory = directory
+        self._selectedPath = selectedPath
+        self._openedFile = openedFile
+        _fileTree = StateObject(wrappedValue: FileTree(rootDirectory: directory.wrappedValue))
+    }
+    
+    var body: some View {
+        ScrollView {
+            // Refresh Button
+            Button(action: { fileTree.updateRootDirectory(to: directory) }) {
+                HStack {
+//                    Spacer()
+                    Text("Refresh")
+//                    Spacer()
+                }
+                .foregroundStyle(Colors.elementText)
+                .frame(minWidth: 50.0, maxWidth: .infinity)
+                .padding()
+                .background(Colors.element)
+                .clipShape(RoundedRectangle(cornerRadius: 28.0))
+            }
+            .buttonStyle(PlainButtonStyle())
+            .padding()
+            
+            // File Nodes
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    FileNodeView(node: fileTree.rootNode, level: 0, selectedPath: $selectedPath, openedFile: $openedFile)
+                    
+                    Spacer()
+                }
+            }
+            .padding()
+        }
+        .onChange(of: directory, perform: { newDirectory in
+            fileTree.updateRootDirectory(to: newDirectory)
+        })
+    }
+    
+}
+TabAddingFileSystemView.swift//
+//  TabAddingFileSystemView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/29/24.
+//
+
+import SwiftUI
+
+struct TabAddingFileSystemView: View {
+    
+    @Binding var directory: String
+    @Binding var selectedPath: String?
+    @Binding var openTabs: [CodeViewModel]
+    
+    
+    @State private var openedFile: String?
+    
+    
+    var body: some View {
+        
+        FileSystemView(
+            directory: $directory,
+            selectedPath: $selectedPath,
+            openedFile: $openedFile)
+        .onChange(of: openedFile) {
+            // Add to tab if openFile can be unwrapped and is not contained in openTabs where openFile equals the openTab filepath
+            if let openedFile = openedFile,
+               !openTabs.contains(where: {$0.filepath == openedFile}) {
+                openTabs.append(
+                    CodeViewModel(filepath: openedFile)
+                )
+            }
+        }
+        
+    }
+    
+}
+
+#Preview {
+    
+    TabAddingFileSystemView(
+        directory: .constant(""),
+        selectedPath: .constant(""),
+        openTabs: .constant([])
+    )
+    
+}
+FileTree.swift//
+//  FileTree.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import Foundation
+import SwiftUI
+
+class FileTree: ObservableObject {
+    
+    @Published var rootNode: FileNode
+    
+    init(rootDirectory: String) {
+        let expandedPath = NSString(string: rootDirectory).expandingTildeInPath
+        rootNode = FileNode(path: expandedPath)
+        rootNode.discoverChildren()
+    }
+    
+    func updateRootDirectory(to newDirectory: String) {
+        let expandedPath = NSString(string: newDirectory).expandingTildeInPath
+        rootNode = FileNode(path: expandedPath)
+        rootNode.discoverChildren()
+    }
+    
+}
+FileNodeView.swift//
+//  FileNodeView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import Foundation
+import SwiftUI
+
+struct FileNodeView: View {
+    
+    @ObservedObject var node: FileNode
+    let level: Int
+    @Binding var selectedPath: String?
+    @Binding var openedFile: String?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                if node.isDirectory {
+                    Image(systemName: node.isExpanded ? "arrowtriangle.down.fill" : "arrowtriangle.right.fill")
+                        .padding(.trailing, 2)
+                        .onTapGesture {
+                            node.toggleExpansion()
+                        }
+                } else {
+                    Image(systemName: "doc.fill")
+                        .foregroundColor(.blue)
+                        .padding(.trailing, 2)
+                }
+                
+                Text(node.name)
+                    .onTapGesture(count: 2) {
+                        if node.isDirectory {
+                            node.toggleExpansion()
+                        } else {
+                            openedFile = node.path
+                        }
+                    }
+                    .simultaneousGesture(
+                        TapGesture(count: 1)
+                            .onEnded {
+                                selectedPath = node.path
+                            }
+                    )
+            }
+            .padding(.leading, CGFloat(level) * 15)
+            .padding(.vertical, 2)
+            .background(Color.gray.opacity(selectedPath == node.path ? 0.3 : 0))
+            .cornerRadius(5)
+            
+            if node.isExpanded {
+                ForEach(node.children) { childNode in
+                    FileNodeView(node: childNode, level: level + 1, selectedPath: $selectedPath, openedFile: $openedFile)
+                }
+            }
+        }
+    }
+    
+}
+FileNode.swift//
+//  FileNode.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import Foundation
+
+class FileNode: ObservableObject, Identifiable {
+    
+    let id = UUID()
+    let name: String
+    let path: String
+    
+    @Published var isExpanded: Bool = false
+    @Published var children: [FileNode] = []
+    
+    var isDirectory: Bool {
+        var isDir: ObjCBool = false
+        FileManager.default.fileExists(atPath: path, isDirectory: &isDir)
+        return isDir.boolValue
+    }
+    
+    init(path: String) {
+        self.path = path
+        self.name = (path as NSString).lastPathComponent
+    }
+    
+    func toggleExpansion() {
+        if isDirectory {
+            isExpanded.toggle()
+            if isExpanded && children.isEmpty {
+                discoverChildren()
+            }
+        }
+    }
+    
+    func discoverChildren() {
+        guard isDirectory else { return }
+        do {
+            let contents = try FileManager.default.contentsOfDirectory(atPath: path)
+            children = contents.map { FileNode(path: (self.path as NSString).appendingPathComponent($0)) }
+                .sorted { $0.isDirectory && !$1.isDirectory }
+        } catch {
+            print("Error reading contents of directory: \(error)")
+        }
+    }
+    
+}
+MainMainViewModel.swift////
+////  MainViewModel.swift
+////  AICodingHelper
+////
+////  Created by Alex Coundouriotis on 6/29/24.
+////
+//
+//import Foundation
+//import SwiftUI
+//
+//
+//class MainViewModel: ObservableObject {
+//    
+//    @Published var directory: String
+//    
+//    @Published var openTabs: [CodeViewModel] = []
+//    @Published var openTab: CodeViewModel = CodeViewModel(filepath: nil)
+//    
+//    
+//    
+//    init(directory: String) {
+//        self.directory = directory
+//    }
+//    
+//}
+MainView.swift//
+//  MainView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import CodeEditor
+import SwiftUI
+
+//class TempMainViewModel: ObservableObject {
+//    @Published var openTabs: [CodeViewModel] = []
+//    @Published var selecte
+//}
+
+struct MainView: View {
+    
+    @State var directory: String = "~/Downloads/test_dir"
+    
+    
+    @State private var selectedPath: String?
+//    @State private var openedFile: String?
+    
+    @State private var openTabs: [CodeViewModel] = []
+//    @State private var openTab: CodeViewModel = CodeViewModel(filepath: nil)
+//    @State private var openTab: CodeViewModel = CodeViewModel(filepath: nil)
+//    @State private var openTab: CodeViewModel?
+    @State private var openedTabIndex: Int?
+    
+//    @ObservedObject var tempMainViewModel: TempMainViewModel
+    
+//    var openTab: CodeViewModel = CodeViewModel(filepath: "")
+    
+    
+    var body: some View {
+        ZStack {
+            VStack {
+                // Tab View
+                if !openTabs.isEmpty {
+//                    TabView(selection: $openTab) {
+                    HStack {
+                        ForEach(openTabs) { openTab in
+                            CodeTabView(
+                                codeViewModel: openTab,
+                                onSelect: {
+                                    self.openedTabIndex = openTabs.firstIndex(where: {$0 === openTab})
+                                },
+                                onClose: {
+                                    
+                                })
+                        }
+                    }
+//                    }
+//                    TabsView(
+//                        openTabs: $openTabs,
+//                        selectedTab: openTabs[openTabIndex ?? 0],
+//                        onSelect: { codeViewModel in
+//                            if let selectedTab = openTabs.firstIndex(where: {$0 === codeViewModel}) {
+//                                self.openTabIndex = selectedTab
+//                            }
+//                        })
+                }
+                
+                HSplitView {
+                    // File Browser
+                    TabAddingFileSystemView(
+                        directory: $directory,
+                        selectedPath: $selectedPath,
+                        openTabs: $openTabs)
+                    
+                    // Code View
+                    if let openedTabIndex = openedTabIndex {
+                        CodeView(codeViewModel: openTabs[openedTabIndex])
+                    }
+                }
+            }
+            
+            // Wide Scope Controls
+            
+        }
+    }
+    
+}
+
+//#Preview {
+//    
+//    MainView()
+//        .frame(width: 600, height: 500)
+//    
+//}
+CodeViewChatGenerator.swift//
+//  AICodingHelperServerNetworkClient.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import CodeEditor
+import Foundation
+
+
+class ChatGenerator: ObservableObject {
+    
+    @Published var streamingChat: String?
+    @Published var streamingChatDelta: String?
+    @Published var streamingChatScope: Scope?
+    @Published var isLoading: Bool = false
+    @Published var isStreaming: Bool = false
+    
+    
+    func streamChat(authToken: String, model: GPTModels, action: ActionType, language: CodeEditor.Language, context: [String], input: String, scope: Scope) async throws {
+        /* Should look something like
+         System
+            You are an AI coding helper service in an IDE so you must format all your responses in <language> code that would be valid in an IDE.
+         User Message 1
+            You are an AI coding helper in an IDE so all responses must be in <language> code that would be valid in an IDE.
+            Here are other files from my projet to reference
+            <Project Files>
+         User Message 2
+            You are an AI coding helper in an IDE so all responses must be in <language> code that would be valid in an IDE.
+            <Action AI Prompt>
+            <Code>
+         */
+        
+        let systemMessage = "You are an AI coding helper service in an IDE so you must format all your responses in \(language.rawValue) code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language."
+        let userMessage1 = {
+            var userMessage1_1 = "You are an AI coding helper in an IDE so all responses must be in \(language.rawValue) code that would be valid in an IDE."
+            var userMessage1_2 = "Here are other files from my project to reference"
+            return ([userMessage1_1, userMessage1_2] + context).joined(separator: "
+")
+        }()
+        let userMessage2 = {
+            var userMessage2_1 = "You are an AI coding helper in an IDE so all responses must be in \(language.rawValue) code that would be valid in an IDE."
+            var userMessage2_2 = action.aiPrompt
+            return [userMessage2_1, userMessage2_2, input].joined(separator: "
+")
+        }()
+        
+        try await streamChat(
+            authToken: authToken,
+            model: model.rawValue,
+            systemMessage: systemMessage,
+            userInputs: [userMessage1, userMessage2],
+            scope: scope)
+    }
+    
+    func streamChat(authToken: String, model: String, systemMessage: String?, userInputs: [String], scope: Scope) async throws {
+        // Create messages and add messages
+        var messages: [OAIChatCompletionRequestMessage] = []
+        
+        // Add systemMessage if not nil
+        if let systemMessage = systemMessage {
+            messages.append(OAIChatCompletionRequestMessage(
+                role: .system,
+                content: [.text(OAIChatCompletionRequestMessageContentText(text: systemMessage))]))
+        }
+        
+        // Add userInputs messages
+        for userInput in userInputs {
+            messages.append(OAIChatCompletionRequestMessage(
+                role: .user,
+                content: [.text(OAIChatCompletionRequestMessageContentText(text: userInput))]))
+        }
+        
+        // Create getChatRequest
+        let getChatRequest = GetChatRequest(
+            authToken: authToken,
+            chatCompletionRequest: OAIChatCompletionRequest(
+                model: model,
+                stream: true,
+                messages: messages))
+        
+        // Stream chat
+        try await streamChat(getChatRequest: getChatRequest, scope: scope)
+    }
+    
+    func streamChat(getChatRequest: GetChatRequest, scope: Scope) async throws {
+        // Ensure not loading or streaming, otherwise return
+        guard !isLoading && !isStreaming else {
+            // TODO: Handle Errors
+            print("Could not stream chat because another chat is currently streaming!")
+            return
+        }
+        
+        // Reset current chat and set scope
+        await MainActor.run {
+            streamingChat = nil
+            streamingChatScope = scope
+        }
+        
+        // Defer setting isLoading and isStreaming to false
+        defer {
+            DispatchQueue.main.async {
+                self.isLoading = false
+                self.isStreaming = false
+            }
+        }
+        
+        // Set isLoading to true
+        await MainActor.run {
+            isLoading = true
+        }
+        
+        // Encode getChatRequest to string, otherwise return
+        guard let requestString = String(data: try JSONEncoder().encode(getChatRequest), encoding: .utf8) else {
+            // TODO: Handle Errors
+            print("Could not unwrap encoded getChatRequest to String in AICodingHelperServerNetworkClient!")
+            return
+        }
+        
+        // Get stream
+        let stream = AICodingHelperWebSocketConnector.getStream()
+        
+        // Send GetChatRequest to stream
+        try await stream.send(.string(requestString))
+        
+        // Parse stream response
+        var firstMessage: Bool = true
+        do {
+            for try await message in stream {
+                if firstMessage {
+                    // Set isLoading to false and isStreaming to true
+                    await MainActor.run {
+                        isLoading = false
+                        isStreaming = true
+                    }
+                    
+                    // Set firstMessage to false
+                    firstMessage = false
+                }
+                
+                // Parse message, and if it cannot be unwrapped continue
+                guard let messageData = {
+                    switch message {
+                    case .data(let data):
+                        return data
+                    case .string(let string):
+                        return string.data(using: .utf8)
+                    @unknown default:
+                        print("Message wasn't stirng or data when parsing message stream! :O")
+                        return nil
+                    }
+                }() else {
+                    print("Could not unwrap messageData in message stream! Skipping...")
+                    continue
+                }
+                
+                // Parse message to GetChatResponse
+                let getChatResponse: GetChatResponse
+                do {
+                    getChatResponse = try JSONDecoder().decode(GetChatResponse.self, from: messageData)
+                } catch {
+                    print("Error decoding messageData to GetChatResponse so skipping... \(error)")
+                    
+                    // Catch as StatusResponse
+                    let statusResponse = try JSONDecoder().decode(StatusResponse.self, from: messageData)
+                    
+                    if statusResponse.success == 5 {
+                        Task {
+                            do {
+                                try await AuthHelper.regenerate()
+                            } catch {
+                                print("Error regenerating authToken in HTTPSConnector... \(error)")
+                            }
+                        }
+                    }
+                    continue
+                }
+                
+                // Update streamingChat and streamingChatDelta
+                await MainActor.run {
+                    if let zeroIndexChoice = getChatResponse.body.oaiResponse.choices[safe: 0],
+                       let content = zeroIndexChoice.delta.content {
+                        if streamingChat == nil {
+                            streamingChat = content
+                        } else {
+                            streamingChat! += content
+                        }
+                        
+                        streamingChatDelta = content
+                    }
+                }
+            }
+        } catch {
+            // TODO: Handle Errors, though this may be normal
+            print("Error parsing stream response in AICodingHelperNetworkClient... \(error)")
+        }
+    }
+    
+}
+CodeEditorLanguageSelector.swift//
+//  CodeEditorLanguageSelector.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import CodeEditor
+import Foundation
+import SwiftUI
+
+
+struct CodeEditorLanguageSelector: View {
+    
+    @Binding var selectedLanguage: CodeEditor.Language
+
+    var body: some View {
+        Picker(selection: $selectedLanguage, content: {
+            ForEach(CodeEditorLanguageResolver.allLanguages, id: \.self) { language in
+                Text(language.rawValue)
+            }
+        }) {
+            Text("Language:")
+        }
+        .frame(width: 140.0)
+        .menuStyle(.automatic)
+    }
+    
+}
+
+#Preview {
+    
+    CodeEditorLanguageSelector(selectedLanguage: .constant(.tex))
+    
+}
+CodeEditorLanguageResolver.swift//
+//  CodeEditorLanguageResolver.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import CodeEditor
+import Foundation
+
+class CodeEditorLanguageResolver {
+  
+  private static let extensionToLanguageMap: [String: CodeEditor.Language] = [
+    "log": .accesslog,
+    "as": .actionscript,
+    "adb": .ada, "ads": .ada,
+    "conf": .apache,
+    "applescript": .applescript,
+    "sh": .bash,
+    "bas": .basic,
+    "c": .c,
+    "cpp": .cpp, "cc": .cpp, "cxx": .cpp,
+    "cs": .cs,
+    "css": .css,
+    "diff": .diff,
+    "dockerfile": .dockerfile,
+    "go": .go,
+    "http": .http,
+    "java": .java,
+    "js": .javascript,
+    "json": .json,
+    "lua": .lua,
+    "md": .markdown,
+    "Makefile": .makefile,
+    "nginxconf": .nginx,
+    "m": .objectivec,
+    "pgsql": .pgsql,
+    "php": .php,
+    "py": .python,
+    "rb": .ruby,
+    "rs": .rust,
+    "bash": .shell,
+    "st": .smalltalk,
+    "sql": .sql,
+    "swift": .swift,
+    "tcl": .tcl,
+    "tex": .tex,
+    "twig": .twig,
+    "ts": .typescript,
+    "vb": .vbnet,
+    "vbs": .vbscript,
+    "xml": .xml,
+    "yaml": .yaml, "yml": .yaml,
+  ]
+    
+    // List of all languages
+    static var allLanguages: [CodeEditor.Language] {
+        [
+          .accesslog, .actionscript, .ada, .apache, .applescript, .bash,
+          .basic, .brainfuck, .c, .cpp, .cs, .css, .diff, .dockerfile,
+          .go, .http, .java, .javascript, .json, .lua, .markdown,
+          .makefile, .nginx, .objectivec, .pgsql, .php, .python, .ruby,
+          .rust, .shell, .smalltalk, .sql, .swift, .tcl, .tex, .twig,
+          .typescript, .vbnet, .vbscript, .xml, .yaml
+        ]
+    }
+  
+  static func language(for fileExtension: String) -> CodeEditor.Language {
+      return extensionToLanguageMap[fileExtension] ?? .tex
+  }
+}
+CodeEditorContainer.swift//
+//  CodeEditorContainer.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import CodeEditor
+import SwiftUI
+
+struct CodeEditorContainer: View {
+    
+    @Binding var fileText: String
+    @Binding var fileSelection: Range<String.Index>
+    @Binding var fileLanguage: CodeEditor.Language
+    
+    
+//    @State private var fileLanguage: CodeEditor.Language = .tex
+    
+//    @State private var fileSelection: Range<String.Index> = "".startIndex..<"".startIndex
+    
+    
+    var body: some View {
+        VStack {
+            // Code Editor
+            CodeEditor(
+                source: $fileText,
+                selection: $fileSelection,
+                language: fileLanguage,
+                //                fontSize: .constant(30.0),
+                inset: CGSize(width: 0, height: 140.0))
+            .padding(.top, -140)
+            
+            // Language Selector
+            HStack {
+                Spacer()
+                CodeEditorLanguageSelector(selectedLanguage: $fileLanguage)
+            }
+        }
+    }
+    
+}
+
+//#Preview {
+//    
+//    CodeEditorContainer(
+//        filepath: .constant("~/Downloads/test_dir/testing.txt"),
+//        fileText: .constant(""),
+//        fileSelection: .constant("".startIndex..<"".startIndex),
+//        fileLanguage: .constant(.tex)
+//    )
+//    
+//}
+CodeView.swift//
+//  CodeView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import CodeEditor
+import SwiftUI
+
+struct CodeView: View {
+    
+//    @Binding var filepath: String?
+    @ObservedObject var codeViewModel: CodeViewModel
+    
+    
+    @Environment(\.undoManager) private var undoManager
+    
+    @StateObject private var chatGenerator: ChatGenerator = ChatGenerator()
+    
+//    @State private var currentNarrowScope: Scope = .file
+    
+//    @State private var openedFileText: String = ""
+//    @StateObject private var openedFileText_workaround_undoableOpenedTextObservable: CodeViewModel = CodeViewModel()
+//    @State private var openedFileTextSelection: Range<String.Index> = "".startIndex..<"".startIndex
+//    @State private var openedFileLanguage: CodeEditor.Language = .tex
+//    
+//    @State private var narrowScopeStreamGenerationInitialSelection: Range<String.Index>?
+//    @State private var narrowScopeStreamGenerationCursorPosition: String.Index?
+    
+    
+    var body: some View {
+        ZStack {
+            // Code Editor Container
+            CodeEditorContainer(
+                fileText: $codeViewModel.openedFileText,
+                fileSelection: $codeViewModel.openedFileTextSelection,
+                fileLanguage: $codeViewModel.openedFileLanguage)
+            
+            // Narrow Scope Controls
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    NarrowScopeControlsView(
+                        scope: $codeViewModel.currentNarrowScope,
+                        onSubmit: { actionType in
+                            generateChat(
+                                actionType: actionType,
+                                useProjectContext: false,
+                                input: String(codeViewModel.openedFileText[codeViewModel.openedFileTextSelection]),
+                                scope: codeViewModel.currentNarrowScope)
+                        })
+                    .padding()
+                }
+            }
+        }
+        .onReceive(codeViewModel.$filepath) { filepath in
+            if let filepath = filepath {
+                // Set fileText
+                do {
+                    codeViewModel.openedFileText = try String(contentsOfFile: filepath)
+                } catch {
+                    // TODO: Handle Errors
+                    print("Error getting contents of file in CodeEditorContainer... \(error)")
+                }
+                
+                // Set fileLanguage
+                let filepathURL = URL(fileURLWithPath: filepath)
+                let fileExtension = filepathURL.pathExtension
+                codeViewModel.openedFileLanguage = CodeEditorLanguageResolver.language(for: fileExtension)
+            }
+        }
+        .onReceive(codeViewModel.$openedFileText) { fileText in
+            // Update file contents
+            if let filepath = codeViewModel.filepath {
+                do {
+                    try fileText.write(toFile: filepath, atomically: true, encoding: .utf8)
+                } catch {
+                    // TODO: Handle Errors
+                    print("Error writing to file in CodeEditorContainer... \(error)")
+                }
+            }
+        }
+        .onChange(of: codeViewModel.openedFileTextSelection) {
+            codeViewModel.currentNarrowScope = codeViewModel.openedFileTextSelection.lowerBound == codeViewModel.openedFileTextSelection.upperBound ? .file : .highlight
+        }
+        .onReceive(chatGenerator.$isStreaming) { newValue in
+            // Do scope related actions on successful stream start TODO: Make sure isStreaming only sets true on successful stream
+            switch chatGenerator.streamingChatScope {
+            case .project:
+                break
+            case .directory:
+                break
+//            case .file:
+//                if newValue {
+//                    // Set openedFileText to empty string
+//                    openedFileText = ""
+//                    
+//                    // Set narrowScopeStreamGenerationCursorPosition to openedFileText startIndex
+//                    narrowScopeStreamGenerationCursorPosition = openedFileText.startIndex
+//                    
+//                    // Set openedFileTextSelection to range from narrowScopeStreamGenerationCursorPosition to narrowScopeStreamGenerationCursorPosition
+//                    openedFileTextSelection = narrowScopeStreamGenerationCursorPosition!..<narrowScopeStreamGenerationCursorPosition!
+//                }
+            case .file, .highlight:
+                if newValue {
+                    // Register opened file text undo, delete narrowScopeStreamGenerationInitialSelection subrange, set narrowScopeStreamGenerationCursorPosition to narrowScopeStreamGenerationInitialSelection lowerBound, and set openedFileTextSelection to a range from narrowScopeStreamGenerationCursorPosition to narrowScopeStreamGenerationCursorPosition
+                    if let narrowScopeStreamGenerationInitialSelection = codeViewModel.narrowScopeStreamGenerationInitialSelection {
+                        registerOpenedFileTextUndo()
+                        
+                        codeViewModel.openedFileText.replaceSubrange(codeViewModel.openedFileTextSelection, with: "")
+                        
+                        codeViewModel.narrowScopeStreamGenerationCursorPosition = narrowScopeStreamGenerationInitialSelection.lowerBound
+                        codeViewModel.openedFileTextSelection = codeViewModel.narrowScopeStreamGenerationCursorPosition!..<codeViewModel.narrowScopeStreamGenerationCursorPosition!
+                    }
+                }
+            case .none:
+                break
+            }
+        }
+        .onReceive(chatGenerator.$streamingChatDelta) { newValue in
+            // If chatGenerator is perform scoped operations for newValue
+            switch chatGenerator.streamingChatScope {
+            case .project:
+                // TODO: Project scope
+                print()
+            case .directory:
+                // TODO: Directory scope
+                print()
+            case .file, .highlight:
+                if let newValue = newValue {
+                    // Insert newValue at narrowScopeStreamGenerationCursorPosition or if null startIndex
+                    codeViewModel.openedFileText.insert(contentsOf: newValue, at: codeViewModel.narrowScopeStreamGenerationCursorPosition ?? codeViewModel.openedFileText.startIndex)
+                    
+                    // Set narrowScopeStreamGenerationCursorPosition to itself offset by newValue count
+                    codeViewModel.narrowScopeStreamGenerationCursorPosition = codeViewModel.openedFileText.index(codeViewModel.narrowScopeStreamGenerationCursorPosition ?? codeViewModel.openedFileText.startIndex, offsetBy: newValue.count)
+                    
+                    // Set openedFileTextSelection to range from narrowScopeStreamGenerationCursorPosition to narrowScopeStreamGenerationCursorPosition
+                    if let narrowScopeStreamGenerationCursorPosition = codeViewModel.narrowScopeStreamGenerationCursorPosition {
+                        codeViewModel.openedFileTextSelection = narrowScopeStreamGenerationCursorPosition..<narrowScopeStreamGenerationCursorPosition
+                    }
+                }
+            case .none:
+                break
+            }
+        }
+    }
+    
+    
+    func generateChat(actionType: ActionType, useProjectContext: Bool, input: String, scope: Scope) {
+        Task {
+            if scope == .highlight {
+                // If scope is highlight set narrowScopeStreamGenerationInitialSelection to openedFileTextSelection
+                await MainActor.run {
+                    codeViewModel.narrowScopeStreamGenerationInitialSelection = codeViewModel.openedFileTextSelection
+                }
+            } else if scope == .file {
+                // If scope is file set narrowScopeStreamGenerationInitialSelection to openedFileText startIndex and endIndex
+                await MainActor.run {
+                    codeViewModel.narrowScopeStreamGenerationInitialSelection = codeViewModel.openedFileText.startIndex..<codeViewModel.openedFileText.endIndex
+                }
+            } else {
+                // If scope is anything else return TODO: Handle Errors
+                print("Scope \(scope) is not supported in narrow scope generation!")
+                return
+            }
+            
+            // Ensure authToken
+            let authToken: String
+            do {
+                authToken = try await AuthHelper.ensure()
+            } catch {
+                // TODO: Handle Errors
+                print("Error ensuring authToken in MainView... \(error)")
+                return
+            }
+            
+            // Stream Chat
+            do {
+                try await chatGenerator.streamChat(
+                    authToken: authToken,
+                    model: .GPT4o,
+                    action: actionType,
+                    language: codeViewModel.openedFileLanguage,
+                    context: [], // TODO: Implement full project context
+                    input: input,
+                    scope: scope)
+            } catch {
+                // TODO: Handle Errors
+                print("Error streaming chat in MainView... \(error)")
+            }
+        }
+    }
+    
+    private func registerOpenedFileTextUndo() {
+        registerOpenedFileTextUndo(
+            oldString: codeViewModel.openedFileText,
+            oldStringSelection: codeViewModel.openedFileTextSelection)
+    }
+    
+    private func registerOpenedFileTextUndo(oldString: String, oldStringSelection: Range<String.Index>) {
+        undoManager?.registerUndo(withTarget: codeViewModel) { target in
+            let currentString = target.openedFileText
+            let currentStringSelection = target.openedFileTextSelection
+            
+            target.openedFileText = oldString
+            target.openedFileTextSelection = oldStringSelection
+            
+            registerOpenedFileTextRedo(newString: currentString, newStringSelection: currentStringSelection)
+        }
+        undoManager?.setActionName("Edit Text")
+    }
+    
+    private func registerOpenedFileTextRedo(newString: String, newStringSelection: Range<String.Index>) {
+        undoManager?.registerUndo(withTarget: codeViewModel) { target in
+            let currentString = target.openedFileText
+            let currentStringSelection = target.openedFileTextSelection
+            
+            target.openedFileText = newString
+            target.openedFileTextSelection = newStringSelection
+            
+            registerOpenedFileTextUndo(oldString: currentString, oldStringSelection: currentStringSelection)
+        }
+        undoManager?.setActionName("Redo Edit")
+    }
+    
+}
+
+//#Preview {
+//    CodeView(
+//        codeViewModel: CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt")
+//    )
+//}
+CodeViewModel.swift//
+//  CodeViewModel.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/28/24.
+//
+
+import CodeEditor
+import Foundation
+import SwiftUI
+
+class CodeViewModel: ObservableObject, Identifiable {
+    
+    @Published var filepath: String?
+    @Published var openedFileText: String = ""
+    @Published var openedFileTextSelection: Range<String.Index> = "".startIndex..<"".endIndex
+    
+    @Published var currentNarrowScope: Scope = .file
+    
+    @Published var openedFileLanguage: CodeEditor.Language = .tex
+    
+    @Published var narrowScopeStreamGenerationInitialSelection: Range<String.Index>?
+    @Published var narrowScopeStreamGenerationCursorPosition: String.Index?
+    
+    
+    init(filepath: String?) {
+        self.filepath = filepath
+    }
+    
+    
+}
+AICodingHelper.entitlements<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.assets.movies.read-only</key>
+	<true/>
+	<key>com.apple.security.assets.music.read-only</key>
+	<true/>
+	<key>com.apple.security.assets.pictures.read-only</key>
+	<true/>
+	<key>com.apple.security.files.downloads.read-write</key>
+	<true/>
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+	<key>com.apple.security.network.client</key>
+	<true/>
+</dict>
+</plist>
+

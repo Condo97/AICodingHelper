@@ -6,3 +6,12 @@
 //
 
 import Foundation
+
+
+enum GPTModels: String {
+    
+    case GPT3_5 = "gpt-3.5-turbo"
+    case GPT4o = "gpt-4o"
+    
+}
+

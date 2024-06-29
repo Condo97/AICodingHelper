@@ -11,9 +11,9 @@ import Foundation
 struct OAIChatCompletionRequest: Codable {
     
     var model: String
-    var maxTokens: Int
-    var n: Int
-    var temperature: Double
+    var maxTokens: Int?
+    var n: Int?
+    var temperature: Double?
     var stream: Bool
     var messages: [OAIChatCompletionRequestMessage]
     

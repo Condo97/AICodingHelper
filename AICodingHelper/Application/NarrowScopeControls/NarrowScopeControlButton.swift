@@ -7,12 +7,44 @@
 
 import SwiftUI
 
-struct NarrowScopeControlButton: View {
+struct NarrowScopeControlButton<Content: View>: View {
+    
+    var label: Content
+    @Binding var subtitle: String
+    @Binding var hoverDescription: String
+    var action: () -> Void
+    
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Button(action: {
+            action()
+        }) {
+            VStack {
+                label
+                    .frame(width: 28.0, height: 28.0)
+                
+                Text(subtitle)
+                    .lineLimit(2)
+            }
+            .frame(width: 80.0, height: 80.0)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .help(hoverDescription)
     }
+    
 }
 
 #Preview {
-    NarrowScopeControlButton()
+    
+    NarrowScopeControlButton(
+        label: Text("//")
+            .font(.system(size: 100.0))
+            .minimumScaleFactor(0.01),
+        subtitle: .constant("Comment"),
+        hoverDescription: .constant("Analyzes all comments"),
+        action: {
+            
+        }
+    )
+    
 }
