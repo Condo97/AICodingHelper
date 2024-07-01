@@ -9,7 +9,7 @@ import CodeEditor
 import Foundation
 
 
-class ChatGenerator: ObservableObject {
+class NarrowScopeChatGenerator: ObservableObject {
     
     @Published var streamingChat: String?
     @Published var streamingChatDelta: String?
@@ -18,7 +18,7 @@ class ChatGenerator: ObservableObject {
     @Published var isStreaming: Bool = false
     
     
-    func streamChat(authToken: String, model: GPTModels, action: ActionType, language: CodeEditor.Language, context: [String], input: String, scope: Scope) async throws {
+    func streamChat(authToken: String, model: GPTModels, action: ActionType, additionalInput: String?, language: CodeEditor.Language?, responseFormat: ResponseFormatType = .text, context: [String], input: String, scope: Scope) async throws {
         /* Should look something like
          System
             You are an AI coding helper service in an IDE so you must format all your responses in <language> code that would be valid in an IDE.
@@ -29,30 +29,32 @@ class ChatGenerator: ObservableObject {
          User Message 2
             You are an AI coding helper in an IDE so all responses must be in <language> code that would be valid in an IDE.
             <Action AI Prompt>
+            <Additional Input>
             <Code>
          */
         
-        let systemMessage = "You are an AI coding helper service in an IDE so you must format all your responses in \(language.rawValue) code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language."
+        let systemMessage = "You are an AI coding helper service in an IDE so you must format all your responses in \(language == nil ? "" : "\(language!.rawValue)") code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language."
         let userMessage1 = {
-            var userMessage1_1 = "You are an AI coding helper in an IDE so all responses must be in \(language.rawValue) code that would be valid in an IDE."
+            var userMessage1_1 = "You are an AI coding helper in an IDE so all responses must be in \(language == nil ? "" : "\(language!.rawValue)") code that would be valid in an IDE."
             var userMessage1_2 = "Here are other files from my project to reference"
             return ([userMessage1_1, userMessage1_2] + context).joined(separator: "\n")
         }()
         let userMessage2 = {
-            var userMessage2_1 = "You are an AI coding helper in an IDE so all responses must be in \(language.rawValue) code that would be valid in an IDE."
+            var userMessage2_1 = "You are an AI coding helper in an IDE so all responses must be in \(language == nil ? "" : "in \(language!.rawValue) code") code that would be valid in an IDE."
             var userMessage2_2 = action.aiPrompt
             return [userMessage2_1, userMessage2_2, input].joined(separator: "\n")
         }()
         
         try await streamChat(
             authToken: authToken,
-            model: model.rawValue,
+            model: model,
+            responseFormat: responseFormat,
             systemMessage: systemMessage,
             userInputs: [userMessage1, userMessage2],
             scope: scope)
     }
     
-    func streamChat(authToken: String, model: String, systemMessage: String?, userInputs: [String], scope: Scope) async throws {
+    func streamChat(authToken: String, model: GPTModels, responseFormat: ResponseFormatType, systemMessage: String?, userInputs: [String], scope: Scope) async throws {
         // Create messages and add messages
         var messages: [OAIChatCompletionRequestMessage] = []
         
@@ -74,7 +76,8 @@ class ChatGenerator: ObservableObject {
         let getChatRequest = GetChatRequest(
             authToken: authToken,
             chatCompletionRequest: OAIChatCompletionRequest(
-                model: model,
+                model: model.rawValue,
+                responseFormat: OAIChatCompletionRequestResponseFormat(type: .text),
                 stream: true,
                 messages: messages))
         

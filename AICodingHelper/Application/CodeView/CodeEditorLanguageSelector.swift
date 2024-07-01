@@ -12,12 +12,12 @@ import SwiftUI
 
 struct CodeEditorLanguageSelector: View {
     
-    @Binding var selectedLanguage: CodeEditor.Language
+    @Binding var selectedLanguage: CodeEditor.Language?
 
     var body: some View {
         Picker(selection: $selectedLanguage, content: {
             ForEach(CodeEditorLanguageResolver.allLanguages, id: \.self) { language in
-                Text(language.rawValue)
+                Text(language?.rawValue ?? "- None -")
             }
         }) {
             Text("Language:")

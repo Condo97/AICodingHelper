@@ -18,7 +18,9 @@ struct MainView: View {
     @State var directory: String = "~/Downloads/test_dir"
     
     
-    @State private var selectedPath: String?
+    @StateObject private var fileSystemGenerator: FileSystemGenerator = FileSystemGenerator()
+    
+//    @State private var selectedFilepaths: [String] = []
 //    @State private var openedFile: String?
     
     @State private var openTabs: [CodeViewModel] = []
@@ -31,45 +33,38 @@ struct MainView: View {
     
 //    var openTab: CodeViewModel = CodeViewModel(filepath: "")
     
+//    @State private var currentWideScope: Scope?
+    
     
     var body: some View {
         ZStack {
             VStack {
                 // Tab View
                 if !openTabs.isEmpty {
-//                    TabView(selection: $openTab) {
-                    HStack {
-                        ForEach(openTabs) { openTab in
-                            CodeTabView(
-                                codeViewModel: openTab,
-                                onSelect: {
-                                    self.openTab = openTab
-                                },
-                                onClose: {
-                                    
-                                })
-                        }
-                    }
+                    TabsView(
+                        openTabs: $openTabs,
+                        selectedTab: $openTab,
+                        onSelect: { selectedTab in
+                            self.openTab = selectedTab
+                        })
 //                    }
-//                    TabsView(
-//                        openTabs: $openTabs,
-//                        selectedTab: openTabs[openTabIndex ?? 0],
-//                        onSelect: { codeViewModel in
-//                            if let selectedTab = openTabs.firstIndex(where: {$0 === codeViewModel}) {
-//                                self.openTabIndex = selectedTab
-//                            }
-//                        })
                 }
                 
                 HSplitView {
+//                    // File Browser
+//                    TabAddingFileSystemView(
+//                        directory: $directory,
+//                        selectedFilepaths: $selectedFilepaths,
+//                        openTab: $openTab,
+//                        openTabs: $openTabs)
                     // File Browser
-                    TabAddingFileSystemView(
-                        directory: $directory,
-                        selectedPath: $selectedPath,
+                    FileBrowserView(
+                        baseDirectory: $directory,
+                        openTab: $openTab,
                         openTabs: $openTabs)
                     
-                    // Code View
                     if let openTab = openTab {
+                        // Code View
                         var openTabBinding: Binding<CodeViewModel> {
                             Binding(
                                 get: {
@@ -79,21 +74,53 @@ struct MainView: View {
                                     
                                 })
                         }
+                        
                         CodeView(codeViewModel: openTabBinding)
+                    } else {
+                        // No Tabs View
+                        ZStack {
+                            Colors.background
+                            
+                            Text("No File Selected")
+                            
+                            // TODO: File Selection Buttons and stuff
+                        }
                     }
                 }
             }
             
-            // Wide Scope Controls
-            
+//            VStack {
+//                Spacer()
+//                HStack {
+//                    // Wide Scope Controls
+//                    WideScopeControlsView(
+//                        scope: $currentWideScope,
+//                        selectedFilepaths: $selectedFilepaths,
+//                        onSubmit: { actionType in
+//                            
+//                        })
+//                    .padding()
+//                    .padding(.bottom)
+//                    .padding(.bottom)
+//                    Spacer()
+//                }
+//            }
         }
+//        .onAppear {
+//            Task {
+//                if let fileSystem = FileSystem.from(path: NSString(string: directory).expandingTildeInPath) {
+//                    let fileSystemJSON = try await fileSystemGenerator.getFileSystem(authToken: AuthHelper.get()!, model: .GPT4o, input: "", fileSystem: fileSystem)
+//                    print(fileSystemJSON)
+//                }
+//            }
+//        }
     }
     
 }
 
-//#Preview {
-//    
-//    MainView()
-//        .frame(width: 600, height: 500)
-//    
-//}
+#Preview {
+    
+    MainView()
+        .frame(width: 650, height: 600)
+    
+}

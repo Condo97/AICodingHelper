@@ -11,15 +11,15 @@ import SwiftUI
 struct FileSystemView: View {
     
     @Binding var directory: String
-    @Binding var selectedPath: String?
-    @Binding var openedFile: String?
+    @Binding var selectedFilepaths: [String]
+    var onOpen: (_ path: String) -> Void
     
     @StateObject private var fileTree: FileTree
     
-    init(directory: Binding<String>, selectedPath: Binding<String?>, openedFile: Binding<String?>) {
+    init(directory: Binding<String>, selectedFilepaths: Binding<[String]>, onOpen: @escaping (_ path: String) -> Void) {
         self._directory = directory
-        self._selectedPath = selectedPath
-        self._openedFile = openedFile
+        self._selectedFilepaths = selectedFilepaths
+        self.onOpen = onOpen
         _fileTree = StateObject(wrappedValue: FileTree(rootDirectory: directory.wrappedValue))
     }
     
@@ -44,7 +44,7 @@ struct FileSystemView: View {
             // File Nodes
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
-                    FileNodeView(node: fileTree.rootNode, level: 0, selectedPath: $selectedPath, openedFile: $openedFile)
+                    FileNodeView(node: fileTree.rootNode, level: 0, selectedFilepaths: $selectedFilepaths, onOpen: onOpen)
                     
                     Spacer()
                 }

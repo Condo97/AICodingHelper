@@ -9,41 +9,41 @@ import SwiftUI
 
 struct CodeTabView: View {
     
-    @ObservedObject var codeViewModel: CodeViewModel
-    var onSelect: () -> Void
+    @Binding var title: String
+    @Binding var selected: Bool
     var onClose: () -> Void
     
-//    @Binding var title: String
-//    @Binding var open: Bool
-//    @Binding var selected: Bool
     
-    var title: String {
-        URL(fileURLWithPath: codeViewModel.filepath ?? "").lastPathComponent
-    }
+    @State private var isHovering: Bool = false
     
     
     var body: some View {
         Button(action: {
-            onSelect()
+            selected = true
         }) {
-            HStack {
-                // Title
-                Text(title)
-                
-                // Close Button
-                Button(action: {
-                    onClose()
-                }) {
-                    Image(systemName: "xmark")
-                        .imageScale(.medium)
+            VStack {
+                Spacer()
+                HStack {
+                    // Title
+                    Text(title)
+                    
+                    // Close Button
+                    Button(action: {
+                        onClose()
+                    }) {
+                        Image(systemName: "xmark")
+                            .imageScale(.medium)
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
                 }
-                .buttonStyle(BorderlessButtonStyle())
+                Spacer()
             }
             .padding([.leading, .trailing])
-            .background(
-                RoundedRectangle(cornerRadius: 2.0)
-//                    .fill(selected ? Colors.foreground : Colors.secondary)
-            )
+            .background(selected ? Colors.foreground : (isHovering ? Colors.background : Colors.secondary))
+            .clipShape(RoundedRectangle(cornerRadius: 2.0))
+            .onHover(perform: { hovering in
+                isHovering = hovering
+            })
         }
         .buttonStyle(PlainButtonStyle())
     }

@@ -1,19 +1,19 @@
 //
-//  NarrowScopeControlButton.swift
+//  WideScopeControlButton.swift
 //  AICodingHelper
 //
-//  Created by Alex Coundouriotis on 6/26/24.
+//  Created by Alex Coundouriotis on 6/30/24.
 //
 
 import SwiftUI
 
-struct NarrowScopeControlButton<Content: View>: View {
+struct WideScopeControlButton<Content: View>: View {
     
     var label: Content
     @Binding var subtitle: String?
     @Binding var hoverDescription: String
     @State var foregroundColor: Color
-    @State var size: CGSize = CGSize(width: 80.0, height: 80.0)
+    @State var size: CGSize = CGSize(width: 180.0, height: 60.0)
     var action: () -> Void
     
     
@@ -24,7 +24,7 @@ struct NarrowScopeControlButton<Content: View>: View {
             ZStack {
                 foregroundColor
                 
-                VStack {
+                HStack {
                     label
                         .frame(width: 28.0, height: 28.0)
                     
@@ -32,6 +32,8 @@ struct NarrowScopeControlButton<Content: View>: View {
                         Text(subtitle)
                             .lineLimit(2)
                     }
+                    
+                    Spacer()
                 }
             }
             .frame(width: size.width, height: size.height)
@@ -44,12 +46,12 @@ struct NarrowScopeControlButton<Content: View>: View {
 
 #Preview {
     
-    NarrowScopeControlButton(
+    WideScopeControlButton(
         label: Text("//")
             .font(.system(size: 100.0))
             .minimumScaleFactor(0.01),
         subtitle: .constant("Comment"),
-        hoverDescription: .constant("Analyzes all comments."),
+        hoverDescription: .constant("Analyze all comments."),
         foregroundColor: Colors.foreground,
         action: {
             

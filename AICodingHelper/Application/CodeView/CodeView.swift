@@ -8,34 +8,75 @@
 import CodeEditor
 import SwiftUI
 
+
 struct CodeView: View {
     
 //    @Binding var filepath: String?
     @Binding var codeViewModel: CodeViewModel
     
+    @ObservedObject private var codeViewModel_ObservedObject: CodeViewModel // INCLUDING THIS FIXES THE ISSUES I WAS HAVING WITH THE codeViewModel BINDING NOT UPDATING THE VIEW! WHAT why IS THIS A GLITCH did I find something? nice :) anyways this seems to allow the View to get updates triggered and it works now
+    
+    /**
+     From Apple documentation:
+     Structure
+     ObservedObject
+     A property wrapper type that subscribes to an observable object and invalidates a view whenever the observable object changes.
+     https://developer.apple.com/documentation/swiftui/observedobject
+     
+     So I mean it looks like just including it will make it invalidate the view whenever the observable object changes which would I guess make those bindings to the binding codeiViewModel ObservedObject update correctly! :)
+     */
+    
     
     @Environment(\.undoManager) private var undoManager
     
-    @StateObject private var chatGenerator: ChatGenerator = ChatGenerator()
+    @StateObject private var chatGenerator: NarrowScopeChatGenerator = NarrowScopeChatGenerator() // This is probably what is causing the view to receive updates when generating a chat and not deleing before generating chat and undoing, but now it works with codeViewMode_ObservedObject just fine
     
-//    @State private var currentNarrowScope: Scope = .file
     
-//    @State private var openedFileText: String = ""
-//    @StateObject private var openedFileText_workaround_undoableOpenedTextObservable: CodeViewModel = CodeViewModel()
-//    @State private var openedFileTextSelection: Range<String.Index> = "".startIndex..<"".startIndex
-//    @State private var openedFileLanguage: CodeEditor.Language = .tex
-//    
-//    @State private var narrowScopeStreamGenerationInitialSelection: Range<String.Index>?
-//    @State private var narrowScopeStreamGenerationCursorPosition: String.Index?
+    private var isCodeEditorEditingDisabled: Binding<Bool> {
+        Binding(
+            get: {
+                // Disabled if chatGenerator isLoading or isStreaming
+                chatGenerator.isLoading || chatGenerator.isStreaming
+            },
+            set: { value in
+                // No actions
+            })
+    }
+    
+    
+    init(codeViewModel: Binding<CodeViewModel>) {
+        self._codeViewModel = codeViewModel
+        self.codeViewModel_ObservedObject = codeViewModel.wrappedValue // What the heck.. for some reason, including this allows CodeEditorContainer to get updated values for its bindings from the codeViewModel binding.. what do you know, there it is lol.. yay I think this should work then. Maybe since it's observed it's just automatically looking for view updates of the like
+    }
     
     
     var body: some View {
         ZStack {
             // Code Editor Container
             CodeEditorContainer(
-                fileText: $codeViewModel.openedFileText,
+                fileText: $codeViewModel.openedFileText,//$glitchyFix_fileText,
                 fileSelection: $codeViewModel.openedFileTextSelection,
                 fileLanguage: $codeViewModel.openedFileLanguage)
+            .disabled(isCodeEditorEditingDisabled.wrappedValue)
+//            .onChange(of: glitchyFix_fileText) {
+//                print("CHANGED")
+//                codeViewModel.openedFileText = glitchyFix_fileText
+//            }
+            
+            // Loading overlay and progress view
+            if isCodeEditorEditingDisabled.wrappedValue {
+                ZStack {
+                    Colors.foreground
+                        .opacity(0.4)
+                    
+                    VStack {
+                        Text(chatGenerator.isLoading ? "Loading..." : "Streaming...")
+                        
+                        ProgressView()
+                            .tint(Colors.foregroundText)
+                    }
+                }
+            }
             
             // Narrow Scope Controls
             VStack {
@@ -44,14 +85,19 @@ struct CodeView: View {
                     Spacer()
                     NarrowScopeControlsView(
                         scope: $codeViewModel.currentNarrowScope,
-                        onSubmit: { actionType in
+                        onSubmit: { actionType, userInput in
                             generateChat(
                                 actionType: actionType,
+                                userInput: userInput,
                                 useProjectContext: false,
-                                input: String(codeViewModel.openedFileText[codeViewModel.openedFileTextSelection]),
                                 scope: codeViewModel.currentNarrowScope)
                         })
-                    .padding()
+                    .padding(8)
+                    .background(Colors.foreground)
+                    .clipShape(RoundedRectangle(cornerRadius: 58.0))
+                    .shadow(color: Colors.foregroundText.opacity(0.05), radius: 8.0)
+                    .padding(.bottom, 48.0)
+                    .padding(.trailing)
                 }
             }
         }
@@ -59,11 +105,14 @@ struct CodeView: View {
             if let filepath = filepath {
                 // Set fileText
                 do {
-                    codeViewModel.openedFileText = try String(contentsOfFile: filepath)
-                } catch {
-                    // TODO: Handle Errors
-                    print("Error getting contents of file in CodeEditorContainer... \(error)")
-                }
+                                    codeViewModel.openedFileText = try String(contentsOfFile: filepath)
+                                } catch {
+                                    print("Error getting contents of file in CodeView... \(error)")
+                                }
+
+//                                let filepathURL = URL(fileURLWithPath: filepath)
+//                                let fileExtension = filepathURL.pathExtension
+//                                codeViewModel.openedFileLanguage = CodeEditorLanguageResolver.language(for: fileExtension)
                 
                 // Set fileLanguage
                 let filepathURL = URL(fileURLWithPath: filepath)
@@ -74,6 +123,10 @@ struct CodeView: View {
         .onReceive(codeViewModel.$openedFileText) { fileText in
             // Update file contents
             if let filepath = codeViewModel.filepath {
+                // Get file contents
+                
+                // Check if
+                
                 do {
                     try fileText.write(toFile: filepath, atomically: true, encoding: .utf8)
                 } catch {
@@ -103,13 +156,27 @@ struct CodeView: View {
 //                    // Set openedFileTextSelection to range from narrowScopeStreamGenerationCursorPosition to narrowScopeStreamGenerationCursorPosition
 //                    openedFileTextSelection = narrowScopeStreamGenerationCursorPosition!..<narrowScopeStreamGenerationCursorPosition!
 //                }
-            case .file, .highlight:
+            case .file:
+                if newValue {
+                    // Set openedFileText to empty string
+                    codeViewModel.openedFileText = ""
+                    
+                    // Set narrowScopeStreamGenerationCursorPosition to openedFileText startIndex
+                    codeViewModel.narrowScopeStreamGenerationCursorPosition = codeViewModel.openedFileText.startIndex
+                    
+                    // Set openedFileTextSelection to range from narrowScopeStreamGenerationCursorPosition to narrowScopeStreamGenerationCursorPosition
+                    codeViewModel.openedFileTextSelection = codeViewModel.narrowScopeStreamGenerationCursorPosition!..<codeViewModel.narrowScopeStreamGenerationCursorPosition!
+                }
+                
+//                // Continue switch to next case
+//                fallthrough
+            case .highlight:
                 if newValue {
                     // Register opened file text undo, delete narrowScopeStreamGenerationInitialSelection subrange, set narrowScopeStreamGenerationCursorPosition to narrowScopeStreamGenerationInitialSelection lowerBound, and set openedFileTextSelection to a range from narrowScopeStreamGenerationCursorPosition to narrowScopeStreamGenerationCursorPosition
                     if let narrowScopeStreamGenerationInitialSelection = codeViewModel.narrowScopeStreamGenerationInitialSelection {
                         registerOpenedFileTextUndo()
                         
-                        codeViewModel.openedFileText.replaceSubrange(codeViewModel.openedFileTextSelection, with: "")
+                        codeViewModel.openedFileText.replaceSubrange(narrowScopeStreamGenerationInitialSelection, with: "")
                         
                         codeViewModel.narrowScopeStreamGenerationCursorPosition = narrowScopeStreamGenerationInitialSelection.lowerBound
                         codeViewModel.openedFileTextSelection = codeViewModel.narrowScopeStreamGenerationCursorPosition!..<codeViewModel.narrowScopeStreamGenerationCursorPosition!
@@ -148,15 +215,26 @@ struct CodeView: View {
     }
     
     
-    func generateChat(actionType: ActionType, useProjectContext: Bool, input: String, scope: Scope) {
+    func generateChat(actionType: ActionType, userInput: String?, useProjectContext: Bool, scope: Scope) {
         Task {
+            var context: [String] = []
+            
+            // Create additionalInput as nil
+            var additionalInput: String?
+            
             if scope == .highlight {
-                // If scope is highlight set narrowScopeStreamGenerationInitialSelection to openedFileTextSelection
+                // If scope is highlight set additionalInput to selection of opened file text, append opened file text with explanation and minimal instructions to context, and set narrowScopeStreamGenerationInitialSelection to openedFileTextSelection
+                additionalInput = String(codeViewModel.openedFileText[codeViewModel.openedFileTextSelection])
+                
+                context.append("This is the entire file for which you are to process a selection of. IMPORTANT: Respond as if you are replacing exactly the selection provided.\n\n\(codeViewModel.openedFileText)")
+                
                 await MainActor.run {
                     codeViewModel.narrowScopeStreamGenerationInitialSelection = codeViewModel.openedFileTextSelection
                 }
             } else if scope == .file {
-                // If scope is file set narrowScopeStreamGenerationInitialSelection to openedFileText startIndex and endIndex
+                // If scope is file set input to opened file text and narrowScopeStreamGenerationInitialSelection to openedFileText startIndex and endIndex
+                
+                additionalInput = codeViewModel.openedFileText
                 await MainActor.run {
                     codeViewModel.narrowScopeStreamGenerationInitialSelection = codeViewModel.openedFileText.startIndex..<codeViewModel.openedFileText.endIndex
                 }
@@ -182,9 +260,10 @@ struct CodeView: View {
                     authToken: authToken,
                     model: .GPT4o,
                     action: actionType,
+                    additionalInput: additionalInput,
                     language: codeViewModel.openedFileLanguage,
-                    context: [], // TODO: Implement full project context
-                    input: input,
+                    context: context, // TODO: Implement full project context
+                    input: userInput ?? "",
                     scope: scope)
             } catch {
                 // TODO: Handle Errors
@@ -195,40 +274,57 @@ struct CodeView: View {
     
     private func registerOpenedFileTextUndo() {
         registerOpenedFileTextUndo(
-            oldString: codeViewModel.openedFileText,
-            oldStringSelection: codeViewModel.openedFileTextSelection)
+            oldText: codeViewModel.openedFileText,
+            oldTextSelection: codeViewModel.openedFileTextSelection)
+//        undoWrapper.registerUndo(
+//            undoManager: undoManager,
+//            oldString: codeViewModel.openedFileText,
+//            oldStringSelection: codeViewModel.openedFileTextSelection,
+//            onUndo: { newString, newStringSelection in
+//                let currentFileText = codeViewModel.openedFileText
+//                let currentFileTextSelection = codeViewModel.openedFileTextSelection
+//                
+//                codeViewModel.openedFileText = newString
+//                codeViewModel.openedFileTextSelection = newStringSelection
+//                
+//                return (currentFileText, currentFileTextSelection)
+//            })
     }
     
-    private func registerOpenedFileTextUndo(oldString: String, oldStringSelection: Range<String.Index>) {
+    private func registerOpenedFileTextUndo(oldText: String, oldTextSelection: Range<String.Index>) {
         undoManager?.registerUndo(withTarget: codeViewModel) { target in
-            let currentString = target.openedFileText
-            let currentStringSelection = target.openedFileTextSelection
+            let currentText = target.openedFileText
+            let currentTextSelection = target.openedFileTextSelection
             
-            target.openedFileText = oldString
-            target.openedFileTextSelection = oldStringSelection
+            DispatchQueue.main.async {
+                target.openedFileText = oldText // I bet if we did a replace instead of a set here it would work fine without the ObservableObject.. see it was triggering a view update fine when updating the existing openedFileText object like this codeViewModel.openedFileText.replaceSubrange(codeViewModel.openedFileTextSelection, with: ""), but when setting it to a new object or reference or whatever it doesn't seem to propogate the update.. maybe the Binding of an ObservableObject can detect and propogate if an object is modified but not if its reference is changed
+                target.openedFileTextSelection = oldTextSelection
+                
+                self.codeViewModel = target
+            }
             
-            registerOpenedFileTextRedo(newString: currentString, newStringSelection: currentStringSelection)
+            registerOpenedFileTextRedo(newText: currentText, newTextSelection: currentTextSelection)
         }
         undoManager?.setActionName("Edit Text")
     }
     
-    private func registerOpenedFileTextRedo(newString: String, newStringSelection: Range<String.Index>) {
+    private func registerOpenedFileTextRedo(newText: String, newTextSelection: Range<String.Index>) {
         undoManager?.registerUndo(withTarget: codeViewModel) { target in
-            let currentString = target.openedFileText
-            let currentStringSelection = target.openedFileTextSelection
+            let currentText = target.openedFileText
+            let currentTextSelection = target.openedFileTextSelection
             
-            target.openedFileText = newString
-            target.openedFileTextSelection = newStringSelection
+            target.openedFileText = newText
+            target.openedFileTextSelection = newTextSelection
             
-            registerOpenedFileTextUndo(oldString: currentString, oldStringSelection: currentStringSelection)
+            registerOpenedFileTextUndo(oldText: currentText, oldTextSelection: currentTextSelection)
         }
         undoManager?.setActionName("Redo Edit")
     }
     
 }
 
-//#Preview {
-//    CodeView(
-//        codeViewModel: CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt")
-//    )
-//}
+#Preview {
+    CodeView(
+        codeViewModel: .constant(CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt"))
+    )
+}

@@ -12,7 +12,10 @@ struct CodeEditorContainer: View {
     
     @Binding var fileText: String
     @Binding var fileSelection: Range<String.Index>
-    @Binding var fileLanguage: CodeEditor.Language
+    @Binding var fileLanguage: CodeEditor.Language?
+    
+    
+    @State private var fontSize: CGFloat? = nil
     
     
 //    @State private var fileLanguage: CodeEditor.Language = .tex
@@ -26,11 +29,14 @@ struct CodeEditorContainer: View {
             CodeEditor(
                 source: $fileText,
                 selection: $fileSelection,
-                language: fileLanguage,
-                //                fontSize: .constant(30.0),
+                language: $fileLanguage,
+                fontSize: $fontSize,
                 inset: CGSize(width: 0, height: 140.0),
                 allowsUndo: false)
             .padding(.top, -140)
+            .onChange(of: fileLanguage) {
+                print("Changed Language \(fileLanguage)")
+            }
             
             // Language Selector
             HStack {

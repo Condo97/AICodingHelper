@@ -54,7 +54,7 @@ class CodeEditorLanguageResolver {
   ]
     
     // List of all languages
-    static var allLanguages: [CodeEditor.Language] {
+    static var allLanguages: [CodeEditor.Language?] {
         [
           .accesslog, .actionscript, .ada, .apache, .applescript, .bash,
           .basic, .brainfuck, .c, .cpp, .cs, .css, .diff, .dockerfile,
