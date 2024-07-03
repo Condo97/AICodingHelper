@@ -36,6 +36,28 @@ class CodeViewModel: ObservableObject, Identifiable {
         self.filepath = filepath
     }
     
+    func saveUndo(undoManager: UndoManager) {
+        let oldFileText = openedFileText
+        let oldFileTextSelection = openedFileTextSelection
+        saveUndo(
+            undoManager: undoManager,
+            oldFileText: oldFileText,
+            oldFileTextSelection: oldFileTextSelection)
+    }
+    
+    func saveUndo(undoManager: UndoManager, oldFileText: String, oldFileTextSelection: Range<String.Index>) {
+        // Save text edit undo action, on FileManager or something we will save a file change undo action
+        undoManager.registerUndo(withTarget: self) { target in
+            let currentText = target.openedFileText
+            let currentTextSelection = target.openedFileTextSelection
+            
+            target.openedFileText = oldFileText
+            target.openedFileTextSelection = oldFileTextSelection
+            
+            target.saveUndo(undoManager: undoManager, oldFileText: currentText, oldFileTextSelection: currentTextSelection)
+        }
+    }
+    
     func startFileMonitoring() {
         guard let filepath = filepath else {
             fileMonitor?.stop()
@@ -53,15 +75,6 @@ class CodeViewModel: ObservableObject, Identifiable {
         reloadFileContents()
     }
     
-//    private func reloadFileContents() {
-//        guard let filepath = filepath else { return }
-//        do {
-//            self.openedFileText = try String(contentsOfFile: filepath)
-//        } catch {
-//            print("Error getting contents of file in CodeViewModel... \(error)")
-//        }
-//    }
-    
     private func reloadFileContents() {
         guard let filepath = filepath else { return }
         do {
@@ -69,7 +82,15 @@ class CodeViewModel: ObservableObject, Identifiable {
             let newFileHash = hashString(fileText)
             
             if newFileHash != lastFileHash { // TODO: See when I update the text file in app it calls this which does update the lastFileHash which is good but it would be nicer if it was already updated coming in to this, because right now there are two updates happening to fileText because it goes Edit in App -> Text Change Detected -> Save Text -> File Change Detected here -> Reload File Contents, Update OpenedFileText and LastFileHash -> Text Change Detected -> Save Text -> File Change Detected here -X newFileHash == lastFileHash so it drops off.. But this could be simpler!
+                // Set openedFilexText to fileText
                 self.openedFileText = fileText
+                
+                // Set openedFileLanguage to language for file extension
+                let filepathURL = URL(fileURLWithPath: filepath)
+                let fileExtension = filepathURL.pathExtension
+                self.openedFileLanguage = CodeEditorLanguageResolver.language(for: fileExtension)
+                
+                // Set lastFileHash to newFileHash
                 self.lastFileHash = newFileHash
             }
         } catch {

@@ -11,8 +11,10 @@ struct TabAddingFileSystemView: View {
     
     @Binding var directory: String
     @Binding var selectedFilepaths: [String]
-    @Binding var openTab: CodeViewModel?
-    @Binding var openTabs: [CodeViewModel]
+    @ObservedObject var tabsViewModel: TabsViewModel
+    
+    
+    @Environment(\.undoManager) var undoManager
     
     
     @State private var openedFile: String?
@@ -25,15 +27,21 @@ struct TabAddingFileSystemView: View {
             selectedFilepaths: $selectedFilepaths,
             onOpen: { path in
                 // Append to openTabs if not in there
-                if !openTabs.contains(where: {$0.filepath == path}) {
-                    openTabs.append(
+                if !tabsViewModel.openTabs.contains(where: {$0.filepath == path}) {
+                    tabsViewModel.openTabs.append(
                         CodeViewModel(filepath: path)
                     )
                 }
                 
-                // Set openTab to CodeViewModel where filepath is equal to path
-                if let pathTab = openTabs.first(where: {$0.filepath == path}) {
-                    openTab = pathTab
+                // Save undo and set openTab to CodeViewModel where filepath is equal to path
+                if let pathTab = tabsViewModel.openTabs.first(where: {$0.filepath == path}) {
+                    // Save undo with tabsViewModel openTab before setting it to pathTab
+                    if let undoManager = undoManager {
+                        tabsViewModel.saveUndo(undoManager: undoManager)
+                    }
+                    
+                    // Set openTab to pathTab
+                    tabsViewModel.openTab = pathTab
                 }
             })
         
@@ -46,8 +54,7 @@ struct TabAddingFileSystemView: View {
     TabAddingFileSystemView(
         directory: .constant(""),
         selectedFilepaths: .constant([]),
-        openTab: .constant(nil),
-        openTabs: .constant([])
+        tabsViewModel: TabsViewModel()
     )
     
 }

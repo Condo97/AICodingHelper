@@ -8,12 +8,15 @@
 import Foundation
 import SwiftUI
 
+
+// TODO: ContextMenu for cut, copy, paste, and generate stuff
 struct FileNodeView: View {
     
     @ObservedObject var node: FileNode
     let level: Int
     @Binding var selectedFilepaths: [String]
     var onOpen: (_ path: String) -> Void
+    
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -50,6 +53,8 @@ struct FileNodeView: View {
                                 }
                             }
                     )
+                
+                Spacer()
             }
             .padding(.leading, CGFloat(level) * 15)
             .padding(.vertical, 2)

@@ -15,6 +15,7 @@ struct FileSystemView: View {
     var onOpen: (_ path: String) -> Void
     
     @StateObject private var fileTree: FileTree
+    @State private var fileMonitor: FileMonitor?
     
     init(directory: Binding<String>, selectedFilepaths: Binding<[String]>, onOpen: @escaping (_ path: String) -> Void) {
         self._directory = directory
@@ -25,22 +26,6 @@ struct FileSystemView: View {
     
     var body: some View {
         ScrollView {
-            // Refresh Button
-            Button(action: { fileTree.updateRootDirectory(to: directory) }) {
-                HStack {
-//                    Spacer()
-                    Text("Refresh")
-//                    Spacer()
-                }
-                .foregroundStyle(Colors.elementText)
-                .frame(minWidth: 50.0, maxWidth: .infinity)
-                .padding()
-                .background(Colors.element)
-                .clipShape(RoundedRectangle(cornerRadius: 28.0))
-            }
-            .buttonStyle(PlainButtonStyle())
-            .padding()
-            
             // File Nodes
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
@@ -53,7 +38,46 @@ struct FileSystemView: View {
         }
         .onChange(of: directory, perform: { newDirectory in
             fileTree.updateRootDirectory(to: newDirectory)
+            startFileMonitor()
         })
+        .onReceive(fileTree.$rootNode) { _ in
+            removeInvalidFilesFromSelectedFilepaths()
+        }
+        .onAppear {
+            startFileMonitor()
+        }
+        .onDisappear {
+            stopFileMonitor()
+        }
+    }
+    
+    
+    private func removeInvalidFilesFromSelectedFilepaths() {
+        var allFilePaths = Set<String>()
+        collectFilePaths(node: fileTree.rootNode, filePaths: &allFilePaths)
+        
+        selectedFilepaths = selectedFilepaths.filter { allFilePaths.contains($0) }
+    }
+    
+    private func collectFilePaths(node: FileNode, filePaths: inout Set<String>) {
+        filePaths.insert(node.path)
+        for child in node.children {
+            collectFilePaths(node: child, filePaths: &filePaths)
+        }
+    }
+    
+    private func startFileMonitor() {
+        stopFileMonitor()
+        let expandedPath = NSString(string: directory).expandingTildeInPath
+        fileMonitor = FileMonitor(paths: [expandedPath]) {
+            fileTree.updateRootDirectory(to: directory)
+        }
+        fileMonitor?.start()
+    }
+    
+    private func stopFileMonitor() {
+        fileMonitor?.stop()
+        fileMonitor = nil
     }
     
 }

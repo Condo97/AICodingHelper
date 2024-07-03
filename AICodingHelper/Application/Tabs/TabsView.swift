@@ -9,9 +9,10 @@ import SwiftUI
 
 struct TabsView: View {
     
-    @Binding var openTabs: [CodeViewModel]
-    @Binding var selectedTab: CodeViewModel?
-    @State var onSelect: (CodeViewModel) -> Void
+    @ObservedObject var tabsViewModel: TabsViewModel
+    
+    
+    @Environment(\.undoManager) private var undoManager
     
     
     private static let tabsHeight: CGFloat = 60.0
@@ -20,12 +21,12 @@ struct TabsView: View {
     var body: some View {
         ScrollView(.horizontal) {
             HStack(spacing: 0.0) {
-                ForEach(openTabs) { openTab in
+                ForEach($tabsViewModel.openTabs) { openTab in
                     var openTabTitle: Binding<String> {
                         Binding(
                             get: {
                                 // Open tab title is last path component of url with openTab filepath
-                                if let filepath = openTab.filepath {
+                                if let filepath = openTab.wrappedValue.filepath {
                                     return URL(fileURLWithPath: filepath).lastPathComponent
                                 }
                                 
@@ -46,7 +47,7 @@ struct TabsView: View {
                             set: { value in
                                 if !value {
                                     // If false remove openTab from openTabs
-                                    openTabs.removeAll(where: {$0 === openTab})
+                                    tabsViewModel.openTabs.removeAll(where: {$0 === openTab.wrappedValue})
                                     
                                     // TODO: Maybe remove all tabs with nil filepaths? Or should that be done somewhere else? Maybe onChange of openTabs or something
                                 }
@@ -56,13 +57,16 @@ struct TabsView: View {
                     var openTabSelected: Binding<Bool> {
                         Binding(
                             get: {
-                                // Conditional if openTab equals selectedTab
-                                openTab === selectedTab
+                                // Conditional if openTab equals tabsViewModel openTab
+                                openTab.wrappedValue === tabsViewModel.openTab
                             },
                             set: { value in
                                 if value {
-                                    // If true set selectedTab to openTab
-                                    selectedTab = openTab
+                                    // If true save undo and set tabsViewModel openTab to openTab
+                                    if let undoManager = undoManager {
+                                        tabsViewModel.saveUndo(undoManager: undoManager)
+                                    }
+                                    tabsViewModel.openTab = openTab.wrappedValue
                                     //                                onSelect(openTab)
                                 }
                             })
@@ -81,22 +85,22 @@ struct TabsView: View {
                         selected: openTabSelected,
                         onClose: {
                             // If current tab is selected, move to adjacent tab on left or right or set to nil
-                            if selectedTab === openTab {
-                                let indexOfOpenTab = openTabs.firstIndex(where: {$0 === openTab})
+                            if tabsViewModel.openTab === openTab.wrappedValue {
+                                let indexOfOpenTab = tabsViewModel.openTabs.firstIndex(where: {$0 === openTab.wrappedValue})
                                 if indexOfOpenTab != nil && indexOfOpenTab! >= 1 {
                                     // Select tab left of openTab if it exists
-                                    selectedTab = openTabs[indexOfOpenTab! - 1]
-                                } else if indexOfOpenTab != nil && indexOfOpenTab! < openTabs.count - 1 {
+                                    tabsViewModel.openTab = tabsViewModel.openTabs[indexOfOpenTab! - 1]
+                                } else if indexOfOpenTab != nil && indexOfOpenTab! < tabsViewModel.openTabs.count - 1 {
                                     // Select tab to right of openTab if it exists
-                                    selectedTab = openTabs[indexOfOpenTab! + 1]
+                                    tabsViewModel.openTab = tabsViewModel.openTabs[indexOfOpenTab! + 1]
                                 } else {
                                     // Set selectedTab to nil
-                                    selectedTab = nil
+                                    tabsViewModel.openTab = nil
                                 }
                             }
                             
                             // Remove openTab from openTabs
-                            openTabs.removeAll(where: {$0 === openTab})
+                            tabsViewModel.openTabs.removeAll(where: {$0 === openTab.wrappedValue})
                         })
                 }
             }
@@ -106,11 +110,13 @@ struct TabsView: View {
     
 }
 
-//#Preview {
-//    
-//    TabsView(
-//        openTabs: .constant([CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt")]),
-//        selectedTab: .constant(CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt"))
-//    )
-//    
-//}
+#Preview {
+    
+    let tabsViewModel = TabsViewModel()
+    tabsViewModel.openTabs = [CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt")]
+    
+    return TabsView(
+        tabsViewModel: tabsViewModel
+    )
+    
+}

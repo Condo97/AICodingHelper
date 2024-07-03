@@ -17,7 +17,56 @@ class WideScopeChatGenerator: ObservableObject {
 //
 //    }
     
-    func refactorFiles(authToken: String, model: GPTModels, action: ActionType, additionalInput: String?, rootDirectoryPath: String, rootFile: FileSystem, alternativeContextFiles: FileSystem?, copyCurrentFilesToTempFiles: Bool) async throws {
+    func refactorProject(action: ActionType, userInput: String?, rootDirectoryPath: String, options: GenerateOptions) {
+        // Create FileSystem from root directory, otherwise reutrn
+        guard let rootDirectoryFileSystem = FileSystem.from(path: rootDirectoryPath) else {
+            // TODO: Handle Errors
+            print("Error unwrapping baseDirectoryFileSystem in FileBrowserView!")
+            return
+        }
+        
+        // Refactor Files
+        refactorFiles(
+            action: action,
+            userInput: userInput,
+            rootDirectoryPath: rootDirectoryPath,
+            rootFile: rootDirectoryFileSystem,
+            alternativeContextFiles: nil,
+            options: options)
+    }
+    
+    func refactorFiles(action: ActionType, userInput: String?, rootDirectoryPath: String, rootFile: FileSystem, alternativeContextFiles: FileSystem?, options: GenerateOptions) {
+        Task {
+            // Create additionalInput from userInput TODO: Add this
+            let additionalInput = userInput
+            
+            // Ensure authToken
+            let authToken: String
+            do {
+                authToken = try await AuthHelper.ensure()
+            } catch {
+                // TODO: Handle Errors
+                print("Error ensuring authToken in MainView... \(error)")
+                return
+            }
+            
+            // Refactor files
+            do {
+                try await refactorFiles(
+                    authToken: authToken,
+                    model: .GPT4o,
+                    action: action,
+                    additionalInput: additionalInput,
+                    rootDirectoryPath: rootDirectoryPath,
+                    rootFile: rootFile,
+                    alternativeContextFiles: alternativeContextFiles,
+                    options: options)
+            }
+        }
+    }
+    
+    
+    func refactorFiles(authToken: String, model: GPTModels, action: ActionType, additionalInput: String?, rootDirectoryPath: String, rootFile: FileSystem, alternativeContextFiles: FileSystem?, options: GenerateOptions) async throws {
         /* Should look something like
          System
             You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE.
@@ -57,10 +106,10 @@ class WideScopeChatGenerator: ObservableObject {
             rootFile: rootFile,
             systemMessage: systemMessage,
             context: [userMessage1],
-            copyCurrentFilesToTempFiles: copyCurrentFilesToTempFiles)
+            options: options)
     }
     
-    func refactorFiles(authToken: String, model: GPTModels, action: ActionType, additionalInput: String?, rootDirectoryPath: String, rootFile: FileSystem, systemMessage: String, context: [String], copyCurrentFilesToTempFiles: Bool) async throws {
+    func refactorFiles(authToken: String, model: GPTModels, action: ActionType, additionalInput: String?, rootDirectoryPath: String, rootFile: FileSystem, systemMessage: String, context: [String], options: GenerateOptions) async throws {
         // Get current item path by rootDirectoryPath / and file name
         let currentItemPath = rootDirectoryPath + "/" + rootFile.name
         
@@ -78,7 +127,7 @@ class WideScopeChatGenerator: ObservableObject {
                         rootFile: file,
                         systemMessage: systemMessage,
                         context: context,
-                        copyCurrentFilesToTempFiles: copyCurrentFilesToTempFiles)
+                        options: options)
                 } catch {
                     // TODO: Handle Errors
                     print("Error refactoring file in WideScopeChatGenerator... \(error)")
@@ -116,7 +165,7 @@ class WideScopeChatGenerator: ObservableObject {
             userInputs: context + [input])
         
         // If copyCurrentFilesToTempFiles copy file to new file with _temp# suffixed name
-        if copyCurrentFilesToTempFiles {
+        if options.contains(.copyCurrentFilesToTempFiles) {
             try FileCopier.copyFileToTempVersion(at: currentItemPath)
         }
         

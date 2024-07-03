@@ -31,11 +31,11 @@ struct CodeEditorContainer: View {
                 selection: $fileSelection,
                 language: $fileLanguage,
                 fontSize: $fontSize,
-                inset: CGSize(width: 0, height: 140.0),
+//                inset: CGSize(width: 0, height: 140.0),
                 allowsUndo: false)
-            .padding(.top, -140)
-            .onChange(of: fileLanguage) {
-                print("Changed Language \(fileLanguage)")
+//            .padding(.top, -140)
+            .onChange(of: fileLanguage) { newValue in
+                print("Changed Language \(newValue)")
             }
             
             // Language Selector

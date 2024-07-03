@@ -47,4 +47,25 @@ class FileNode: ObservableObject, Identifiable {
         }
     }
     
+    func expandedPaths() -> Set<String> {
+        var paths = Set<String>()
+        if isExpanded {
+            paths.insert(path)
+            for child in children {
+                paths.formUnion(child.expandedPaths())
+            }
+        }
+        return paths
+    }
+    
+    func applyExpandedPaths(_ paths: Set<String>) {
+        if paths.contains(path) {
+            isExpanded = true
+            discoverChildren()
+            for child in children {
+                child.applyExpandedPaths(paths)
+            }
+        }
+    }
+    
 }

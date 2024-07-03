@@ -10,10 +10,16 @@ import SwiftUI
 @main
 struct AICodingHelperApp: App {
     
+    
+    @Environment(\.undoManager) private var undoManager
+    
+    @StateObject private var undoUpdater: UndoUpdater = UndoUpdater()
+    
 
     var body: some Scene {
         WindowGroup {
             MainView()
+                .environmentObject(undoUpdater)
                 .task {
                     do {
                         try await AuthHelper.ensure()

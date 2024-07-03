@@ -15,96 +15,138 @@ import SwiftUI
 
 struct MainView: View {
     
-    @State var directory: String = "~/Downloads/test_dir"
+    @State var directory: String = "~/Downloads/files_temp"
+    
+    
+    private static let defaultMultiFileParentFileSystemName = "TempSelection"
+    
+    
+    @Environment(\.undoManager) private var undoManager
     
     
     @StateObject private var fileSystemGenerator: FileSystemGenerator = FileSystemGenerator()
+    @StateObject private var wideScopeChatGenerator: WideScopeChatGenerator = WideScopeChatGenerator()
+    @StateObject private var tabsViewModel: TabsViewModel = TabsViewModel()
     
-//    @State private var selectedFilepaths: [String] = []
-//    @State private var openedFile: String?
+    @State private var fileBrowserSelectedFilepaths: [String] = []
     
-    @State private var openTabs: [CodeViewModel] = []
-//    @State private var openTab: CodeViewModel = CodeViewModel(filepath: nil)
-//    @State private var openTab: CodeViewModel = CodeViewModel(filepath: nil)
-    @State private var openTab: CodeViewModel?
-//    @State private var openedTabIndex: Int?
     
-//    @ObservedObject var tempMainViewModel: TempMainViewModel
-    
-//    var openTab: CodeViewModel = CodeViewModel(filepath: "")
-    
-//    @State private var currentWideScope: Scope?
+    private var currentWideScopeName: Binding<String> {
+        Binding(
+            get: {
+                if fileBrowserSelectedFilepaths.count == 1 {
+                    if let file = fileBrowserSelectedFilepaths[safe: 0],
+                       FileSystem.from(path: NSString(string: file).expandingTildeInPath)?.fileType == .folder {
+                        // If fileBrowserSelectedFilepaths contains one object and when transforemd to a FileSystem is type of folder return "Directory"
+                        return "Directory"
+                    } else {
+                        // Otherwise and if fileBrowserSelectedFilepaths contains one object return "File"
+                        return "File"
+                    }
+                } else if fileBrowserSelectedFilepaths.count > 1 {
+                    // If there are multiple files in fileBrowserSelectedFilepaths return "Files"
+                    return "Files"
+                } else if fileBrowserSelectedFilepaths.count == 0 {
+                    // If there are no files in fileBrowserSelectedFilepaths return "Project"
+                    return "Project"
+                }
+                
+                // Return blank string
+                return ""
+            },
+            set: { value in
+                
+            })
+    }
     
     
     var body: some View {
         ZStack {
             VStack {
-                // Tab View
-                if !openTabs.isEmpty {
-                    TabsView(
-                        openTabs: $openTabs,
-                        selectedTab: $openTab,
-                        onSelect: { selectedTab in
-                            self.openTab = selectedTab
-                        })
-//                    }
-                }
-                
-                HSplitView {
-//                    // File Browser
-//                    TabAddingFileSystemView(
-//                        directory: $directory,
-//                        selectedFilepaths: $selectedFilepaths,
-//                        openTab: $openTab,
-//                        openTabs: $openTabs)
+                NavigationSplitView(sidebar: {
                     // File Browser
                     FileBrowserView(
                         baseDirectory: $directory,
-                        openTab: $openTab,
-                        openTabs: $openTabs)
-                    
-                    if let openTab = openTab {
-                        // Code View
-                        var openTabBinding: Binding<CodeViewModel> {
-                            Binding(
-                                get: {
-                                    self.openTab!
-                                },
-                                set: { value in
-                                    
-                                })
-                        }
+                        selectedFilepaths: $fileBrowserSelectedFilepaths,
+                        tabsViewModel: tabsViewModel)
+                }) {
+                    // Tab View
+                    VStack(spacing: 0.0) {
+                        TabsView(tabsViewModel: tabsViewModel)
                         
-                        CodeView(codeViewModel: openTabBinding)
-                    } else {
-                        // No Tabs View
-                        ZStack {
-                            Colors.background
+                        if let openTab = tabsViewModel.openTab {
+                            // Code View
+                            var openTabBinding: Binding<CodeViewModel> {
+                                Binding(
+                                    get: {
+                                        openTab
+                                    },
+                                    set: { value in
+                                        
+                                    })
+                            }
                             
-                            Text("No File Selected")
-                            
-                            // TODO: File Selection Buttons and stuff
+                            CodeView(codeViewModel: openTabBinding)
+                        } else {
+                            // No Tabs View
+                            VStack {
+                                //                            }
+                                //                            CodeView(codeViewModel: .constant(CodeViewModel(filepath: nil)))
+                                //                            CodeEditorContainer(fileText: .constant(""), fileSelection: .constant("".startIndex..<"".startIndex), fileLanguage: .constant(.swift))
+                                CodeEditor(source: "")
+                                
+                                //                            Text("No File Selected")
+                                
+                                // TODO: File Selection Buttons and stuff
+                            }
                         }
                     }
                 }
             }
-            
-//            VStack {
-//                Spacer()
-//                HStack {
-//                    // Wide Scope Controls
-//                    WideScopeControlsView(
-//                        scope: $currentWideScope,
-//                        selectedFilepaths: $selectedFilepaths,
-//                        onSubmit: { actionType in
-//                            
-//                        })
-//                    .padding()
-//                    .padding(.bottom)
-//                    .padding(.bottom)
-//                    Spacer()
-//                }
-//            }
+        }
+        .overlay {
+            // Wide Scope Controls
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    WideScopeControlsView(
+                        scopeName: currentWideScopeName,
+                        selectedFilepaths: $fileBrowserSelectedFilepaths,
+                        onSubmit: { actionType, generateOptions in
+                            // If selectedFilepaths contains at least one item refactor files with it or them, otherwise refactor project TODO: Maybe make this implementation better in regards to doing entire project refactor
+                            if fileBrowserSelectedFilepaths.count > 0 {
+                                // Get rootFile using FileSystem from with the first selected path if there is only one item and FileSystem from with all selected paths if there are multiple. The reason to use the different function is because from without paths and parent name will make it the root node and fetch all the items whereas with paths it will create a parent with parent name to hold the paths and then assemble the FileSystem normally
+                                guard let rootFile = fileBrowserSelectedFilepaths.count == 1 ? FileSystem.from(path: fileBrowserSelectedFilepaths[0]) : FileSystem.from(
+                                    parentName: MainView.defaultMultiFileParentFileSystemName,
+                                    paths: fileBrowserSelectedFilepaths) else {
+                                    // TODO: Handle Errors
+                                    print("Error unwrapping rootFile in FileBrowserView!")
+                                    return
+                                }
+                                
+                                wideScopeChatGenerator.refactorFiles(
+                                    action: actionType,
+                                    userInput: nil, // TODO: Add this
+                                    rootDirectoryPath: NSString(string: directory).expandingTildeInPath,
+                                    rootFile: rootFile,
+                                    alternativeContextFiles: nil,
+                                    options: generateOptions)
+                            } else {
+                                // Refactor project
+                                wideScopeChatGenerator.refactorProject(
+                                    action: actionType,
+                                    userInput: nil, // TODO: Add this
+                                    rootDirectoryPath: NSString(string: directory).expandingTildeInPath,
+                                    options: generateOptions)
+                            }
+                        })
+                    .shadow(color: Colors.foregroundText.opacity(0.05), radius: 8.0)
+                    .padding()
+                    .padding(.bottom)
+                    .padding(.bottom)
+                }
+            }
         }
 //        .onAppear {
 //            Task {
