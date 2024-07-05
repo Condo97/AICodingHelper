@@ -15,7 +15,7 @@ import SwiftUI
 
 struct MainView: View {
     
-    @State var directory: String = NSString(string: "~/Downloads/Files_Testing").expandingTildeInPath
+    @State var directory: String = NSString(string: "/Users/alexcoundouriotis/Xcode Projects/AICodingHelper/AICodingHelper/Application/Files").expandingTildeInPath
     
     
     private static let defaultMultiFileParentFileSystemName = "TempSelection"
