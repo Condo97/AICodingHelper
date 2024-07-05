@@ -8,7 +8,7 @@
 import Foundation
 
 
-extension FileSystem {
+class FilePrettyPrinter {
     
     func stringifyContent(rootDirectory: String) -> String {
         // Get filepath from rootDirectory and name
