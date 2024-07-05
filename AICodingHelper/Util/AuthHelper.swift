@@ -10,7 +10,7 @@ import Foundation
 class AuthHelper {
     
     static func get() -> String? {
-        return UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)
+        return UserDefaults.standard.string(forKey: Constants.UserDefaults.authTokenKey)
     }
     
     /***
@@ -21,13 +21,13 @@ class AuthHelper {
      */
     static func ensure() async throws -> String {
         // If no authToken, register the user and update the authToken in UserDefaults
-        if UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey) == nil {
-            let registerUserResponse = try await AICodingHelperServerHTTPSConnector.registerUser()
+        if UserDefaults.standard.string(forKey: Constants.UserDefaults.authTokenKey) == nil {
+            let registerUserResponse = try await AICodingHelperHTTPSConnector.registerUser()
             
-            UserDefaults.standard.set(registerUserResponse.body.authToken, forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)
+            UserDefaults.standard.set(registerUserResponse.body.authToken, forKey: Constants.UserDefaults.authTokenKey)
         }
         
-        return UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)!
+        return UserDefaults.standard.string(forKey: Constants.UserDefaults.authTokenKey)!
     }
     
     /***
@@ -38,13 +38,13 @@ class AuthHelper {
      */
     @discardableResult
     static func regenerate() async throws -> String {
-        UserDefaults.standard.set(nil, forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)
+        UserDefaults.standard.set(nil, forKey: Constants.UserDefaults.authTokenKey)
         
-        let registerUserResponse = try await AICodingHelperServerHTTPSConnector.registerUser()
+        let registerUserResponse = try await AICodingHelperHTTPSConnector.registerUser()
         
-        UserDefaults.standard.set(registerUserResponse.body.authToken, forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)
+        UserDefaults.standard.set(registerUserResponse.body.authToken, forKey: Constants.UserDefaults.authTokenKey)
         
-        return UserDefaults.standard.string(forKey: Constants.UserDefaults.userDefaultStoredAuthTokenKey)!
+        return UserDefaults.standard.string(forKey: Constants.UserDefaults.authTokenKey)!
     }
     
 }

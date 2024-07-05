@@ -15,7 +15,15 @@ struct FileNodeView: View {
     @ObservedObject var node: FileNode
     let level: Int
     @Binding var selectedFilepaths: [String]
-    var onOpen: (_ path: String) -> Void
+    var onAction: (_ action: FileActions, _ path: String) -> Void
+    
+    
+    @EnvironmentObject private var focusViewModel: FocusViewModel
+    
+    @FocusState private var focused
+    
+    @State private var alertShowingRename = false
+    @State private var newName: String = ""
     
     
     var body: some View {
@@ -36,9 +44,11 @@ struct FileNodeView: View {
                 Text(node.name)
                     .onTapGesture(count: 2) {
                         if node.isDirectory {
+                            // Expand node
                             node.toggleExpansion()
                         } else {
-                            onOpen(node.path)
+                            // Open action
+                            onAction(.open, node.path)
                         }
                     }
                     .simultaneousGesture(
@@ -58,15 +68,53 @@ struct FileNodeView: View {
             }
             .padding(.leading, CGFloat(level) * 15)
             .padding(.vertical, 2)
-            .background(Color.gray.opacity(selectedFilepaths.contains(node.path) ? 0.3 : 0))
+            .background(
+                focused
+                ?
+                Colors.element.opacity(selectedFilepaths.contains(node.path) ? 0.3 : 0)
+                :
+                Color.gray.opacity(selectedFilepaths.contains(node.path) ? 0.3 : 0)
+            )
             .cornerRadius(5)
+            .focusable()
+            .focusEffectDisabledVersionCheck()
+            .focused($focused)
+            .onChange(of: focused) { newValue in
+                if newValue {
+                    focusViewModel.focus = .browser
+                }
+            }
             
             if node.isExpanded {
                 ForEach(node.children) { childNode in
-                    FileNodeView(node: childNode, level: level + 1, selectedFilepaths: $selectedFilepaths, onOpen: onOpen)
+                    FileNodeView(node: childNode, level: level + 1, selectedFilepaths: $selectedFilepaths, onAction: onAction)
                 }
             }
         }
+        .contextMenu {
+            // Rename File
+            Button(action: {
+                onAction(.rename, node.path)
+            }) {
+                Text("Rename")
+            }
+
+            // Create Folder
+            Button(action: {
+                onAction(.newFolder, node.path)
+            }) {
+                Text("Create Folder")
+            }
+            
+            // Delete
+            Button(action: {
+                onAction(.delete, node.path)
+            }) {
+                Text("Delete")
+            }
+        }
+        
     }
     
 }
+

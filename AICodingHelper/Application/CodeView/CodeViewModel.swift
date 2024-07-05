@@ -17,15 +17,29 @@ class CodeViewModel: ObservableObject, Identifiable {
             startFileMonitoring()
         }
     }
-    @Published var openedFileText: String = ""
+    @Published var openedFileText: String = "" {
+        didSet {
+            if let filepath = filepath {
+                do {
+                    try openedFileText.write(toFile: filepath, atomically: true, encoding: .utf8)
+                } catch {
+                    print("Error writing to file in CodeViewModel... \(error)")
+                }
+            }
+        }
+    }
     @Published var openedFileTextSelection: Range<String.Index> = "".startIndex..<"".endIndex
-    
-    @Published var currentNarrowScope: Scope = .file
     
     @Published var openedFileLanguage: CodeEditor.Language?
     
     @Published var narrowScopeStreamGenerationInitialSelection: Range<String.Index>?
     @Published var narrowScopeStreamGenerationCursorPosition: String.Index?
+    
+    @Published var isLoading: Bool = false
+    @Published var isStreaming: Bool = false
+    
+    
+    private let additionalTokensForEstimation: Int = Constants.Additional.additionalTokensForEstimationPerFile
     
     
     private var fileMonitor: FileMonitor?
@@ -74,6 +88,159 @@ class CodeViewModel: ObservableObject, Identifiable {
         fileMonitor?.start()
         reloadFileContents()
     }
+    
+    @MainActor // What does this do? It seems to silence the undoManager data race beacuse of not using a main actor isolated context but what is it actually doing
+    func generate(authToken: String, remainingTokens: Int, action: ActionType, additionalInput: String?, scope: Scope, context: [String], undoManager: UndoManager?, options: GenerateOptions) async {
+        // Defer setting isLoading and isStreaming to false
+        defer {
+            DispatchQueue.main.async {
+                self.isLoading = false
+                self.isStreaming = false
+            }
+        }
+        
+        // Set isLoading to true
+        await MainActor.run {
+            isLoading = true
+        }
+        
+        // Create mutable context variable
+        var mutableContext = context
+        
+        // Get input for scope
+        let input: String = {
+            // If scope is highlight and highlighted text is valid set input to highlight
+            if scope == .highlight && openedFileTextSelection.lowerBound >= openedFileText.startIndex && openedFileTextSelection.upperBound <= openedFileText.endIndex {
+                return String(openedFileText[openedFileTextSelection])
+            }
+            
+            // Otherwise set to openedFileText
+            return openedFileText
+        }()
+        
+        // If scope is highlight and highlighted text is valid add opened file text to context
+        if scope == .highlight && openedFileTextSelection.lowerBound >= openedFileText.startIndex && openedFileTextSelection.upperBound <= openedFileText.endIndex {
+            mutableContext.append("This is the entire file for which you are to process a selection of. IMPORTANT: Respond as if you are replacing exactly the selection provided.\n\n\(openedFileText)")
+        }
+        
+        // If scope is highlight and highlihgted text is valid set narrowScopeStreamGenerationInitialSelection to openedFileTextSelection otherwise the entire file
+        if scope == .highlight && openedFileTextSelection.lowerBound >= openedFileText.startIndex && openedFileTextSelection.upperBound <= openedFileText.endIndex {
+            narrowScopeStreamGenerationInitialSelection = openedFileTextSelection
+        } else {
+            narrowScopeStreamGenerationInitialSelection = openedFileText.startIndex..<openedFileText.endIndex
+        }
+        
+        // TODO: Include entire project in context generate option implemetation
+        
+        // Calculate tokens with action, input, context, and additionalInput to ensure it is within user's remaining tokens, otherwise throw estimatedTokensHitsLimit error
+        let estimatedTokens: Int
+        do {
+            estimatedTokens = try await TokenCalculator.calculateTokens(
+                authToken: authToken,
+                inputs: [
+                    action.aiPrompt,
+                    input,
+                ] + context + [
+                    additionalInput ?? ""
+                ]
+            )
+            
+            if estimatedTokens + additionalTokensForEstimation > remainingTokens {
+                throw GenerationError.estimatedTokensHitsLimit
+            }
+        } catch {
+            // TODO: Handle Errors
+            print("Error estimating tokens in CodeViewModel... \(error)")
+            return
+        }
+        
+        // Do generation
+        do {
+            var firstChat = true
+            try await ChatGenerator.streamChat(
+                authToken: authToken,
+                model: .GPT4o,
+                action: action,
+                additionalInput: additionalInput,
+                language: openedFileLanguage,
+                responseFormat: .text,
+                context: mutableContext,
+                input: input,
+                scope: scope,
+                stream: { getChatResponse in
+                    if firstChat {
+                        // Set isLoading to false and isStreaming to true
+                        await MainActor.run {
+                            isLoading = false
+                            isStreaming = true
+                            
+                        }
+                        
+                        // Save undo
+                        if let undoManager = undoManager {
+                            saveUndo(undoManager: undoManager)
+                        }
+                        
+                        // If scope is highlight and highlighted text is valid do highilghted scope operations, otherwise do file wide operations
+                        if scope == .highlight && openedFileTextSelection.lowerBound >= openedFileText.startIndex && openedFileTextSelection.upperBound <= openedFileText.endIndex,
+                           let narrowScopeStreamGenerationInitialSelection = narrowScopeStreamGenerationInitialSelection {
+                            await MainActor.run {
+                                // Delete narrowScopeStreamGenerationInitialSelection subrange, set narrowScopeStreamGenerationCursorPosition to narrowScopeStreamGenerationInitialSelection lowerBound, and set openedFileTextSelection to a range from narrowScopeStreamGenerationCursorPosition to narrowScopeStreamGenerationCursorPosition
+                                openedFileText.replaceSubrange(narrowScopeStreamGenerationInitialSelection, with: "")
+                                
+                                narrowScopeStreamGenerationCursorPosition = narrowScopeStreamGenerationInitialSelection.lowerBound
+                                
+                                openedFileTextSelection = narrowScopeStreamGenerationCursorPosition!..<narrowScopeStreamGenerationCursorPosition!
+                            }
+                        } else {
+                            await MainActor.run {
+                                // If generate option copyCurrentFilesToTempFiles is true and filepath can be unwrapped copy file to temp file
+                                if options.contains(.copyCurrentFilesToTempFiles),
+                                   let filepath = filepath {
+                                    do {
+                                        try FileCopier.copyFileToTempVersion(at: filepath)
+                                    } catch {
+                                        // TODO: Handle Errors
+                                        print("Error copying current file to temp file in CodeViewModel, proceeding... \(error)")
+                                    }
+                                }
+                                
+                                // Set openedFileText to empty string
+                                openedFileText = ""
+                                
+                                // Set narrowScopeStreamGenerationCursorPosition to openedFileText startIndex
+                                narrowScopeStreamGenerationCursorPosition = openedFileText.startIndex
+                                
+                                // Set openedFileTextSelection to range from narrowScopeStreamGenerationCursorPosition to narrowScopeStreamGenerationCursorPosition
+                                openedFileTextSelection = narrowScopeStreamGenerationCursorPosition!..<narrowScopeStreamGenerationCursorPosition!
+                            }
+                        }
+                        // Set firstChat to false
+                        firstChat = false
+                    }
+                    
+                    // Update with streaming chat delta
+                    if let chatTextDelta = getChatResponse.body.oaiResponse.choices[safe: 0]?.delta.content {
+                        await MainActor.run {
+                            // Insert newValue at narrowScopeStreamGenerationCursorPosition or if null startIndex
+                            openedFileText.insert(contentsOf: chatTextDelta, at: narrowScopeStreamGenerationCursorPosition ?? openedFileText.startIndex)
+                            
+                            // Set narrowScopeStreamGenerationCursorPosition to itself offset by newValue count
+                            narrowScopeStreamGenerationCursorPosition = openedFileText.index(narrowScopeStreamGenerationCursorPosition ?? openedFileText.startIndex, offsetBy: chatTextDelta.count)
+                            
+                            // Set openedFileTextSelection to range from narrowScopeStreamGenerationCursorPosition to narrowScopeStreamGenerationCursorPosition
+                            if let narrowScopeStreamGenerationCursorPosition = narrowScopeStreamGenerationCursorPosition {
+                                openedFileTextSelection = narrowScopeStreamGenerationCursorPosition..<narrowScopeStreamGenerationCursorPosition
+                            }
+                        }
+                    }
+                })
+        } catch {
+            print("Error streaming chat in CodeViewModel... \(error)")
+        }
+        
+    }
+    
     
     private func reloadFileContents() {
         guard let filepath = filepath else { return }

@@ -9,6 +9,7 @@ import Foundation
 
 enum Scope {
     case project
+    case multifile
     case directory
     case file
     case highlight
@@ -19,7 +20,8 @@ extension Scope {
     var name: String {
         switch self {
         case .project: "project"
-        case .directory: "directory"
+        case .multifile: "files"
+        case .directory: "folder"
         case .file: "file"
         case .highlight: "highlight"
         }

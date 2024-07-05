@@ -11,10 +11,10 @@ struct GetRemainingTokensResponse: Codable {
     
     struct Body: Codable {
         
-        var remaining: Int
+        var remainingTokens: Int
         
         enum CodingKeys: String, CodingKey {
-            case remaining
+            case remainingTokens
         }
         
     }

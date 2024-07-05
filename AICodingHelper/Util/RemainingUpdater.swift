@@ -9,23 +9,23 @@ import Foundation
 
 class RemainingUpdater: ObservableObject {
     
-    @Published var remaining: Int? = persistentRemaining
+    @Published var remaining: Int = persistentRemaining
     
     
     private static var persistentRemaining: Int {
         get {
-            UserDefaults.standard.integer(forKey: Constants.UserDefaults.userDefaultStoredGeneratedChatsRemaining)
+            UserDefaults.standard.integer(forKey: Constants.UserDefaults.tokensRemaining)
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: Constants.UserDefaults.userDefaultStoredGeneratedChatsRemaining)
+            UserDefaults.standard.set(newValue, forKey: Constants.UserDefaults.tokensRemaining)
         }
     }
     
-    func set(drinksRemaining: Int) {
-        RemainingUpdater.persistentRemaining = drinksRemaining
+    func set(tokensRemaining: Int) {
+        RemainingUpdater.persistentRemaining = tokensRemaining
         
         DispatchQueue.main.async {
-            self.remaining = drinksRemaining
+            self.remaining = tokensRemaining
         }
     }
     
@@ -34,10 +34,10 @@ class RemainingUpdater: ObservableObject {
         let authRequest = AuthRequest(authToken: authToken)
         
         // Do request
-        let remainingResponse = try await ChitChatHTTPSConnector.getRemaining(request: authRequest)//BarbackNetworkService.getRemainingDrinks(request: authRequest)
+        let remainingResponse = try await AICodingHelperHTTPSConnector.getRemaining(request: authRequest)//BarbackNetworkService.getRemainingDrinks(request: authRequest)
         
         // Set persistentRemaining to response remainingDrinks
-        set(drinksRemaining: remainingResponse.body.remaining)
+        set(tokensRemaining: remainingResponse.body.remainingTokens)
     }
     
 }

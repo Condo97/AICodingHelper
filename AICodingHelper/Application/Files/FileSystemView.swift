@@ -12,34 +12,38 @@ struct FileSystemView: View {
     
     @Binding var directory: String
     @Binding var selectedFilepaths: [String]
-    var onOpen: (_ path: String) -> Void
+    var onAction: (_ action: FileActions, _ path: String) -> Void
     
     @StateObject private var fileTree: FileTree
     @State private var fileMonitor: FileMonitor?
     
-    init(directory: Binding<String>, selectedFilepaths: Binding<[String]>, onOpen: @escaping (_ path: String) -> Void) {
+    
+    init(directory: Binding<String>, selectedFilepaths: Binding<[String]>, onAction: @escaping (_ action: FileActions, _ path: String) -> Void) {
         self._directory = directory
         self._selectedFilepaths = selectedFilepaths
-        self.onOpen = onOpen
+        self.onAction = onAction
         _fileTree = StateObject(wrappedValue: FileTree(rootDirectory: directory.wrappedValue))
     }
     
     var body: some View {
         ScrollView {
-            // File Nodes
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
-                    FileNodeView(node: fileTree.rootNode, level: 0, selectedFilepaths: $selectedFilepaths, onOpen: onOpen)
-                    
+                    FileNodeView(
+                        node: fileTree.rootNode,
+                        level: 0,
+                        selectedFilepaths: $selectedFilepaths,
+                        onAction: onAction
+                    )
                     Spacer()
                 }
             }
             .padding()
         }
-        .onChange(of: directory, perform: { newDirectory in
+        .onChange(of: directory) { newDirectory in
             fileTree.updateRootDirectory(to: newDirectory)
             startFileMonitor()
-        })
+        }
         .onReceive(fileTree.$rootNode) { _ in
             removeInvalidFilesFromSelectedFilepaths()
         }
@@ -50,7 +54,6 @@ struct FileSystemView: View {
             stopFileMonitor()
         }
     }
-    
     
     private func removeInvalidFilesFromSelectedFilepaths() {
         var allFilePaths = Set<String>()

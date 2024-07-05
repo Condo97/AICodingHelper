@@ -6,3 +6,13 @@
 //
 
 import Foundation
+
+
+enum FileActions {
+    
+    case open
+    case rename
+    case newFolder
+    case delete
+    
+}

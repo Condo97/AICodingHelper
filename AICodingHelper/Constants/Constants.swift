@@ -9,6 +9,12 @@ import Foundation
 
 struct Constants {
     
+    struct Additional {
+        
+        static let additionalTokensForEstimationPerFile: Int = 50
+        
+    }
+    
     struct ImageName {
         
         struct Actions {
@@ -28,6 +34,8 @@ struct Constants {
             
             struct Endpoints {
                 
+                static let calculateTokens = "/calculateTokens"
+                static let getRemainingTokens = "/getRemainingTokens"
                 static let registerUser = "/registerUser"
                 
             }
@@ -56,8 +64,11 @@ struct Constants {
     
     struct UserDefaults {
         
-        static let userDefaultStoredAuthTokenKey = "authTokenKey"
+        static let authTokenKey = "authTokenKey"
+        static let tokensRemaining = "tokensRemaining"
         
+        static let generateOptionCopyCurrentFilesToTempFile = "generateOptionCopyCurrentFilesToTempFile"
+        static let generateOptionUseEntireProjectAsContext = "generateOptionUseEntireProjectAsContext"
     }
     
 }

@@ -7,6 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BB1405DC2C35A2DC0036CFE8 /* FocusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405DB2C35A2DC0036CFE8 /* FocusViewModel.swift */; };
+		BB1405DE2C35ACF00036CFE8 /* View+FocusEffectDisabledVersionCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405DD2C35ACF00036CFE8 /* View+FocusEffectDisabledVersionCheck.swift */; };
+		BB1405E02C360CC40036CFE8 /* ProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405DF2C360CC40036CFE8 /* ProgressTracker.swift */; };
+		BB1405E22C360D180036CFE8 /* FileCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405E12C360D180036CFE8 /* FileCounter.swift */; };
+		BB1405E42C362A1E0036CFE8 /* UserDefaultsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405E32C362A1E0036CFE8 /* UserDefaultsHelper.swift */; };
+		BB1405E62C362B450036CFE8 /* BindingUserDefaultsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405E52C362B450036CFE8 /* BindingUserDefaultsHelper.swift */; };
+		BB1405E82C362C4D0036CFE8 /* RemainingUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405E72C362C4D0036CFE8 /* RemainingUpdater.swift */; };
+		BB1405EA2C362CA50036CFE8 /* AuthRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405E92C362CA50036CFE8 /* AuthRequest.swift */; };
+		BB1405EC2C362CBD0036CFE8 /* GetRemainingTokensResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405EB2C362CBD0036CFE8 /* GetRemainingTokensResponse.swift */; };
+		BB1405EE2C36CBF00036CFE8 /* CalculateTokensResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405ED2C36CBF00036CFE8 /* CalculateTokensResponse.swift */; };
+		BB1405F02C36CC560036CFE8 /* CalculateTokensRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405EF2C36CC560036CFE8 /* CalculateTokensRequest.swift */; };
+		BB1405F32C36CE330036CFE8 /* GenerationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405F22C36CE330036CFE8 /* GenerationError.swift */; };
+		BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4D2C36D29200263D3F /* TokenCalculator.swift */; };
+		BB617C502C38568400263D3F /* FilepathCodeGenerationPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */; };
+		BB617C542C3885D900263D3F /* FileActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C532C3885D900263D3F /* FileActions.swift */; };
 		BB7FF80F2C2CAA9B000B60C3 /* AICodingHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF80E2C2CAA9B000B60C3 /* AICodingHelperApp.swift */; };
 		BB7FF8132C2CAA9C000B60C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB7FF8122C2CAA9C000B60C3 /* Assets.xcassets */; };
 		BB7FF8162C2CAA9C000B60C3 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB7FF8152C2CAA9C000B60C3 /* Preview Assets.xcassets */; };
@@ -49,7 +64,7 @@
 		BB85617E2C2F2392001C11F8 /* AICodingHelperWebSocketConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB85617D2C2F2392001C11F8 /* AICodingHelperWebSocketConnector.swift */; };
 		BB8561802C2F2B98001C11F8 /* StatusResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB85617F2C2F2B98001C11F8 /* StatusResponse.swift */; };
 		BB8561822C2F2BC7001C11F8 /* AuthHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561812C2F2BC7001C11F8 /* AuthHelper.swift */; };
-		BB8561852C2F2C2C001C11F8 /* AICodingHelperServerHTTPSConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561842C2F2C2C001C11F8 /* AICodingHelperServerHTTPSConnector.swift */; };
+		BB8561852C2F2C2C001C11F8 /* AICodingHelperHTTPSConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561842C2F2C2C001C11F8 /* AICodingHelperHTTPSConnector.swift */; };
 		BB8561882C2F2D22001C11F8 /* HTTPSClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561872C2F2D22001C11F8 /* HTTPSClient.swift */; };
 		BB85618A2C2F2D49001C11F8 /* RegisterUserResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561892C2F2D49001C11F8 /* RegisterUserResponse.swift */; };
 		BB85618C2C2F2D6D001C11F8 /* BlankRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB85618B2C2F2D6D001C11F8 /* BlankRequest.swift */; };
@@ -77,7 +92,7 @@
 		BBB7C7642C325AE200BEDD07 /* WideScopeControlButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7632C325AE200BEDD07 /* WideScopeControlButton.swift */; };
 		BBB7C7662C32FE8D00BEDD07 /* WideScopeChatGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7652C32FE8D00BEDD07 /* WideScopeChatGenerator.swift */; };
 		BBB7C7682C330ABE00BEDD07 /* FileCopier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7672C330ABE00BEDD07 /* FileCopier.swift */; };
-		BBB7C76A2C330C9400BEDD07 /* FileSystem+StringifyContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7692C330C9400BEDD07 /* FileSystem+StringifyContent.swift */; };
+		BBB7C76A2C330C9400BEDD07 /* FilePrettyPrinter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7692C330C9400BEDD07 /* FilePrettyPrinter.swift */; };
 		BBB7C76F2C3312D600BEDD07 /* FileBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C76E2C3312D600BEDD07 /* FileBrowserView.swift */; };
 /* End PBXBuildFile section */
 
@@ -99,6 +114,21 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BB1405DB2C35A2DC0036CFE8 /* FocusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusViewModel.swift; sourceTree = "<group>"; };
+		BB1405DD2C35ACF00036CFE8 /* View+FocusEffectDisabledVersionCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+FocusEffectDisabledVersionCheck.swift"; sourceTree = "<group>"; };
+		BB1405DF2C360CC40036CFE8 /* ProgressTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressTracker.swift; sourceTree = "<group>"; };
+		BB1405E12C360D180036CFE8 /* FileCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCounter.swift; sourceTree = "<group>"; };
+		BB1405E32C362A1E0036CFE8 /* UserDefaultsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsHelper.swift; sourceTree = "<group>"; };
+		BB1405E52C362B450036CFE8 /* BindingUserDefaultsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BindingUserDefaultsHelper.swift; sourceTree = "<group>"; };
+		BB1405E72C362C4D0036CFE8 /* RemainingUpdater.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemainingUpdater.swift; sourceTree = "<group>"; };
+		BB1405E92C362CA50036CFE8 /* AuthRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthRequest.swift; sourceTree = "<group>"; };
+		BB1405EB2C362CBD0036CFE8 /* GetRemainingTokensResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetRemainingTokensResponse.swift; sourceTree = "<group>"; };
+		BB1405ED2C36CBF00036CFE8 /* CalculateTokensResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculateTokensResponse.swift; sourceTree = "<group>"; };
+		BB1405EF2C36CC560036CFE8 /* CalculateTokensRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculateTokensRequest.swift; sourceTree = "<group>"; };
+		BB1405F22C36CE330036CFE8 /* GenerationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationError.swift; sourceTree = "<group>"; };
+		BB617C4D2C36D29200263D3F /* TokenCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenCalculator.swift; sourceTree = "<group>"; };
+		BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilepathCodeGenerationPrompt.swift; sourceTree = "<group>"; };
+		BB617C532C3885D900263D3F /* FileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActions.swift; sourceTree = "<group>"; };
 		BB7FF80B2C2CAA9B000B60C3 /* AICodingHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AICodingHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB7FF80E2C2CAA9B000B60C3 /* AICodingHelperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICodingHelperApp.swift; sourceTree = "<group>"; };
 		BB7FF8122C2CAA9C000B60C3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -146,7 +176,7 @@
 		BB85617D2C2F2392001C11F8 /* AICodingHelperWebSocketConnector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICodingHelperWebSocketConnector.swift; sourceTree = "<group>"; };
 		BB85617F2C2F2B98001C11F8 /* StatusResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusResponse.swift; sourceTree = "<group>"; };
 		BB8561812C2F2BC7001C11F8 /* AuthHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthHelper.swift; sourceTree = "<group>"; };
-		BB8561842C2F2C2C001C11F8 /* AICodingHelperServerHTTPSConnector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICodingHelperServerHTTPSConnector.swift; sourceTree = "<group>"; };
+		BB8561842C2F2C2C001C11F8 /* AICodingHelperHTTPSConnector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICodingHelperHTTPSConnector.swift; sourceTree = "<group>"; };
 		BB8561872C2F2D22001C11F8 /* HTTPSClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPSClient.swift; sourceTree = "<group>"; };
 		BB8561892C2F2D49001C11F8 /* RegisterUserResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterUserResponse.swift; sourceTree = "<group>"; };
 		BB85618B2C2F2D6D001C11F8 /* BlankRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlankRequest.swift; sourceTree = "<group>"; };
@@ -173,7 +203,7 @@
 		BBB7C7632C325AE200BEDD07 /* WideScopeControlButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideScopeControlButton.swift; sourceTree = "<group>"; };
 		BBB7C7652C32FE8D00BEDD07 /* WideScopeChatGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideScopeChatGenerator.swift; sourceTree = "<group>"; };
 		BBB7C7672C330ABE00BEDD07 /* FileCopier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCopier.swift; sourceTree = "<group>"; };
-		BBB7C7692C330C9400BEDD07 /* FileSystem+StringifyContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileSystem+StringifyContent.swift"; sourceTree = "<group>"; };
+		BBB7C7692C330C9400BEDD07 /* FilePrettyPrinter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePrettyPrinter.swift; sourceTree = "<group>"; };
 		BBB7C76E2C3312D600BEDD07 /* FileBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -203,6 +233,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BB1405F12C36CE290036CFE8 /* Error */ = {
+			isa = PBXGroup;
+			children = (
+				BB1405F22C36CE330036CFE8 /* GenerationError.swift */,
+			);
+			path = Error;
+			sourceTree = "<group>";
+		};
 		BB7FF8022C2CAA9B000B60C3 = {
 			isa = PBXGroup;
 			children = (
@@ -228,6 +266,7 @@
 			children = (
 				BB7FF83E2C2CAAF3000B60C3 /* Application */,
 				BB8561142C2CBD73001C11F8 /* Constants */,
+				BB1405F12C36CE290036CFE8 /* Error */,
 				BB85611E2C2CCED7001C11F8 /* Model */,
 				BB85612A2C2F0467001C11F8 /* Networking */,
 				BB8561832C2F2BCA001C11F8 /* Util */,
@@ -283,8 +322,10 @@
 			isa = PBXGroup;
 			children = (
 				BBB7C75B2C31FEAE00BEDD07 /* FileSystemGenerator.swift */,
-				BB8561B32C306D84001C11F8 /* MainViewModel.swift */,
+				BB1405DB2C35A2DC0036CFE8 /* FocusViewModel.swift */,
 				BB7FF8402C2CAB19000B60C3 /* MainView.swift */,
+				BB8561B32C306D84001C11F8 /* MainViewModel.swift */,
+				BB1405DF2C360CC40036CFE8 /* ProgressTracker.swift */,
 				BB8E17C52C347F8800E3F463 /* UndoUpdater.swift */,
 			);
 			path = Main;
@@ -321,7 +362,9 @@
 				BB8561262C2CE257001C11F8 /* Scope.swift */,
 				BB8561922C2F358B001C11F8 /* GPTModels.swift */,
 				BB8E17BD2C3366D100E3F463 /* GenerateOptions.swift */,
+				BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */,
 				BB8E17C92C3599D800E3F463 /* FocusableContent.swift */,
+				BB617C532C3885D900263D3F /* FileActions.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -380,7 +423,7 @@
 			children = (
 				BB8561682C2F1F45001C11F8 /* Request */,
 				BB8561692C2F1F49001C11F8 /* Response */,
-				BB8561842C2F2C2C001C11F8 /* AICodingHelperServerHTTPSConnector.swift */,
+				BB8561842C2F2C2C001C11F8 /* AICodingHelperHTTPSConnector.swift */,
 				BB85617D2C2F2392001C11F8 /* AICodingHelperWebSocketConnector.swift */,
 			);
 			path = "AICodingHelper Server";
@@ -390,6 +433,8 @@
 			isa = PBXGroup;
 			children = (
 				BB85612C2C2F0476001C11F8 /* OAI */,
+				BB1405E92C362CA50036CFE8 /* AuthRequest.swift */,
+				BB1405EF2C36CC560036CFE8 /* CalculateTokensRequest.swift */,
 				BB85618B2C2F2D6D001C11F8 /* BlankRequest.swift */,
 				BB85612E2C2F04FB001C11F8 /* GetChatRequest.swift */,
 			);
@@ -400,7 +445,9 @@
 			isa = PBXGroup;
 			children = (
 				BB85612D2C2F047E001C11F8 /* OAI */,
+				BB1405ED2C36CBF00036CFE8 /* CalculateTokensResponse.swift */,
 				BB8561752C2F20C1001C11F8 /* GetChatResponse.swift */,
+				BB1405EB2C362CBD0036CFE8 /* GetRemainingTokensResponse.swift */,
 				BB8561892C2F2D49001C11F8 /* RegisterUserResponse.swift */,
 				BB85617F2C2F2B98001C11F8 /* StatusResponse.swift */,
 			);
@@ -411,10 +458,16 @@
 			isa = PBXGroup;
 			children = (
 				BB8561812C2F2BC7001C11F8 /* AuthHelper.swift */,
+				BB1405E52C362B450036CFE8 /* BindingUserDefaultsHelper.swift */,
 				BB85618D2C2F32CC001C11F8 /* Collection+Safe.swift */,
 				BBB7C7672C330ABE00BEDD07 /* FileCopier.swift */,
+				BB1405E12C360D180036CFE8 /* FileCounter.swift */,
 				BBB7C7512C31B13500BEDD07 /* FileMonitor.swift */,
-				BBB7C7692C330C9400BEDD07 /* FileSystem+StringifyContent.swift */,
+				BBB7C7692C330C9400BEDD07 /* FilePrettyPrinter.swift */,
+				BB1405E72C362C4D0036CFE8 /* RemainingUpdater.swift */,
+				BB1405E32C362A1E0036CFE8 /* UserDefaultsHelper.swift */,
+				BB1405DD2C35ACF00036CFE8 /* View+FocusEffectDisabledVersionCheck.swift */,
+				BB617C4D2C36D29200263D3F /* TokenCalculator.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -601,17 +654,22 @@
 				BB85618C2C2F2D6D001C11F8 /* BlankRequest.swift in Sources */,
 				BB85618A2C2F2D49001C11F8 /* RegisterUserResponse.swift in Sources */,
 				BB8561782C2F2161001C11F8 /* NarrowScopeChatGenerator.swift in Sources */,
+				BB1405E62C362B450036CFE8 /* BindingUserDefaultsHelper.swift in Sources */,
+				BB1405E22C360D180036CFE8 /* FileCounter.swift in Sources */,
 				BB8561762C2F20C1001C11F8 /* GetChatResponse.swift in Sources */,
 				BB8561572C2F0F6A001C11F8 /* OAIChatCompletionRequestMessageContent.swift in Sources */,
 				BB8561B42C306D84001C11F8 /* MainViewModel.swift in Sources */,
 				BB8561B02C305FB9001C11F8 /* CodeTabView.swift in Sources */,
 				BB8561272C2CE257001C11F8 /* Scope.swift in Sources */,
+				BB1405EE2C36CBF00036CFE8 /* CalculateTokensResponse.swift in Sources */,
 				BB7FF8512C2CAE13000B60C3 /* FileNodeView.swift in Sources */,
 				BB85612F2C2F04FB001C11F8 /* GetChatRequest.swift in Sources */,
-				BB8561852C2F2C2C001C11F8 /* AICodingHelperServerHTTPSConnector.swift in Sources */,
+				BB8561852C2F2C2C001C11F8 /* AICodingHelperHTTPSConnector.swift in Sources */,
 				BBB7C7522C31B13500BEDD07 /* FileMonitor.swift in Sources */,
 				BB8561162C2CBD7D001C11F8 /* Colors.swift in Sources */,
 				BB8561182C2CC246001C11F8 /* CodeEditorLanguageSelector.swift in Sources */,
+				BB1405EC2C362CBD0036CFE8 /* GetRemainingTokensResponse.swift in Sources */,
+				BB617C502C38568400263D3F /* FilepathCodeGenerationPrompt.swift in Sources */,
 				BBB7C75C2C31FEAE00BEDD07 /* FileSystemGenerator.swift in Sources */,
 				BB85616C2C2F205E001C11F8 /* ChatCompletionChunk.swift in Sources */,
 				BB85618E2C2F32CC001C11F8 /* Collection+Safe.swift in Sources */,
@@ -620,23 +678,30 @@
 				BB85617E2C2F2392001C11F8 /* AICodingHelperWebSocketConnector.swift in Sources */,
 				BB85617A2C2F234B001C11F8 /* WebSocketClient.swift in Sources */,
 				BBB7C7562C31F92B00BEDD07 /* OAIChatCompletionRequestResponseFormat.swift in Sources */,
+				BB1405E82C362C4D0036CFE8 /* RemainingUpdater.swift in Sources */,
 				BB8E17C62C347F8800E3F463 /* UndoUpdater.swift in Sources */,
-				BBB7C76A2C330C9400BEDD07 /* FileSystem+StringifyContent.swift in Sources */,
+				BBB7C76A2C330C9400BEDD07 /* FilePrettyPrinter.swift in Sources */,
 				BB8561202C2CCEE5001C11F8 /* ActionType.swift in Sources */,
 				BB85614F2C2F0991001C11F8 /* CompletionContentType.swift in Sources */,
 				BB8561112C2CB78D001C11F8 /* CodeEditorContainer.swift in Sources */,
 				BBB7C7642C325AE200BEDD07 /* WideScopeControlButton.swift in Sources */,
 				BB7FF81B2C2CAA9C000B60C3 /* AICodingHelper.xcdatamodeld in Sources */,
 				BB7FF8412C2CAB19000B60C3 /* MainView.swift in Sources */,
+				BB617C542C3885D900263D3F /* FileActions.swift in Sources */,
 				BB8561652C2F1944001C11F8 /* OAIChatCompletionRequestMessageContentImageURL.swift in Sources */,
+				BB1405F02C36CC560036CFE8 /* CalculateTokensRequest.swift in Sources */,
 				BB8561592C2F0F88001C11F8 /* OAIChatCompletionRequestMessageContentText.swift in Sources */,
 				BBB7C75A2C31FD2E00BEDD07 /* FileSystem.swift in Sources */,
 				BB8E17BE2C3366D100E3F463 /* GenerateOptions.swift in Sources */,
 				BB8561632C2F16ED001C11F8 /* OAIChatCompletionRequestMessageContentType.swift in Sources */,
+				BB1405DE2C35ACF00036CFE8 /* View+FocusEffectDisabledVersionCheck.swift in Sources */,
 				BBB7C7662C32FE8D00BEDD07 /* WideScopeChatGenerator.swift in Sources */,
+				BB1405DC2C35A2DC0036CFE8 /* FocusViewModel.swift in Sources */,
 				BB7FF80F2C2CAA9B000B60C3 /* AICodingHelperApp.swift in Sources */,
+				BB1405F32C36CE330036CFE8 /* GenerationError.swift in Sources */,
 				BB8E17CA2C3599D800E3F463 /* FocusableContent.swift in Sources */,
 				BB8561532C2F0EEF001C11F8 /* OAIChatCompletionRequestMessage.swift in Sources */,
+				BB1405E42C362A1E0036CFE8 /* UserDefaultsHelper.swift in Sources */,
 				BBB7C7682C330ABE00BEDD07 /* FileCopier.swift in Sources */,
 				BB8561742C2F20AD001C11F8 /* ChatCompletionUsage.swift in Sources */,
 				BB85616E2C2F2071001C11F8 /* ChatCompletionChoice.swift in Sources */,
@@ -646,13 +711,16 @@
 				BBB7C7542C31F52D00BEDD07 /* ResponseFormatType.swift in Sources */,
 				BB8561552C2F0F54001C11F8 /* OAIChatCompletionRequest.swift in Sources */,
 				BB8561882C2F2D22001C11F8 /* HTTPSClient.swift in Sources */,
+				BB1405EA2C362CA50036CFE8 /* AuthRequest.swift in Sources */,
 				BB7FF84B2C2CADA4000B60C3 /* FileTree.swift in Sources */,
 				BB8561132C2CBB18001C11F8 /* CodeEditorLanguageResolver.swift in Sources */,
 				BB8E17C02C3369A900E3F463 /* WideScopeControlSwitch.swift in Sources */,
 				BB85614D2C2F097F001C11F8 /* CompletionRole.swift in Sources */,
 				BB8561802C2F2B98001C11F8 /* StatusResponse.swift in Sources */,
 				BB8561AE2C305276001C11F8 /* TabView.swift in Sources */,
+				BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */,
 				BB8E17C82C349B2900E3F463 /* TabsViewModel.swift in Sources */,
+				BB1405E02C360CC40036CFE8 /* ProgressTracker.swift in Sources */,
 				BB8561252C2CD30A001C11F8 /* NarrowScopeControlButton.swift in Sources */,
 				BBB7C76F2C3312D600BEDD07 /* FileBrowserView.swift in Sources */,
 				BB8561932C2F358B001C11F8 /* GPTModels.swift in Sources */,

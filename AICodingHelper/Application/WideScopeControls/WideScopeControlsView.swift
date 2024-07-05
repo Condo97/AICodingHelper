@@ -11,9 +11,10 @@ import SwiftUI
 
 struct WideScopeControlsView: View {
     
-    @Binding var scopeName: String
+    @Binding var scope: Scope
+    @ObservedObject var focusViewModel: FocusViewModel
     @Binding var selectedFilepaths: [String]
-    var onSubmit: (_ actionType: ActionType, _ generateOptions: GenerateOptions/*TODO: , _ userInput: String?*/) -> Void
+    var onSubmit: (_ actionType: ActionType, _ userInput: String, _ generateOptions: GenerateOptions/*TODO: , _ userInput: String?*/) -> Void
     
     
     private static let additionalPromptTitleMatchedGeometryEffectID = "additionalPromptTitle"
@@ -27,18 +28,18 @@ struct WideScopeControlsView: View {
     @State private var isDisplayingAdditionalPrompt: Bool = false
     @State private var isDisplayingControls: Bool = false
     
-    @State private var generateOptionCopyCurrentFilesToTempFile: Bool = false
-    @State private var generateOptionUseEntireProjectAsContext: Bool = false
+    private var generateOptionCopyCurrentFilesToTempFile: Binding<Bool> { BindingUserDefaultsHelper.generateOptionCopyCurrentFilesToTempFile }
+    private var generateOptionUseEntireProjectAsContext: Binding<Bool> { BindingUserDefaultsHelper.generateOptionUseEntireProjectAsContext }
     
     
     private var enabledGenerateOptions: GenerateOptions {
         var generateOptions: GenerateOptions = []
         
-        if generateOptionCopyCurrentFilesToTempFile {
+        if generateOptionCopyCurrentFilesToTempFile.wrappedValue {
             generateOptions.insert(.copyCurrentFilesToTempFiles)
         }
         
-        if generateOptionUseEntireProjectAsContext {
+        if generateOptionUseEntireProjectAsContext.wrappedValue {
             generateOptions.insert(.useEntireProjectAsContext)
         }
         
@@ -59,65 +60,65 @@ struct WideScopeControlsView: View {
                                     label: Text("//")
                                         .font(.system(size: 100.0))
                                         .minimumScaleFactor(0.01),
-                                    title: .constant(Text("Comment").fontWeight(.medium) + Text(" \(scopeName)")),
-                                    subtitle: .constant("AI comments your \(scopeName.lowercased())"),
-                                    hoverDescription: Binding(get: {"AI comments your \(scopeName)"}, set: {_ in}),
+                                    title: .constant(Text("Comment").fontWeight(.medium) + Text(" \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized)")),
+                                    subtitle: .constant("AI comments your \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized.lowercased())"),
+                                    hoverDescription: Binding(get: {"AI comments your \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized)"}, set: {_ in}),
                                     foregroundColor: .foreground,
-                                    action: { onSubmit(.comment, enabledGenerateOptions) })
+                                    action: { onSubmit(.comment, additionalPromptText, enabledGenerateOptions) })
                                 
                                 // Bug Fix
                                 WideScopeControlButton(
                                     label: Image(Constants.ImageName.Actions.bug)
                                         .resizable()
                                         .aspectRatio(contentMode: .fit),
-                                    title: .constant(Text("Bug Fix").fontWeight(.medium) + Text(" \(scopeName)")),
-                                    subtitle: .constant("AI finds and fixes bugs in your \(scopeName.lowercased())"),
-                                    hoverDescription: Binding(get: {"AI fixes bugs in your \(scopeName)"}, set: {_ in}),
+                                    title: .constant(Text("Bug Fix").fontWeight(.medium) + Text(" \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized)")),
+                                    subtitle: .constant("AI finds and fixes bugs in your \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized.lowercased())"),
+                                    hoverDescription: Binding(get: {"AI fixes bugs in your \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized)"}, set: {_ in}),
                                     foregroundColor: .foreground,
-                                    action: { onSubmit(.bugFix, enabledGenerateOptions) })
+                                    action: { onSubmit(.bugFix, additionalPromptText, enabledGenerateOptions) })
                                 
                                 // Split
                                 WideScopeControlButton(
                                     label: Image(Constants.ImageName.Actions.split)
                                         .resizable()
                                         .aspectRatio(contentMode: .fit),
-                                    title: .constant(Text("Split").fontWeight(.medium) + Text(" \(scopeName)")),
-                                    subtitle: .constant("AI splits classes and structures in your \(scopeName.lowercased())"),
-                                    hoverDescription: Binding(get: {"AI separates your \(scopeName)"}, set: {_ in}),
+                                    title: .constant(Text("Split").fontWeight(.medium) + Text(" \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized)")),
+                                    subtitle: .constant("AI splits classes and structures in your \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized.lowercased())"),
+                                    hoverDescription: Binding(get: {"AI separates your \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized)"}, set: {_ in}),
                                     foregroundColor: .foreground,
-                                    action: { onSubmit(.split, enabledGenerateOptions) })
+                                    action: { onSubmit(.split, additionalPromptText, enabledGenerateOptions) })
                                 
                                 // Simplify
                                 WideScopeControlButton(
                                     label: Image(Constants.ImageName.Actions.simplify)
                                         .resizable()
                                         .aspectRatio(contentMode: .fit),
-                                    title: .constant(Text("Simplify").fontWeight(.medium) + Text(" \(scopeName)")),
-                                    subtitle: .constant("AI simplifies complex code in your \(scopeName.lowercased())"),
-                                    hoverDescription: Binding(get: {"AI simplifies your \(scopeName)."}, set: {_ in}),
+                                    title: .constant(Text("Simplify").fontWeight(.medium) + Text(" \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized)")),
+                                    subtitle: .constant("AI simplifies complex code in your \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized.lowercased())"),
+                                    hoverDescription: Binding(get: {"AI simplifies your \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized)."}, set: {_ in}),
                                     foregroundColor: .foreground,
-                                    action: { onSubmit(.simplify, enabledGenerateOptions) })
+                                    action: { onSubmit(.simplify, additionalPromptText, enabledGenerateOptions) })
                                 
                                 // Test
                                 WideScopeControlButton(
                                     label: Image(Constants.ImageName.Actions.createTests)
                                         .resizable()
                                         .aspectRatio(contentMode: .fit),
-                                    title: .constant(Text("Create Tests").fontWeight(.medium) + Text(" for \(scopeName)")),
-                                    subtitle: .constant("AI creates tests for code in your \(scopeName.lowercased())"),
-                                    hoverDescription: Binding(get: {"AI creates tests for your \(scopeName)"}, set: {_ in}),
+                                    title: .constant(Text("Create Tests").fontWeight(.medium) + Text(" for \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized)")),
+                                    subtitle: .constant("AI creates tests for code in your \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized.lowercased())"),
+                                    hoverDescription: Binding(get: {"AI creates tests for your \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized)"}, set: {_ in}),
                                     foregroundColor: .foreground,
-                                    action: { onSubmit(.createTests, enabledGenerateOptions) })
+                                    action: { onSubmit(.createTests, additionalPromptText, enabledGenerateOptions) })
                                 
                                 //                        // Custom
                                 WideScopeControlButton(
                                     label: Image(systemName: "questionmark.app")
                                         .resizable(),
-                                    title: .constant(Text("Omni").fontWeight(.medium)),
-                                    subtitle: .constant("AI executes a task described by your *Additional Prompt* in your \(scopeName.lowercased())."),
-                                    hoverDescription: Binding(get: {"AI executes a task descirbed by your \(scopeName)."}, set: {_ in}),
+                                    title: .constant(Text("Omni").fontWeight(.medium) + Text(" for \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized)")),
+                                    subtitle: .constant("AI executes a task described by your *Additional Prompt* in your \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized.lowercased())."),
+                                    hoverDescription: Binding(get: {"AI executes a task descirbed by your \(focusViewModel.focus == .editor ? "Current " : "")\(scope.name.capitalized)"}, set: {_ in}),
                                     foregroundColor: .foreground,
-                                    action: { onSubmit(.custom, enabledGenerateOptions) })
+                                    action: { onSubmit(.custom, additionalPromptText, enabledGenerateOptions) })
                                 
                                 // Additional Prompt Entry or Popup or Show Button or Something
                                 if !isDisplayingAdditionalPrompt {
@@ -150,18 +151,18 @@ struct WideScopeControlsView: View {
                                 
                                 // Create temporary files instead of rewriting TODO: Add option to NarrowScopeControlsView
                                 WideScopeControlSwitch(
-                                    isOn: $generateOptionCopyCurrentFilesToTempFile,
+                                    isOn: generateOptionCopyCurrentFilesToTempFile,
                                     title: .constant(Text("Save to Temp File")),
-                                    subtitle: generateOptionCopyCurrentFilesToTempFile ? .constant(Text("Will not overwrite your files.")) : .constant(Text("***Will overwrite***").foregroundColor(Color(NSColor.systemRed)) + Text(" your files.")),
+                                    subtitle: generateOptionCopyCurrentFilesToTempFile.wrappedValue ? .constant(Text("Will not overwrite your files.")) : .constant(Text("***Will overwrite***").foregroundColor(Color(NSColor.systemRed)) + Text(" your files.")),
                                     hoverDescription: .constant("Use all files to give AI more context to what it is coding."),
                                     foregroundColor: .foreground)
                                 .offset(x: -8)
                                 
                                 // Use entire project as context TODO: Maybe make this a three option switch where it can either be no added context, selected files as context, project as context.. TODO: Add option to NarrowScopeControlsView
                                 WideScopeControlSwitch(
-                                    isOn: $generateOptionUseEntireProjectAsContext,
+                                    isOn: generateOptionUseEntireProjectAsContext,
                                     title: .constant(Text("Project as Context")),
-                                    subtitle: generateOptionUseEntireProjectAsContext ? .constant(Text("More accuracy and cost.")) : .constant(Text("Let AI see your entire project. May increase cost.")),
+                                    subtitle: generateOptionUseEntireProjectAsContext.wrappedValue ? .constant(Text("More accuracy and cost.")) : .constant(Text("Let AI see your entire project. May increase cost.")),
                                     hoverDescription: .constant("Use all files to give AI more context to what it is coding."),
                                     foregroundColor: .foreground)
                                 .offset(x: -8)
@@ -260,14 +261,17 @@ struct WideScopeControlsView: View {
 }
 
 #Preview {
+    
     WideScopeControlsView(
-        scopeName: .constant("Directory"),
+        scope: .constant(.directory),
+        focusViewModel: FocusViewModel(),
         selectedFilepaths: .constant([]),
-        onSubmit: { actionType, generateOptions in
+        onSubmit: { actionType, additionalPromptText, generateOptions in
             print("Submitted \(actionType)")
         }
     )
         .padding()
         .background(Colors.background)
         .frame(width: 800, height: 400)
+    
 }

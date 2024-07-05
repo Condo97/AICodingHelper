@@ -8,176 +8,180 @@
 import Foundation
 
 
-class WideScopeChatGenerator: ObservableObject {
+class WideScopeChatGenerator {
     
-    @Published var isLoading: Bool = false
+    struct WideScopeChatGenerationTask {
+        
+        var filepathCodeGenerationPrompts: [FilepathCodeGenerationPrompt]
+        var copyCurrentFilesToTempFiles: Bool
+        
+    }
     
     
-//    func refactorSelectedItems(authToken: String, model: GPTModels, action: ActionType, selectedItemPaths: [String], copyCurrentFilesToTempFiles: Bool) async throws { TODO: The FileSystem may be parsed by the caller, however it could also I guess be parsed here lol
-//
+    static func refactorFiles(authToken: String, wideScopeChatGenerationTask: WideScopeChatGenerationTask, progressTracker: ProgressTracker) async throws {
+        // Start progress tracker estimation with totalTasks as filepathCodeGenerationPrompts count
+        DispatchQueue.main.async {
+            progressTracker.startEstimation(totalTasks: wideScopeChatGenerationTask.filepathCodeGenerationPrompts.count)
+        }
+        
+        for filepathCodeGenerationPrompt in wideScopeChatGenerationTask.filepathCodeGenerationPrompts {
+            // Refactor file
+            try await refactorFile(
+                authToken: authToken,
+                filepathCodeGenerationPrompt: filepathCodeGenerationPrompt,
+                copyCurrentFileToTempFile: wideScopeChatGenerationTask.copyCurrentFilesToTempFiles)
+            
+            // Complete task for progressTracker
+            DispatchQueue.main.async {
+                progressTracker.completeTask()
+            }
+        }
+    }
+    
+    static func refactorFile(authToken: String, filepathCodeGenerationPrompt: FilepathCodeGenerationPrompt, copyCurrentFileToTempFile: Bool) async throws {
+        // Refactor files
+        try await refactorFile(
+            authToken: authToken,
+            model: filepathCodeGenerationPrompt.model,
+            additionalInput: filepathCodeGenerationPrompt.additionalInput,
+            filepath: filepathCodeGenerationPrompt.filepath,
+            systemMessage: filepathCodeGenerationPrompt.systemMessage,
+            context: filepathCodeGenerationPrompt.context,
+            copyCurrentFileToTempFile: copyCurrentFileToTempFile)
+        
+//        try await refactorFile(
+//            authToken: authToken,
+//            model: filepathCodeGenerationPrompt.model,
+//            action: filepathCodeGenerationPrompt.action,
+//            additionalInput: filepathCodeGenerationPrompt.additionalInput,
+//            filepaths: filepathCodeGenerationPrompt.filepaths,
+//            alternateContextFilepaths: filepathCodeGenerationPrompt.additionalContextFilepaths,
+//            options: filepathCodeGenerationPrompt.options,
+//            progressTracker: progressTracker)
+    }
+    
+//    static func refactorFiles(authToken: String, remainingTokens: Int, action: ActionType, userInput: String?, filepaths: [String], alternateContextFilepaths: [String]?, options: GenerateOptions, progressTracker: ProgressTracker) async throws {
+//        // Create additionalInput from userInput TODO: Add this
+//        let additionalInput = userInput
+//        
+//        // Refactor files
+//        try await refactorFiles(
+//            authToken: authToken,
+//            remainingTokens: remainingTokens,
+//            model: .GPT4o,
+//            action: action,
+//            additionalInput: additionalInput,
+//            filepaths: filepaths,
+//            alternateContextFilepaths: alternateContextFilepaths,
+//            options: options,
+//            progressTracker: progressTracker)
 //    }
     
-    func refactorProject(action: ActionType, userInput: String?, rootDirectoryPath: String, options: GenerateOptions) {
-        // Create FileSystem from root directory, otherwise reutrn
-        guard let rootDirectoryFileSystem = FileSystem.from(path: rootDirectoryPath) else {
-            // TODO: Handle Errors
-            print("Error unwrapping baseDirectoryFileSystem in FileBrowserView!")
-            return
-        }
-        
-        // Refactor Files
-        refactorFiles(
-            action: action,
-            userInput: userInput,
-            rootDirectoryPath: rootDirectoryPath,
-            rootFile: rootDirectoryFileSystem,
-            alternativeContextFiles: nil,
-            options: options)
-    }
+//    static func refactorFiles(authToken: String, model: GPTModels, action: ActionType, additionalInput: String?, filepaths: [String], alternateContextFilepaths: [String]?, options: GenerateOptions, progressTracker: ProgressTracker) async throws {
+//        
+//        
+//        // Estimate tokens with action + systemMessage + userMessage1 + additionalInput + filepath content for each filepath
+//        var estimatedTokens: Int = await TokenCalculator.getEstimatedTokens(
+//            authToken: authToken,
+//            filepaths: filepaths,
+//            contextForEachFile: [action.aiPrompt, systemMessage, userMessage1, additionalInput ?? ""].joined(separator: "\n"))
+//        
+//        // If estimatedTokens is greater than remainingTokens throw GenerationError estimatedTokensHitsLimit
+//        if estimatedTokens > remainingTokens {
+//            throw GenerationError.estimatedTokensHitsLimit
+//        }
+//        
+//        // Refactor Files
+//        try await refactorFiles(
+//            authToken: authToken,
+//            model: model,
+//            action: action,
+//            additionalInput: additionalInput,
+//            filepaths: filepaths,
+//            systemMessage: systemMessage,
+//            context: [userMessage1],
+//            options: options,
+//            progressTracker: progressTracker)
+//    }
     
-    func refactorFiles(action: ActionType, userInput: String?, rootDirectoryPath: String, rootFile: FileSystem, alternativeContextFiles: FileSystem?, options: GenerateOptions) {
-        Task {
-            // Create additionalInput from userInput TODO: Add this
-            let additionalInput = userInput
-            
-            // Ensure authToken
-            let authToken: String
-            do {
-                authToken = try await AuthHelper.ensure()
-            } catch {
-                // TODO: Handle Errors
-                print("Error ensuring authToken in MainView... \(error)")
-                return
-            }
-            
-            // Refactor files
-            do {
-                try await refactorFiles(
-                    authToken: authToken,
-                    model: .GPT4o,
-                    action: action,
-                    additionalInput: additionalInput,
-                    rootDirectoryPath: rootDirectoryPath,
-                    rootFile: rootFile,
-                    alternativeContextFiles: alternativeContextFiles,
-                    options: options)
-            }
-        }
-    }
-    
-    
-    func refactorFiles(authToken: String, model: GPTModels, action: ActionType, additionalInput: String?, rootDirectoryPath: String, rootFile: FileSystem, alternativeContextFiles: FileSystem?, options: GenerateOptions) async throws {
-        /* Should look something like
-         System
-            You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE.
-         User Message 1
-            You are an AI coding helper in an IDE so all responses must be in code that would be valid in an IDE.
-            -- if using alternative context files, which would be something like the project files
-                Here are other files in my project to reference
-                <Project Files>
-            -- if not using alternative context files and therefore just using selection as context
-                Here are other files included in the selection to eventually be refactored, for reference purposes.
-                <Selected Files>
-         User Message 2
-            You are an AI coding helper in an IDE so all responses must be in code that would be valid in an IDE.
-            <Action AI Prompt>
-            <Additional Input>
-            <Code>
-         */
-        
-        // Get context string from files as alternativeContextFiles if not nil, otherwise from rootFile
-        let contextString = alternativeContextFiles == nil ? rootFile.stringifyContent(rootDirectory: rootDirectoryPath) : alternativeContextFiles!.stringifyContent(rootDirectory: rootDirectoryPath)
-        
-        // Parse and assemble systemMessage and parse and add context String from alternativeContextFiles or if nil files
-        let systemMessage = "You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language."
-        let userMessage1 = {
-            let userMessage1_1 = "You are an AI coding helper in an IDE so all responses must be in code that would be valid in an IDE."
-            let userMessage1_2 = alternativeContextFiles == nil ? "Here are other files included in the selection to eventually be refactored, for reference purposes" : "Here aer other files in my project to reference"
-            return [userMessage1_1, userMessage1_2, contextString].joined(separator: "\n")
-        }()
-        
-        // Refactor Files
-        try await refactorFiles(
-            authToken: authToken,
-            model: model,
-            action: action,
-            additionalInput: additionalInput,
-            rootDirectoryPath: rootDirectoryPath,
-            rootFile: rootFile,
-            systemMessage: systemMessage,
-            context: [userMessage1],
-            options: options)
-    }
-    
-    func refactorFiles(authToken: String, model: GPTModels, action: ActionType, additionalInput: String?, rootDirectoryPath: String, rootFile: FileSystem, systemMessage: String, context: [String], options: GenerateOptions) async throws {
-        // Get current item path by rootDirectoryPath / and file name
-        let currentItemPath = rootDirectoryPath + "/" + rootFile.name
-        
-        // If file has subfiles recursively call refactorFiles for each file in it updating rootDirectoryPath adding the current file's name and return
-        if let subfiles = rootFile.subfiles {
-            // Refactor each file in rootFile subsfiles
-            for file in subfiles {
-                do {
-                    try await refactorFiles(
-                        authToken: authToken,
-                        model: model,
-                        action: action,
-                        additionalInput: additionalInput,
-                        rootDirectoryPath: currentItemPath,
-                        rootFile: file,
-                        systemMessage: systemMessage,
-                        context: context,
-                        options: options)
-                } catch {
-                    // TODO: Handle Errors
-                    print("Error refactoring file in WideScopeChatGenerator... \(error)")
-                }
-            }
-            
-            return
-        }
+    /**
+     Refactor File
+     
+     Automatically uses filepaths as context unless alternateContextFilepaths are specified
+     */
+    static func refactorFile(authToken: String, model: GPTModels, additionalInput: String, filepath: String, systemMessage: String, context: [String], copyCurrentFileToTempFile: Bool) async throws {
+//        // If file is directory, loop through each file and call refactorFile with it - Directories will not be in the generation prompt now
+//        var isDirectory: ObjCBool = false
+//        if FileManager.default.fileExists(atPath: filepath, isDirectory: &isDirectory) {
+//            if isDirectory.boolValue {
+//                do {
+//                    let subfiles = try FileManager.default.contentsOfDirectory(atPath: filepath)
+//                    for subfile in subfiles {
+//                        let subfilePath = (filepath as NSString).appendingPathComponent(subfile)
+//                        
+//                        try await refactorFile(
+//                            authToken: authToken,
+//                            model: model,
+//                            action: action,
+//                            additionalInput: additionalInput,
+//                            filepath: subfilePath,
+//                            systemMessage: systemMessage,
+//                            context: context,
+//                            options: options,
+//                            progressTracker: progressTracker)
+//                    }
+//                } catch {
+//                    // TODO: Handle Errors
+//                    print("Error getting subfiles from directory in WideScopeChatGenerator... \(error)")
+//                }
+//            }
+//        }
         
         // Get file contents using currentItemPath
-        let fileContents = try String(contentsOfFile: currentItemPath)
+        let fileContents = try String(contentsOfFile: filepath)
         
-        // Create input from action, additionalInput, and fileContents
-        let input: String = {
-            /*
-             Should be
-             You are an AI coding helper in an IDE so all responses must be in code that would be valid in an IDE.
-             <Action AI Prompt>
-             <Additional Input>
-             <Code>
-             */
-            var input = action.aiPrompt
-            if let additionalInput = additionalInput {
-                input += additionalInput
-            }
-            input += fileContents
-            return input
-        }()
+        // Create promptInput from additionalInput \n fileContents
+        let promptInput = additionalInput + fileContents
         
-        // Get chat with userInputs as context with input at the bottom
+//        // Create input from action, additionalInput, and fileContents
+//        let input: String = {
+//            /*
+//             Should be
+//             You are an AI coding helper in an IDE so all responses must be in code that would be valid in an IDE.
+//             <Action AI Prompt>
+//             <Additional Input>
+//             <Code>
+//             */
+//            var input = action.aiPrompt
+//            if let additionalInput = additionalInput {
+//                input += additionalInput
+//            }
+//            input += fileContents
+//            return input
+//        }()
+        
+        // Get chat with userInputs as context with promptInput at the bottom
         let fileChatResponse = try await getChat(
             authToken: authToken,
             model: model,
             systemMessage: systemMessage,
-            userInputs: context + [input])
+            userInputs: context + [promptInput])
         
-        // If copyCurrentFilesToTempFiles copy file to new file with _temp# suffixed name
-        if options.contains(.copyCurrentFilesToTempFiles) {
-            try FileCopier.copyFileToTempVersion(at: currentItemPath)
+        // If copyCurrentFileToTempFile copy file to new file with _temp# suffixed name
+        if copyCurrentFileToTempFile {
+            try FileCopier.copyFileToTempVersion(at: filepath)
         }
         
         // Set file text to chat
         try fileChatResponse?.write(
-            toFile: currentItemPath,
+            toFile: filepath,
             atomically: true,
             encoding: .utf8)
     }
+        
     
     
-    private func getChat(authToken: String, model: GPTModels, systemMessage: String?, userInputs: [String]) async throws -> String? {
+    private static func getChat(authToken: String, model: GPTModels, systemMessage: String?, userInputs: [String]) async throws -> String? {
         // Create inputMessages array
         var inputMessages: [OAIChatCompletionRequestMessage] = []
         
@@ -215,25 +219,7 @@ class WideScopeChatGenerator: ObservableObject {
         return try await getChat(getChatRequest: getChatRequest)
     }
     
-    private func getChat(getChatRequest: GetChatRequest) async throws -> String? {
-//        guard !isLoading else {
-//            // TODO: Handle Errors
-//            print("Could not get chat because another chat is currently loading!")
-//            return nil
-//        }
-//        
-//        // Defer setting isLoading to false
-//        defer {
-//            DispatchQueue.main.async {
-//                self.isLoading = false
-//            }
-//        }
-//        
-//        // Set isLoading to true
-//        await MainActor.run {
-//            isLoading = true
-//        }
-        
+    private static func getChat(getChatRequest: GetChatRequest) async throws -> String? {
         // Encode getChatRequest to string, otherwise return
         guard let requestString = String(data: try JSONEncoder().encode(getChatRequest), encoding: .utf8) else {
             // TODO: Handle Errors

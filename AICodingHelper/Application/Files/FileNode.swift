@@ -41,6 +41,7 @@ class FileNode: ObservableObject, Identifiable {
         do {
             let contents = try FileManager.default.contentsOfDirectory(atPath: path)
             children = contents.map { FileNode(path: (self.path as NSString).appendingPathComponent($0)) }
+                .sorted { $1.name > $0.name }
                 .sorted { $0.isDirectory && !$1.isDirectory }
         } catch {
             print("Error reading contents of directory: \(error)")

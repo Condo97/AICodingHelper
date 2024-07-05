@@ -26,12 +26,13 @@ struct TabsView: View {
                         Binding(
                             get: {
                                 // Open tab title is last path component of url with openTab filepath
-                                if let filepath = openTab.wrappedValue.filepath {
+                                if let filepath = openTab.wrappedValue.filepath,
+                                   FileManager.default.fileExists(atPath: filepath) {
                                     return URL(fileURLWithPath: filepath).lastPathComponent
                                 }
                                 
                                 // Default if filepath cannot be unwrapped
-                                return "*No Filename*"
+                                return "*Deleted*"
                             },
                             set: { value in
                                 // No set actions

@@ -9,16 +9,9 @@ import CodeEditor
 import Foundation
 
 
-class NarrowScopeChatGenerator: ObservableObject {
+class ChatGenerator {
     
-    @Published var streamingChat: String?
-    @Published var streamingChatDelta: String?
-    @Published var streamingChatScope: Scope?
-    @Published var isLoading: Bool = false
-    @Published var isStreaming: Bool = false
-    
-    
-    func streamChat(authToken: String, model: GPTModels, action: ActionType, additionalInput: String?, language: CodeEditor.Language?, responseFormat: ResponseFormatType = .text, context: [String], input: String, scope: Scope) async throws {
+    static func streamChat(authToken: String, model: GPTModels, action: ActionType, additionalInput: String?, language: CodeEditor.Language?, responseFormat: ResponseFormatType = .text, context: [String], input: String, scope: Scope, stream: (GetChatResponse) async -> Void) async throws {
         /* Should look something like
          System
             You are an AI coding helper service in an IDE so you must format all your responses in <language> code that would be valid in an IDE.
@@ -51,10 +44,11 @@ class NarrowScopeChatGenerator: ObservableObject {
             responseFormat: responseFormat,
             systemMessage: systemMessage,
             userInputs: [userMessage1, userMessage2],
-            scope: scope)
+            scope: scope,
+            stream: stream)
     }
     
-    func streamChat(authToken: String, model: GPTModels, responseFormat: ResponseFormatType, systemMessage: String?, userInputs: [String], scope: Scope) async throws {
+    static func streamChat(authToken: String, model: GPTModels, responseFormat: ResponseFormatType, systemMessage: String?, userInputs: [String], scope: Scope, stream: (GetChatResponse) async -> Void) async throws {
         // Create messages and add messages
         var messages: [OAIChatCompletionRequestMessage] = []
         
@@ -82,36 +76,10 @@ class NarrowScopeChatGenerator: ObservableObject {
                 messages: messages))
         
         // Stream chat
-        try await streamChat(getChatRequest: getChatRequest, scope: scope)
+        try await streamChat(getChatRequest: getChatRequest, scope: scope, stream: stream)
     }
     
-    func streamChat(getChatRequest: GetChatRequest, scope: Scope) async throws {
-        // Ensure not loading or streaming, otherwise return
-        guard !isLoading && !isStreaming else {
-            // TODO: Handle Errors
-            print("Could not stream chat because another chat is currently streaming!")
-            return
-        }
-        
-        // Reset current chat and set scope
-        await MainActor.run {
-            streamingChat = nil
-            streamingChatScope = scope
-        }
-        
-        // Defer setting isLoading and isStreaming to false
-        defer {
-            DispatchQueue.main.async {
-                self.isLoading = false
-                self.isStreaming = false
-            }
-        }
-        
-        // Set isLoading to true
-        await MainActor.run {
-            isLoading = true
-        }
-        
+    static func streamChat(getChatRequest: GetChatRequest, scope: Scope, stream: (GetChatResponse) async -> Void) async throws {
         // Encode getChatRequest to string, otherwise return
         guard let requestString = String(data: try JSONEncoder().encode(getChatRequest), encoding: .utf8) else {
             // TODO: Handle Errors
@@ -120,26 +88,14 @@ class NarrowScopeChatGenerator: ObservableObject {
         }
         
         // Get stream
-        let stream = AICodingHelperWebSocketConnector.getStream()
+        let chatStream = AICodingHelperWebSocketConnector.getStream()
         
         // Send GetChatRequest to stream
-        try await stream.send(.string(requestString))
+        try await chatStream.send(.string(requestString))
         
         // Parse stream response
-        var firstMessage: Bool = true
         do {
-            for try await message in stream {
-                if firstMessage {
-                    // Set isLoading to false and isStreaming to true
-                    await MainActor.run {
-                        isLoading = false
-                        isStreaming = true
-                    }
-                    
-                    // Set firstMessage to false
-                    firstMessage = false
-                }
-                
+            for try await message in chatStream {
                 // Parse message, and if it cannot be unwrapped continue
                 guard let messageData = {
                     switch message {
@@ -178,19 +134,21 @@ class NarrowScopeChatGenerator: ObservableObject {
                     continue
                 }
                 
-                // Update streamingChat and streamingChatDelta
-                await MainActor.run {
-                    if let zeroIndexChoice = getChatResponse.body.oaiResponse.choices[safe: 0],
-                       let content = zeroIndexChoice.delta.content {
-                        if streamingChat == nil {
-                            streamingChat = content
-                        } else {
-                            streamingChat! += content
-                        }
-                        
-                        streamingChatDelta = content
-                    }
-                }
+                await stream(getChatResponse)
+                
+//                // Update streamingChat and streamingChatDelta
+//                await MainActor.run {
+//                    if let zeroIndexChoice = getChatResponse.body.oaiResponse.choices[safe: 0],
+//                       let content = zeroIndexChoice.delta.content {
+//                        if streamingChat == nil {
+//                            streamingChat = content
+//                        } else {
+//                            streamingChat! += content
+//                        }
+//                        
+//                        streamingChatDelta = content
+//                    }
+//                }
             }
         } catch {
             // TODO: Handle Errors, though this may be normal

@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+
+class FocusViewModel: ObservableObject {
+    
+    @Published var focus: FocusableContent = .browser
+    
+}

@@ -6,3 +6,18 @@
 //
 
 import Foundation
+
+
+struct CalculateTokensRequest: Codable {
+    
+    var authToken: String
+    var model: GPTModels
+    var input: String
+    
+    enum CodingKeys: String, CodingKey {
+        case authToken
+        case model
+        case input
+    }
+    
+}
