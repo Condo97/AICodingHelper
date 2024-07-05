@@ -17,36 +17,44 @@ struct AICodingHelperApp: App {
     @StateObject private var remainingUpdater: RemainingUpdater = RemainingUpdater()
     @StateObject private var undoUpdater: UndoUpdater = UndoUpdater()
     
+    @State private var directory: String?
+    
 
     var body: some Scene {
         WindowGroup {
-            MainView()
-                .environmentObject(focusViewModel)
-                .environmentObject(remainingUpdater)
-                .environmentObject(undoUpdater)
-                .task {
-                    // Get and ensure authToken
-                    let authToken: String
-                    do {
-                        #if DEBUG
-                        authToken = try await AuthHelper.regenerate()
-                        #else
-                        authToken = try await AuthHelper.ensure()
-                        #endif
-                    } catch {
-                        // TODO: Handle Errors
-                        print("Error ensuring authToken in AICodingHelperApp... \(error)")
-                        return
-                    }
-                    
-                    // Update remainingUpdater
-                    do {
-                        try await remainingUpdater.update(authToken: authToken)
-                    } catch {
-                        // TODO: Handle Errors
-                        print("Error updating remaining in AICodingHelperApp... \(error)")
-                    }
+            ZStack {
+                if let directory = directory {
+                    MainView(directory: directory)
+                } else {
+                    FilePickerView(filePath: $directory)
                 }
+            }
+            .environmentObject(focusViewModel)
+            .environmentObject(remainingUpdater)
+            .environmentObject(undoUpdater)
+            .task {
+                // Get and ensure authToken
+                let authToken: String
+                do {
+                    #if DEBUG
+                    authToken = try await AuthHelper.regenerate()
+                    #else
+                    authToken = try await AuthHelper.ensure()
+                    #endif
+                } catch {
+                    // TODO: Handle Errors
+                    print("Error ensuring authToken in AICodingHelperApp... \(error)")
+                    return
+                }
+                
+                // Update remainingUpdater
+                do {
+                    try await remainingUpdater.update(authToken: authToken)
+                } catch {
+                    // TODO: Handle Errors
+                    print("Error updating remaining in AICodingHelperApp... \(error)")
+                }
+            }
         }
     }
     
