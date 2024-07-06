@@ -383,7 +383,7 @@ struct MainView: View {
                                             authToken: authToken,
                                             model: .GPT4o,
                                             instructions: instructions,
-                                            selectedFilepaths: [directory],
+                                            selectedFilepaths: fileBrowserSelectedFilepaths,
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
                                             // TODO: Handle Errors
                                             print("Could not unwrap plan after making plan in MainView!")
@@ -467,7 +467,7 @@ struct MainView: View {
                                             authToken: authToken,
                                             model: .GPT4o,
                                             instructions: instructions,
-                                            selectedFilepaths: [directory],
+                                            selectedFilepaths: [firstFileBrowserSelectedFilepath],
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
                                             // TODO: Handle Errors
                                             print("Could not unwrap plan after making plan in MainView!")
