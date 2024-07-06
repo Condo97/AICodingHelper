@@ -26,10 +26,14 @@ class WideScopeChatGenerator {
         
         for filepathCodeGenerationPrompt in wideScopeChatGenerationTask.filepathCodeGenerationPrompts {
             // Refactor file
-            try await refactorFile(
-                authToken: authToken,
-                filepathCodeGenerationPrompt: filepathCodeGenerationPrompt,
-                copyCurrentFileToTempFile: wideScopeChatGenerationTask.copyCurrentFilesToTempFiles)
+            do {
+                try await refactorFile(
+                    authToken: authToken,
+                    filepathCodeGenerationPrompt: filepathCodeGenerationPrompt,
+                    copyCurrentFileToTempFile: wideScopeChatGenerationTask.copyCurrentFilesToTempFiles)
+            } catch {
+                print("Error refactoring file in WideScopeChatGenerator, continuing with other files... \(error)")
+            }
             
             // Complete task for progressTracker
             DispatchQueue.main.async {
