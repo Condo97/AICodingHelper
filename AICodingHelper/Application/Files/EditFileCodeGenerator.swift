@@ -8,17 +8,9 @@
 import Foundation
 
 
-class WideScopeChatGenerator {
+class EditFileCodeGenerator {
     
-    struct WideScopeChatGenerationTask {
-        
-        var filepathCodeGenerationPrompts: [FilepathCodeGenerationPrompt]
-        var copyCurrentFilesToTempFiles: Bool
-        
-    }
-    
-    
-    static func refactorFiles(authToken: String, wideScopeChatGenerationTask: WideScopeChatGenerationTask, progressTracker: ProgressTracker) async throws {
+    static func refactorFiles(authToken: String, wideScopeChatGenerationTask: CodeGenerationTask, progressTracker: ProgressTracker) async throws {
         // Start progress tracker estimation with totalTasks as filepathCodeGenerationPrompts count
         DispatchQueue.main.async {
             progressTracker.startEstimation(totalTasks: wideScopeChatGenerationTask.filepathCodeGenerationPrompts.count)
@@ -52,61 +44,7 @@ class WideScopeChatGenerator {
             systemMessage: filepathCodeGenerationPrompt.systemMessage,
             context: filepathCodeGenerationPrompt.context,
             copyCurrentFileToTempFile: copyCurrentFileToTempFile)
-        
-//        try await refactorFile(
-//            authToken: authToken,
-//            model: filepathCodeGenerationPrompt.model,
-//            action: filepathCodeGenerationPrompt.action,
-//            additionalInput: filepathCodeGenerationPrompt.additionalInput,
-//            filepaths: filepathCodeGenerationPrompt.filepaths,
-//            alternateContextFilepaths: filepathCodeGenerationPrompt.additionalContextFilepaths,
-//            options: filepathCodeGenerationPrompt.options,
-//            progressTracker: progressTracker)
     }
-    
-//    static func refactorFiles(authToken: String, remainingTokens: Int, action: ActionType, userInput: String?, filepaths: [String], alternateContextFilepaths: [String]?, options: GenerateOptions, progressTracker: ProgressTracker) async throws {
-//        // Create additionalInput from userInput TODO: Add this
-//        let additionalInput = userInput
-//        
-//        // Refactor files
-//        try await refactorFiles(
-//            authToken: authToken,
-//            remainingTokens: remainingTokens,
-//            model: .GPT4o,
-//            action: action,
-//            additionalInput: additionalInput,
-//            filepaths: filepaths,
-//            alternateContextFilepaths: alternateContextFilepaths,
-//            options: options,
-//            progressTracker: progressTracker)
-//    }
-    
-//    static func refactorFiles(authToken: String, model: GPTModels, action: ActionType, additionalInput: String?, filepaths: [String], alternateContextFilepaths: [String]?, options: GenerateOptions, progressTracker: ProgressTracker) async throws {
-//        
-//        
-//        // Estimate tokens with action + systemMessage + userMessage1 + additionalInput + filepath content for each filepath
-//        var estimatedTokens: Int = await TokenCalculator.getEstimatedTokens(
-//            authToken: authToken,
-//            filepaths: filepaths,
-//            contextForEachFile: [action.aiPrompt, systemMessage, userMessage1, additionalInput ?? ""].joined(separator: "\n"))
-//        
-//        // If estimatedTokens is greater than remainingTokens throw GenerationError estimatedTokensHitsLimit
-//        if estimatedTokens > remainingTokens {
-//            throw GenerationError.estimatedTokensHitsLimit
-//        }
-//        
-//        // Refactor Files
-//        try await refactorFiles(
-//            authToken: authToken,
-//            model: model,
-//            action: action,
-//            additionalInput: additionalInput,
-//            filepaths: filepaths,
-//            systemMessage: systemMessage,
-//            context: [userMessage1],
-//            options: options,
-//            progressTracker: progressTracker)
-//    }
     
     /**
      Refactor File
@@ -114,55 +52,11 @@ class WideScopeChatGenerator {
      Automatically uses filepaths as context unless alternateContextFilepaths are specified
      */
     static func refactorFile(authToken: String, model: GPTModels, additionalInput: String, filepath: String, systemMessage: String, context: [String], copyCurrentFileToTempFile: Bool) async throws {
-//        // If file is directory, loop through each file and call refactorFile with it - Directories will not be in the generation prompt now
-//        var isDirectory: ObjCBool = false
-//        if FileManager.default.fileExists(atPath: filepath, isDirectory: &isDirectory) {
-//            if isDirectory.boolValue {
-//                do {
-//                    let subfiles = try FileManager.default.contentsOfDirectory(atPath: filepath)
-//                    for subfile in subfiles {
-//                        let subfilePath = (filepath as NSString).appendingPathComponent(subfile)
-//                        
-//                        try await refactorFile(
-//                            authToken: authToken,
-//                            model: model,
-//                            action: action,
-//                            additionalInput: additionalInput,
-//                            filepath: subfilePath,
-//                            systemMessage: systemMessage,
-//                            context: context,
-//                            options: options,
-//                            progressTracker: progressTracker)
-//                    }
-//                } catch {
-//                    // TODO: Handle Errors
-//                    print("Error getting subfiles from directory in WideScopeChatGenerator... \(error)")
-//                }
-//            }
-//        }
-        
         // Get file contents using currentItemPath
         let fileContents = try String(contentsOfFile: filepath)
         
         // Create promptInput from additionalInput \n fileContents
         let promptInput = additionalInput + fileContents
-        
-//        // Create input from action, additionalInput, and fileContents
-//        let input: String = {
-//            /*
-//             Should be
-//             You are an AI coding helper in an IDE so all responses must be in code that would be valid in an IDE.
-//             <Action AI Prompt>
-//             <Additional Input>
-//             <Code>
-//             */
-//            var input = action.aiPrompt
-//            if let additionalInput = additionalInput {
-//                input += additionalInput
-//            }
-//            input += fileContents
-//            return input
-//        }()
         
         // Get chat with userInputs as context with promptInput at the bottom
         let fileChatResponse = try await getChat(

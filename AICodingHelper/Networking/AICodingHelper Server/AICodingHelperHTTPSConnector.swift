@@ -68,6 +68,35 @@ class AICodingHelperHTTPSConnector {
         }
     }
     
+    static func planCodeGeneration(request: FunctionCallRequest) async throws -> OAICompletionResponse {
+        let (data, response) = try await HTTPSClient.post(
+            url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.planCodeGeneration)")!,
+            body: request,
+            headers: nil)
+        
+        do {
+            let oaiCompletionResponse = try JSONDecoder().decode(OAICompletionResponse.self, from: data)
+            
+            return oaiCompletionResponse
+        } catch {
+            // Catch as StatusResponse
+            let statusResponse = try JSONDecoder().decode(StatusResponse.self, from: data)
+            
+            // Regenerate AuthToken if necessary
+            if statusResponse.success == 5 {
+                Task {
+                    do {
+                        try await AuthHelper.regenerate()
+                    } catch {
+                        print("Error regenerating authToken in HTTPSConnector... \(error)")
+                    }
+                }
+            }
+            
+            throw error
+        }
+    }
+    
     static func registerUser() async throws -> RegisterUserResponse {
         let (data, response) = try await HTTPSClient.post(
             url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.registerUser)")!,

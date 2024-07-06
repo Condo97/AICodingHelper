@@ -35,8 +35,8 @@ struct MainView: View {
     
     @State private var fileBrowserSelectedFilepaths: [String] = []
     
-    @State private var currentWideScopeChatGenerationTask: WideScopeChatGenerator.WideScopeChatGenerationTask?
-    @State private var currentWideScopeChatGenerationTaskTokenEstimation: Int?
+    @State private var currentCodeGenerationPlan: CodeGenerationPlan?
+    @State private var currentCodeGenerationPlanTokenEstimation: Int?
     
     private static let additionalTokensForEstimationPerFile: Int = Constants.Additional.additionalTokensForEstimationPerFile
     
@@ -326,41 +326,36 @@ struct MainView: View {
                                             self.isLoadingBrowser = true
                                         }
                                         
-                                        // Get FilepathCodeGenerationPrompt for each file in project
-                                        let filepathCodeGenerationPrompts = FilepathCodeGenerationPrompt.from(
-                                            model: .GPT4o,
-                                            action: actionType,
-                                            userInput: userInput,
-                                            filepaths: [directory],
-                                            alternateContextFilepaths: alternateContextFilepaths)
+                                        // Create instructions from action aiPrompt and userInput
+                                        let instructions = actionType.aiPrompt + (userInput.isEmpty ? "" : "\n" + userInput)
                                         
-                                        // Create WideScopeChatGenerationTask and set to currentWideScopeChatGenerationTask
-                                        let currentWideScopeChatGenerationTask = WideScopeChatGenerator.WideScopeChatGenerationTask(
-                                            filepathCodeGenerationPrompts: filepathCodeGenerationPrompts,
-                                            copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles))
+                                        // Create Plan and set to currentCodeGenerationPlan
+                                        guard let plan = try await CodeGenerationPlanner.makePlan(
+                                            authToken: authToken,
+                                            model: .GPT4o,
+                                            instructions: instructions,
+                                            selectedFilepaths: [directory],
+                                            copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
+                                            // TODO: Handle Errors
+                                            print("Could not unwrap plan after making plan in MainView!")
+                                            return
+                                        }
                                         DispatchQueue.main.async {
-                                            self.currentWideScopeChatGenerationTask = currentWideScopeChatGenerationTask
+                                            self.currentCodeGenerationPlan = plan
                                         }
                                         
-                                        // Get token estimation for currentWideScopeChatGenerationTask and set to currentWideScopeChatGenerationTaskTokenEstimation
-                                        let currentWideScopeChatGenerationTaskTokenEstimation = await TokenCalculator.getEstimatedTokens(
+                                        // Estimate tokens for plan and set to currentCodeGenerationPlanTokenEstimation
+                                        let tokenEstimation = await TokenCalculator.getEstimatedTokens(
                                             authToken: authToken,
-                                            wideScopeChatGenerationTask: currentWideScopeChatGenerationTask)
+                                            codeGenerationPlan: plan)
                                         DispatchQueue.main.async {
-                                            self.currentWideScopeChatGenerationTaskTokenEstimation = currentWideScopeChatGenerationTaskTokenEstimation
+                                            self.currentCodeGenerationPlanTokenEstimation = tokenEstimation
                                         }
                                         
                                         // Set alertShowingWideScopeChatGenerationEstimatedTokensApproval alert to true
                                         DispatchQueue.main.async {
                                             self.alertShowingWideScopeChatGenerationEstimatedTokensApproval = true
                                         }
-                                        
-//                                        // Refactor files
-//                                        try await WideScopeChatGenerator.refactorFiles(
-//                                            authToken: authToken,
-//                                            filepathCodeGenerationPrompts: filepathCodeGenerationPrompts,
-//                                            copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles),
-//                                            progressTracker: progressTracker)
                                     } catch {
                                         // TODO: Handle Errors
                                         print("Error building refactor files task in MainView... \(error)")
@@ -380,49 +375,36 @@ struct MainView: View {
                                             self.isLoadingBrowser = true
                                         }
                                         
-                                        // Get FilepathCodeGenerationPrompt for each selected file
-                                        let filepathCodeGenerationPrompts = FilepathCodeGenerationPrompt.from(
-                                            model: .GPT4o,
-                                            action: actionType,
-                                            userInput: userInput,
-                                            filepaths: fileBrowserSelectedFilepaths,
-                                            alternateContextFilepaths: alternateContextFilepaths)
+                                        // Create instructions from action aiPrompt and userInput
+                                        let instructions = actionType.aiPrompt + (userInput.isEmpty ? "" : "\n" + userInput)
                                         
-                                        // Create WideScopeChatGenerationTask and set to currentWideScopeChatGenerationTask
-                                        let currentWideScopeChatGenerationTask = WideScopeChatGenerator.WideScopeChatGenerationTask(
-                                            filepathCodeGenerationPrompts: filepathCodeGenerationPrompts,
-                                            copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles))
+                                        // Create Plan and set to currentCodeGenerationPlan
+                                        guard let plan = try await CodeGenerationPlanner.makePlan(
+                                            authToken: authToken,
+                                            model: .GPT4o,
+                                            instructions: instructions,
+                                            selectedFilepaths: [directory],
+                                            copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
+                                            // TODO: Handle Errors
+                                            print("Could not unwrap plan after making plan in MainView!")
+                                            return
+                                        }
                                         DispatchQueue.main.async {
-                                            self.currentWideScopeChatGenerationTask = currentWideScopeChatGenerationTask
+                                            self.currentCodeGenerationPlan = plan
                                         }
                                         
-                                        // Get token estimation for currentWideScopeChatGenerationTask and set to currentWideScopeChatGenerationTaskTokenEstimation
-                                        let currentWideScopeChatGenerationTaskTokenEstimation = await TokenCalculator.getEstimatedTokens(
+                                        // Estimate tokens for plan and set to currentCodeGenerationPlanTokenEstimation
+                                        let tokenEstimation = await TokenCalculator.getEstimatedTokens(
                                             authToken: authToken,
-                                            wideScopeChatGenerationTask: currentWideScopeChatGenerationTask)
+                                            codeGenerationPlan: plan)
                                         DispatchQueue.main.async {
-                                            self.currentWideScopeChatGenerationTaskTokenEstimation = currentWideScopeChatGenerationTaskTokenEstimation
+                                            self.currentCodeGenerationPlanTokenEstimation = tokenEstimation
                                         }
                                         
                                         // Set alertShowingWideScopeChatGenerationEstimatedTokensApproval alert to true
                                         DispatchQueue.main.async {
                                             self.alertShowingWideScopeChatGenerationEstimatedTokensApproval = true
                                         }
-                                        
-//                                        // Start progressTracker with totalTasks as files from FileCounter
-//                                        DispatchQueue.main.async {
-//                                            progressTracker.startEstimation(totalTasks: FileCounter.countFiles(paths: fileBrowserSelectedFilepaths))
-//                                        }
-//                                        
-//                                        try await WideScopeChatGenerator.refactorFiles(
-//                                            authToken: authToken,
-//                                            remainingTokens: remainingUpdater.remaining,
-//                                            action: actionType,
-//                                            userInput: nil, // TODO: Add this
-//                                            filepaths: fileBrowserSelectedFilepaths,
-//                                            alternateContextFilepaths: nil,
-//                                            options: generateOptions,
-//                                            progressTracker: progressTracker)
                                     } catch {
                                         // TODO: Handle Errors
                                         print("Error refactoring files in MainView... \(error)")
@@ -477,49 +459,36 @@ struct MainView: View {
                                             self.isLoadingBrowser = true
                                         }
                                         
-                                        // Get FilepathCodeGenerationPrompt for firstFileBrowserSelectedFilepath
-                                        let filepathCodeGenerationPrompts = FilepathCodeGenerationPrompt.from(
-                                            model: .GPT4o,
-                                            action: actionType,
-                                            userInput: userInput,
-                                            filepaths: [firstFileBrowserSelectedFilepath],
-                                            alternateContextFilepaths: alternateContextFilepaths)
+                                        // Create instructions from action aiPrompt and userInput
+                                        let instructions = actionType.aiPrompt + (userInput.isEmpty ? "" : "\n" + userInput)
                                         
-                                        // Create WideScopeChatGenerationTask and set to currentWideScopeChatGenerationTask
-                                        let currentWideScopeChatGenerationTask = WideScopeChatGenerator.WideScopeChatGenerationTask(
-                                            filepathCodeGenerationPrompts: filepathCodeGenerationPrompts,
-                                            copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles))
+                                        // Create Plan and set to currentCodeGenerationPlan
+                                        guard let plan = try await CodeGenerationPlanner.makePlan(
+                                            authToken: authToken,
+                                            model: .GPT4o,
+                                            instructions: instructions,
+                                            selectedFilepaths: [directory],
+                                            copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
+                                            // TODO: Handle Errors
+                                            print("Could not unwrap plan after making plan in MainView!")
+                                            return
+                                        }
                                         DispatchQueue.main.async {
-                                            self.currentWideScopeChatGenerationTask = currentWideScopeChatGenerationTask
+                                            self.currentCodeGenerationPlan = plan
                                         }
                                         
-                                        // Get token estimation for currentWideScopeChatGenerationTask and set to currentWideScopeChatGenerationTaskTokenEstimation
-                                        let currentWideScopeChatGenerationTaskTokenEstimation = await TokenCalculator.getEstimatedTokens(
+                                        // Estimate tokens for plan and set to currentCodeGenerationPlanTokenEstimation
+                                        let tokenEstimation = await TokenCalculator.getEstimatedTokens(
                                             authToken: authToken,
-                                            wideScopeChatGenerationTask: currentWideScopeChatGenerationTask)
+                                            codeGenerationPlan: plan)
                                         DispatchQueue.main.async {
-                                            self.currentWideScopeChatGenerationTaskTokenEstimation = currentWideScopeChatGenerationTaskTokenEstimation
+                                            self.currentCodeGenerationPlanTokenEstimation = tokenEstimation
                                         }
                                         
                                         // Set alertShowingWideScopeChatGenerationEstimatedTokensApproval alert to true
                                         DispatchQueue.main.async {
                                             self.alertShowingWideScopeChatGenerationEstimatedTokensApproval = true
                                         }
-                                        
-//                                        // Start progressTracker with totalTasks as files from FileCounter
-//                                        DispatchQueue.main.async {
-//                                            progressTracker.startEstimation(totalTasks: FileCounter.countFiles(paths: [firstFileBrowserSelectedFilepath]))
-//                                        }
-//                                        
-//                                        try await WideScopeChatGenerator.refactorFiles(
-//                                            authToken: authToken,
-//                                            remainingTokens: remainingUpdater.remaining,
-//                                            action: actionType,
-//                                            userInput: nil, // TODO: Add this
-//                                            filepaths: [firstFileBrowserSelectedFilepath],
-//                                            alternateContextFilepaths: nil,
-//                                            options: generateOptions,
-//                                            progressTracker: progressTracker)
                                     } catch {
                                         // TODO: Handle Errors
                                         print("Error refactoring files in MainView... \(error)")
@@ -582,10 +551,10 @@ struct MainView: View {
             }
         }, message: {
             Text("Task Details:\n")
+//            +
+//            Text("• \(currentWideScopeChatGenerationTask?.filepathCodeGenerationPrompts.count ?? -1) Files\n")
             +
-            Text("• \(currentWideScopeChatGenerationTask?.filepathCodeGenerationPrompts.count ?? -1) Files\n")
-            +
-            Text("• \(currentWideScopeChatGenerationTaskTokenEstimation ?? -1) Est. Tokens")
+            Text("• \(currentCodeGenerationPlanTokenEstimation ?? -1) Est. Tokens")
         })
         .alert("More Tokens Needed", isPresented: $alertShowingNotEnoughTokensToPerformTask, actions: {
             Button("Close") {
@@ -618,18 +587,16 @@ struct MainView: View {
     
     
     func refactorFiles() {
-        guard let currentWideScopeChatGenerationTask = currentWideScopeChatGenerationTask,
-              let currentWideScopeChatGenerationTaskTokenEstimation = currentWideScopeChatGenerationTaskTokenEstimation else {
+        guard let currentCodeGenerationPlan = currentCodeGenerationPlan,
+              let currentCodeGenerationPlanTokenEstimation = currentCodeGenerationPlanTokenEstimation else {
             // TODO: Handle Errors
-            print("Could not unwrap currentWideScopeChatGenerationTask or currentWideScopeChatGenerationTaskTokenEstimation in MainView!")
+            print("Could not unwrap currentCodeGenerationPlan in MainView!")
             return
         }
         
-        guard currentWideScopeChatGenerationTaskTokenEstimation + MainView.additionalTokensForEstimationPerFile < remainingUpdater.remaining else {
-            // Show not enough tokens alert
-            DispatchQueue.main.async {
-                self.alertShowingNotEnoughTokensToPerformTask = true
-            }
+        guard currentCodeGenerationPlanTokenEstimation + MainView.additionalTokensForEstimationPerFile < remainingUpdater.remaining else {
+            // TODO: Handle Errors
+            print("Could not unwrap currentCodeGenerationPlanTokenEstimation in MainView!")
             return
         }
         
@@ -656,25 +623,75 @@ struct MainView: View {
                 return
             }
             
-            // Refactor files
+            // Generate and refactor
             do {
-                try await WideScopeChatGenerator.refactorFiles(
+                try await CodeGenerationPlanExecutor.generateAndRefactor(
                     authToken: authToken,
-                    wideScopeChatGenerationTask: currentWideScopeChatGenerationTask,
-                    progressTracker: progressTracker)
+                    plan: currentCodeGenerationPlan)
             } catch {
                 // TODO: Handle Errors
-                print("Error refactoring files in MainView... \(error)")
-            }
-            
-            // Update remaining
-            do {
-                try await remainingUpdater.update(authToken: authToken)
-            } catch {
-                // TODO: Handle Errors
-                print("Error updating remaining in MainView... \(error)")
+                print("Error generating and refactoring çode in MainView... \(error)")
             }
         }
+        
+        
+//        guard let currentWideScopeChatGenerationTask = currentWideScopeChatGenerationTask,
+//              let currentWideScopeChatGenerationTaskTokenEstimation = currentWideScopeChatGenerationTaskTokenEstimation else {
+//            // TODO: Handle Errors
+//            print("Could not unwrap currentWideScopeChatGenerationTask or currentWideScopeChatGenerationTaskTokenEstimation in MainView!")
+//            return
+//        }
+//        
+//        guard currentWideScopeChatGenerationTaskTokenEstimation + MainView.additionalTokensForEstimationPerFile < remainingUpdater.remaining else {
+//            // Show not enough tokens alert
+//            DispatchQueue.main.async {
+//                self.alertShowingNotEnoughTokensToPerformTask = true
+//            }
+//            return
+//        }
+//        
+//        Task {
+//            // Defer setting isLoadingBrowser to false
+//            defer {
+//                DispatchQueue.main.async {
+//                    self.isLoadingBrowser = false
+//                }
+//            }
+//            
+//            // Set isLoadingBrowser to true
+//            await MainActor.run {
+//                isLoadingBrowser = true
+//            }
+//            
+//            // Ensure authToken
+//            let authToken: String
+//            do {
+//                authToken = try await AuthHelper.ensure()
+//            } catch {
+//                // TODO: Handle Errors
+//                print("Error ensuring authToken in MainView... \(error)")
+//                return
+//            }
+//            
+//            // Refactor files
+//            do {
+//                try await EditFileCodeGenerator.refactorFiles(
+//                    authToken: authToken,
+//                    wideScopeChatGenerationTask: currentWideScopeChatGenerationTask,
+//                    progressTracker: progressTracker)
+//            } catch {
+//                // TODO: Handle Errors
+//                print("Error refactoring files in MainView... \(error)")
+//            }
+//            
+//            // Update remaining
+//            do {
+//                try await remainingUpdater.update(authToken: authToken)
+//            } catch {
+//                // TODO: Handle Errors
+//                print("Error updating remaining in MainView... \(error)")
+//            }
+//        }
     }
     
 }

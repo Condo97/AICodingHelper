@@ -36,6 +36,7 @@ struct Constants {
                 
                 static let calculateTokens = "/calculateTokens"
                 static let getRemainingTokens = "/getRemainingTokens"
+                static let planCodeGeneration = "/planCodeGeneration"
                 static let registerUser = "/registerUser"
                 
             }

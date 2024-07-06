@@ -10,22 +10,36 @@ import Foundation
 
 class TokenCalculator {
     
-    static func getEstimatedTokens(authToken: String, wideScopeChatGenerationTask: WideScopeChatGenerator.WideScopeChatGenerationTask) async -> Int {
+    static func getEstimatedTokens(authToken: String, codeGenerationPlan: CodeGenerationPlan) async -> Int {
         var estimatedTokens: Int = 0
         
         await withTaskGroup(of: Int.self) { taskGroup in
-            for filepathCodeGenerationPrompt in wideScopeChatGenerationTask.filepathCodeGenerationPrompts {
-                taskGroup.addTask {
-                    do {
-                        // Return estimated tokens to taskGroup
-                        return try await getEstimatedTokens(
-                            authToken: authToken,
-                            filepath: filepathCodeGenerationPrompt.filepath,
-                            additionalInput: (filepathCodeGenerationPrompt.context + [filepathCodeGenerationPrompt.systemMessage, filepathCodeGenerationPrompt.additionalInput]).joined(separator: "\n"))
-                    } catch {
-                        print("Error getting estimated tokens for \(filepathCodeGenerationPrompt.filepath)... \(error)")
+            for step in codeGenerationPlan.planFC.steps {
+                switch step.action {
+                case .edit:
+                    taskGroup.addTask {
+                        // Get string from all files in editReferenceFilepaths
+                        if let additionalInput = step.editReferenceFilepaths?.compactMap({FilePrettyPrinter.getFileContent(filepath: $0)}).joined(separator: "\n") {
+                            do {
+                                // Return estimated tokens to taskGroup
+                                return try await getEstimatedTokens(
+                                    authToken: authToken,
+                                    filepath: step.filepath,
+                                    additionalInput: additionalInput)
+                            } catch {
+                                // TODO: Handle Errors
+                                print("Error getting estimated tokens for \(step.filepath) in TokenCalculator... \(error)")
+                            }
+                        }
+                        
                         return 0
                     }
+                case .create:
+                    // No tokens used
+                    break
+                case .delete:
+                    // No tokens used
+                    break
                 }
             }
             
@@ -37,27 +51,6 @@ class TokenCalculator {
         
         return estimatedTokens
     }
-    
-//    static func getEstimatedTokens(authToken: String, filepathCodeGenerationPrompt: FilepathCodeGenerationPrompt) async -> Int {
-//        await getEstimatedTokens(
-//            authToken: authToken,
-//            filepaths: filepathCodeGenerationPrompt.filepaths,
-//            contextForEachFile: ([filepathCodeGenerationPrompt.systemMessage, filepathCodeGenerationPrompt.additionalInput] + filepathCodeGenerationPrompt.context).joined(separator: "\n"))
-//    }
-    
-//    static func getEstimatedTokens(authToken: String, filepaths: [String], contextForEachFile: String) async -> Int {
-//        var totalTokens = 0
-//        
-//        for filepath in filepaths {
-//            do {
-//                totalTokens += try await getEstimatedTokens(authToken: authToken, filepath: filepath, contextForEachFile: contextForEachFile)
-//            } catch {
-//                print("Error processing \(filepath) in TokenCalculator... \(error)")
-//            }
-//        }
-//        
-//        return totalTokens
-//    }
 
     static func getEstimatedTokens(authToken: String, filepath: String, additionalInput: String) async throws -> Int {
         var pathTokens = 0

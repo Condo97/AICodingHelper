@@ -23,6 +23,21 @@
 		BB617C502C38568400263D3F /* FilepathCodeGenerationPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */; };
 		BB617C542C3885D900263D3F /* FileActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C532C3885D900263D3F /* FileActions.swift */; };
 		BB617C572C389D1000263D3F /* FilePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C562C389D1000263D3F /* FilePickerView.swift */; };
+		BB617C592C39AB9400263D3F /* FunctionCallRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C582C39AB9400263D3F /* FunctionCallRequest.swift */; };
+		BB617C5B2C39ABE200263D3F /* OAICompletionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C5A2C39ABE200263D3F /* OAICompletionResponse.swift */; };
+		BB617C5F2C39C32200263D3F /* OAIChatCompletionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C5E2C39C32200263D3F /* OAIChatCompletionResponse.swift */; };
+		BB617C612C39C38000263D3F /* OAIChatCompletionResponseUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C602C39C38000263D3F /* OAIChatCompletionResponseUsage.swift */; };
+		BB617C652C39C3D300263D3F /* OAIChatCompletionResponseChoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C642C39C3D300263D3F /* OAIChatCompletionResponseChoice.swift */; };
+		BB617C672C39C41C00263D3F /* OAIChatCompletionResponseMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C662C39C41C00263D3F /* OAIChatCompletionResponseMessage.swift */; };
+		BB617C6B2C39C4B300263D3F /* OAIChatCompletionResponseMessageToolCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C6A2C39C4B300263D3F /* OAIChatCompletionResponseMessageToolCall.swift */; };
+		BB617C6E2C39C65600263D3F /* PlanCodeGenerationFC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C6D2C39C65600263D3F /* PlanCodeGenerationFC.swift */; };
+		BB617C702C39C6DE00263D3F /* FunctionCallParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C6F2C39C6DE00263D3F /* FunctionCallParser.swift */; };
+		BB617C722C39CDCE00263D3F /* CodeGenerationPlanGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C712C39CDCE00263D3F /* CodeGenerationPlanGenerator.swift */; };
+		BB617C742C39CE1B00263D3F /* CodeGenerationTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C732C39CE1B00263D3F /* CodeGenerationTask.swift */; };
+		BB617C762C39D35800263D3F /* CodeGenerationPlanExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C752C39D35800263D3F /* CodeGenerationPlanExecutor.swift */; };
+		BB617C7C2C39DDDC00263D3F /* CodeGenerationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C7B2C39DDDC00263D3F /* CodeGenerationPlan.swift */; };
+		BB617C7E2C39DFA600263D3F /* CodeGenerationPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C7D2C39DFA600263D3F /* CodeGenerationPlanner.swift */; };
+		BB617C802C3A043200263D3F /* OAIChatCompletionResponseMessageToolCallFunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C7F2C3A043200263D3F /* OAIChatCompletionResponseMessageToolCallFunction.swift */; };
 		BB7FF80F2C2CAA9B000B60C3 /* AICodingHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF80E2C2CAA9B000B60C3 /* AICodingHelperApp.swift */; };
 		BB7FF8132C2CAA9C000B60C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB7FF8122C2CAA9C000B60C3 /* Assets.xcassets */; };
 		BB7FF8162C2CAA9C000B60C3 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB7FF8152C2CAA9C000B60C3 /* Preview Assets.xcassets */; };
@@ -91,7 +106,7 @@
 		BBB7C75C2C31FEAE00BEDD07 /* FileSystemGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C75B2C31FEAE00BEDD07 /* FileSystemGenerator.swift */; };
 		BBB7C7622C32571200BEDD07 /* WideScopeControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7612C32571200BEDD07 /* WideScopeControlsView.swift */; };
 		BBB7C7642C325AE200BEDD07 /* WideScopeControlButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7632C325AE200BEDD07 /* WideScopeControlButton.swift */; };
-		BBB7C7662C32FE8D00BEDD07 /* WideScopeChatGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7652C32FE8D00BEDD07 /* WideScopeChatGenerator.swift */; };
+		BBB7C7662C32FE8D00BEDD07 /* EditFileCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7652C32FE8D00BEDD07 /* EditFileCodeGenerator.swift */; };
 		BBB7C7682C330ABE00BEDD07 /* FileCopier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7672C330ABE00BEDD07 /* FileCopier.swift */; };
 		BBB7C76A2C330C9400BEDD07 /* FilePrettyPrinter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7692C330C9400BEDD07 /* FilePrettyPrinter.swift */; };
 		BBB7C76F2C3312D600BEDD07 /* FileBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C76E2C3312D600BEDD07 /* FileBrowserView.swift */; };
@@ -131,6 +146,21 @@
 		BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilepathCodeGenerationPrompt.swift; sourceTree = "<group>"; };
 		BB617C532C3885D900263D3F /* FileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActions.swift; sourceTree = "<group>"; };
 		BB617C562C389D1000263D3F /* FilePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePickerView.swift; sourceTree = "<group>"; };
+		BB617C582C39AB9400263D3F /* FunctionCallRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FunctionCallRequest.swift; sourceTree = "<group>"; };
+		BB617C5A2C39ABE200263D3F /* OAICompletionResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAICompletionResponse.swift; sourceTree = "<group>"; };
+		BB617C5E2C39C32200263D3F /* OAIChatCompletionResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionResponse.swift; sourceTree = "<group>"; };
+		BB617C602C39C38000263D3F /* OAIChatCompletionResponseUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionResponseUsage.swift; sourceTree = "<group>"; };
+		BB617C642C39C3D300263D3F /* OAIChatCompletionResponseChoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionResponseChoice.swift; sourceTree = "<group>"; };
+		BB617C662C39C41C00263D3F /* OAIChatCompletionResponseMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionResponseMessage.swift; sourceTree = "<group>"; };
+		BB617C6A2C39C4B300263D3F /* OAIChatCompletionResponseMessageToolCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionResponseMessageToolCall.swift; sourceTree = "<group>"; };
+		BB617C6D2C39C65600263D3F /* PlanCodeGenerationFC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanCodeGenerationFC.swift; sourceTree = "<group>"; };
+		BB617C6F2C39C6DE00263D3F /* FunctionCallParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FunctionCallParser.swift; sourceTree = "<group>"; };
+		BB617C712C39CDCE00263D3F /* CodeGenerationPlanGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenerationPlanGenerator.swift; sourceTree = "<group>"; };
+		BB617C732C39CE1B00263D3F /* CodeGenerationTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenerationTask.swift; sourceTree = "<group>"; };
+		BB617C752C39D35800263D3F /* CodeGenerationPlanExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenerationPlanExecutor.swift; sourceTree = "<group>"; };
+		BB617C7B2C39DDDC00263D3F /* CodeGenerationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenerationPlan.swift; sourceTree = "<group>"; };
+		BB617C7D2C39DFA600263D3F /* CodeGenerationPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenerationPlanner.swift; sourceTree = "<group>"; };
+		BB617C7F2C3A043200263D3F /* OAIChatCompletionResponseMessageToolCallFunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionResponseMessageToolCallFunction.swift; sourceTree = "<group>"; };
 		BB7FF80B2C2CAA9B000B60C3 /* AICodingHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AICodingHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB7FF80E2C2CAA9B000B60C3 /* AICodingHelperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICodingHelperApp.swift; sourceTree = "<group>"; };
 		BB7FF8122C2CAA9C000B60C3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -203,7 +233,7 @@
 		BBB7C75B2C31FEAE00BEDD07 /* FileSystemGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemGenerator.swift; sourceTree = "<group>"; };
 		BBB7C7612C32571200BEDD07 /* WideScopeControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideScopeControlsView.swift; sourceTree = "<group>"; };
 		BBB7C7632C325AE200BEDD07 /* WideScopeControlButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideScopeControlButton.swift; sourceTree = "<group>"; };
-		BBB7C7652C32FE8D00BEDD07 /* WideScopeChatGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideScopeChatGenerator.swift; sourceTree = "<group>"; };
+		BBB7C7652C32FE8D00BEDD07 /* EditFileCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditFileCodeGenerator.swift; sourceTree = "<group>"; };
 		BBB7C7672C330ABE00BEDD07 /* FileCopier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCopier.swift; sourceTree = "<group>"; };
 		BBB7C7692C330C9400BEDD07 /* FilePrettyPrinter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePrettyPrinter.swift; sourceTree = "<group>"; };
 		BBB7C76E2C3312D600BEDD07 /* FileBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserView.swift; sourceTree = "<group>"; };
@@ -249,6 +279,38 @@
 				BB617C562C389D1000263D3F /* FilePickerView.swift */,
 			);
 			path = FilePicker;
+			sourceTree = "<group>";
+		};
+		BB617C5C2C39AC1400263D3F /* Stream */ = {
+			isa = PBXGroup;
+			children = (
+				BB85616B2C2F205E001C11F8 /* ChatCompletionChunk.swift */,
+				BB85616D2C2F2071001C11F8 /* ChatCompletionChoice.swift */,
+				BB85616F2C2F2080001C11F8 /* ChatCompletionDelta.swift */,
+				BB8561732C2F20AD001C11F8 /* ChatCompletionUsage.swift */,
+			);
+			path = Stream;
+			sourceTree = "<group>";
+		};
+		BB617C5D2C39AC3100263D3F /* Completion */ = {
+			isa = PBXGroup;
+			children = (
+				BB617C5E2C39C32200263D3F /* OAIChatCompletionResponse.swift */,
+				BB617C642C39C3D300263D3F /* OAIChatCompletionResponseChoice.swift */,
+				BB617C662C39C41C00263D3F /* OAIChatCompletionResponseMessage.swift */,
+				BB617C6A2C39C4B300263D3F /* OAIChatCompletionResponseMessageToolCall.swift */,
+				BB617C7F2C3A043200263D3F /* OAIChatCompletionResponseMessageToolCallFunction.swift */,
+				BB617C602C39C38000263D3F /* OAIChatCompletionResponseUsage.swift */,
+			);
+			path = Completion;
+			sourceTree = "<group>";
+		};
+		BB617C6C2C39C64800263D3F /* FunctionCall */ = {
+			isa = PBXGroup;
+			children = (
+				BB617C6D2C39C65600263D3F /* PlanCodeGenerationFC.swift */,
+			);
+			path = FunctionCall;
 			sourceTree = "<group>";
 		};
 		BB7FF8022C2CAA9B000B60C3 = {
@@ -351,7 +413,9 @@
 				BB7FF8502C2CAE13000B60C3 /* FileNodeView.swift */,
 				BBB7C76E2C3312D600BEDD07 /* FileBrowserView.swift */,
 				BB8561A82C304C7E001C11F8 /* TabAddingFileSystemView.swift */,
-				BBB7C7652C32FE8D00BEDD07 /* WideScopeChatGenerator.swift */,
+				BBB7C7652C32FE8D00BEDD07 /* EditFileCodeGenerator.swift */,
+				BB617C712C39CDCE00263D3F /* CodeGenerationPlanGenerator.swift */,
+				BB617C7D2C39DFA600263D3F /* CodeGenerationPlanner.swift */,
 			);
 			path = Files;
 			sourceTree = "<group>";
@@ -376,6 +440,8 @@
 				BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */,
 				BB8E17C92C3599D800E3F463 /* FocusableContent.swift */,
 				BB617C532C3885D900263D3F /* FileActions.swift */,
+				BB617C732C39CE1B00263D3F /* CodeGenerationTask.swift */,
+				BB617C7B2C39DDDC00263D3F /* CodeGenerationPlan.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -421,10 +487,9 @@
 		BB85612D2C2F047E001C11F8 /* OAI */ = {
 			isa = PBXGroup;
 			children = (
-				BB85616B2C2F205E001C11F8 /* ChatCompletionChunk.swift */,
-				BB85616D2C2F2071001C11F8 /* ChatCompletionChoice.swift */,
-				BB85616F2C2F2080001C11F8 /* ChatCompletionDelta.swift */,
-				BB8561732C2F20AD001C11F8 /* ChatCompletionUsage.swift */,
+				BB617C6C2C39C64800263D3F /* FunctionCall */,
+				BB617C5D2C39AC3100263D3F /* Completion */,
+				BB617C5C2C39AC1400263D3F /* Stream */,
 			);
 			path = OAI;
 			sourceTree = "<group>";
@@ -448,6 +513,7 @@
 				BB1405EF2C36CC560036CFE8 /* CalculateTokensRequest.swift */,
 				BB85618B2C2F2D6D001C11F8 /* BlankRequest.swift */,
 				BB85612E2C2F04FB001C11F8 /* GetChatRequest.swift */,
+				BB617C582C39AB9400263D3F /* FunctionCallRequest.swift */,
 			);
 			path = Request;
 			sourceTree = "<group>";
@@ -461,6 +527,7 @@
 				BB1405EB2C362CBD0036CFE8 /* GetRemainingTokensResponse.swift */,
 				BB8561892C2F2D49001C11F8 /* RegisterUserResponse.swift */,
 				BB85617F2C2F2B98001C11F8 /* StatusResponse.swift */,
+				BB617C5A2C39ABE200263D3F /* OAICompletionResponse.swift */,
 			);
 			path = Response;
 			sourceTree = "<group>";
@@ -479,6 +546,8 @@
 				BB1405E32C362A1E0036CFE8 /* UserDefaultsHelper.swift */,
 				BB1405DD2C35ACF00036CFE8 /* View+FocusEffectDisabledVersionCheck.swift */,
 				BB617C4D2C36D29200263D3F /* TokenCalculator.swift */,
+				BB617C6F2C39C6DE00263D3F /* FunctionCallParser.swift */,
+				BB617C752C39D35800263D3F /* CodeGenerationPlanExecutor.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -661,14 +730,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BB617C672C39C41C00263D3F /* OAIChatCompletionResponseMessage.swift in Sources */,
 				BBB7C7622C32571200BEDD07 /* WideScopeControlsView.swift in Sources */,
 				BB85618C2C2F2D6D001C11F8 /* BlankRequest.swift in Sources */,
 				BB85618A2C2F2D49001C11F8 /* RegisterUserResponse.swift in Sources */,
+				BB617C742C39CE1B00263D3F /* CodeGenerationTask.swift in Sources */,
+				BB617C7C2C39DDDC00263D3F /* CodeGenerationPlan.swift in Sources */,
 				BB8561782C2F2161001C11F8 /* NarrowScopeChatGenerator.swift in Sources */,
 				BB1405E62C362B450036CFE8 /* BindingUserDefaultsHelper.swift in Sources */,
 				BB1405E22C360D180036CFE8 /* FileCounter.swift in Sources */,
 				BB8561762C2F20C1001C11F8 /* GetChatResponse.swift in Sources */,
 				BB8561572C2F0F6A001C11F8 /* OAIChatCompletionRequestMessageContent.swift in Sources */,
+				BB617C6B2C39C4B300263D3F /* OAIChatCompletionResponseMessageToolCall.swift in Sources */,
 				BB8561B42C306D84001C11F8 /* MainViewModel.swift in Sources */,
 				BB8561B02C305FB9001C11F8 /* CodeTabView.swift in Sources */,
 				BB8561272C2CE257001C11F8 /* Scope.swift in Sources */,
@@ -676,6 +749,7 @@
 				BB7FF8512C2CAE13000B60C3 /* FileNodeView.swift in Sources */,
 				BB85612F2C2F04FB001C11F8 /* GetChatRequest.swift in Sources */,
 				BB8561852C2F2C2C001C11F8 /* AICodingHelperHTTPSConnector.swift in Sources */,
+				BB617C7E2C39DFA600263D3F /* CodeGenerationPlanner.swift in Sources */,
 				BBB7C7522C31B13500BEDD07 /* FileMonitor.swift in Sources */,
 				BB8561162C2CBD7D001C11F8 /* Colors.swift in Sources */,
 				BB8561182C2CC246001C11F8 /* CodeEditorLanguageSelector.swift in Sources */,
@@ -689,11 +763,16 @@
 				BB85617E2C2F2392001C11F8 /* AICodingHelperWebSocketConnector.swift in Sources */,
 				BB85617A2C2F234B001C11F8 /* WebSocketClient.swift in Sources */,
 				BBB7C7562C31F92B00BEDD07 /* OAIChatCompletionRequestResponseFormat.swift in Sources */,
+				BB617C5B2C39ABE200263D3F /* OAICompletionResponse.swift in Sources */,
 				BB1405E82C362C4D0036CFE8 /* RemainingUpdater.swift in Sources */,
 				BB8E17C62C347F8800E3F463 /* UndoUpdater.swift in Sources */,
+				BB617C5F2C39C32200263D3F /* OAIChatCompletionResponse.swift in Sources */,
 				BBB7C76A2C330C9400BEDD07 /* FilePrettyPrinter.swift in Sources */,
 				BB8561202C2CCEE5001C11F8 /* ActionType.swift in Sources */,
+				BB617C6E2C39C65600263D3F /* PlanCodeGenerationFC.swift in Sources */,
 				BB85614F2C2F0991001C11F8 /* CompletionContentType.swift in Sources */,
+				BB617C652C39C3D300263D3F /* OAIChatCompletionResponseChoice.swift in Sources */,
+				BB617C722C39CDCE00263D3F /* CodeGenerationPlanGenerator.swift in Sources */,
 				BB8561112C2CB78D001C11F8 /* CodeEditorContainer.swift in Sources */,
 				BBB7C7642C325AE200BEDD07 /* WideScopeControlButton.swift in Sources */,
 				BB7FF81B2C2CAA9C000B60C3 /* AICodingHelper.xcdatamodeld in Sources */,
@@ -706,7 +785,7 @@
 				BB8E17BE2C3366D100E3F463 /* GenerateOptions.swift in Sources */,
 				BB8561632C2F16ED001C11F8 /* OAIChatCompletionRequestMessageContentType.swift in Sources */,
 				BB1405DE2C35ACF00036CFE8 /* View+FocusEffectDisabledVersionCheck.swift in Sources */,
-				BBB7C7662C32FE8D00BEDD07 /* WideScopeChatGenerator.swift in Sources */,
+				BBB7C7662C32FE8D00BEDD07 /* EditFileCodeGenerator.swift in Sources */,
 				BB1405DC2C35A2DC0036CFE8 /* FocusViewModel.swift in Sources */,
 				BB7FF80F2C2CAA9B000B60C3 /* AICodingHelperApp.swift in Sources */,
 				BB1405F32C36CE330036CFE8 /* GenerationError.swift in Sources */,
@@ -721,6 +800,9 @@
 				BB8561612C2F1518001C11F8 /* InputImageDetail.swift in Sources */,
 				BBB7C7542C31F52D00BEDD07 /* ResponseFormatType.swift in Sources */,
 				BB8561552C2F0F54001C11F8 /* OAIChatCompletionRequest.swift in Sources */,
+				BB617C592C39AB9400263D3F /* FunctionCallRequest.swift in Sources */,
+				BB617C802C3A043200263D3F /* OAIChatCompletionResponseMessageToolCallFunction.swift in Sources */,
+				BB617C702C39C6DE00263D3F /* FunctionCallParser.swift in Sources */,
 				BB8561882C2F2D22001C11F8 /* HTTPSClient.swift in Sources */,
 				BB1405EA2C362CA50036CFE8 /* AuthRequest.swift in Sources */,
 				BB7FF84B2C2CADA4000B60C3 /* FileTree.swift in Sources */,
@@ -728,6 +810,7 @@
 				BB8E17C02C3369A900E3F463 /* WideScopeControlSwitch.swift in Sources */,
 				BB85614D2C2F097F001C11F8 /* CompletionRole.swift in Sources */,
 				BB8561802C2F2B98001C11F8 /* StatusResponse.swift in Sources */,
+				BB617C612C39C38000263D3F /* OAIChatCompletionResponseUsage.swift in Sources */,
 				BB8561AE2C305276001C11F8 /* TabView.swift in Sources */,
 				BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */,
 				BB8E17C82C349B2900E3F463 /* TabsViewModel.swift in Sources */,
@@ -741,6 +824,7 @@
 				BB7FF84D2C2CADE2000B60C3 /* FileNode.swift in Sources */,
 				BB85617C2C2F236A001C11F8 /* SocketStream.swift in Sources */,
 				BB8561A52C2F9787001C11F8 /* CodeViewModel.swift in Sources */,
+				BB617C762C39D35800263D3F /* CodeGenerationPlanExecutor.swift in Sources */,
 				BB617C572C389D1000263D3F /* FilePickerView.swift in Sources */,
 				BB7FF84F2C2CAE00000B60C3 /* FileSystemView.swift in Sources */,
 			);
