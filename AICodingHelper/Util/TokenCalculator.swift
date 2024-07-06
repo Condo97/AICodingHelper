@@ -19,7 +19,7 @@ class TokenCalculator {
                 case .edit:
                     taskGroup.addTask {
                         // Get string from all files in editReferenceFilepaths
-                        if let additionalInput = step.editReferenceFilepaths?.compactMap({FilePrettyPrinter.getFileContent(filepath: $0)}).joined(separator: "\n") {
+                        if let additionalInput = step.referenceFilepaths?.compactMap({FilePrettyPrinter.getFileContent(filepath: $0)}).joined(separator: "\n") {
                             do {
                                 // Return estimated tokens to taskGroup
                                 return try await getEstimatedTokens(

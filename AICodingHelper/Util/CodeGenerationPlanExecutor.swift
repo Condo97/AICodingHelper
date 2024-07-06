@@ -45,7 +45,7 @@ class CodeGenerationPlanExecutor {
                 instructions: instructions,
                 editPrompt: step.editSummary,
                 editFilepath: step.filepath,
-                referenceFilepaths: step.editReferenceFilepaths,
+                referenceFilepaths: step.referenceFilepaths,
                 copyCurrentFileToTempFile: copyCurrentFileToTempFile)
         case .create:
             performCreate(filepath: step.filepath)
