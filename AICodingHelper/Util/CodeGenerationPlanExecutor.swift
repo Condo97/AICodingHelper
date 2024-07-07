@@ -43,7 +43,7 @@ class CodeGenerationPlanExecutor {
                 authToken: authToken,
                 model: model,
                 instructions: instructions,
-                editPrompt: step.editSummary,
+                editPrompt: step.editInstructions,
                 editFilepath: step.filepath,
                 referenceFilepaths: step.referenceFilepaths,
                 copyCurrentFileToTempFile: copyCurrentFileToTempFile)

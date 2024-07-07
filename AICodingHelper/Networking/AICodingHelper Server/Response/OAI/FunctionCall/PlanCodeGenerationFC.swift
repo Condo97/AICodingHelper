@@ -21,14 +21,14 @@ struct PlanCodeGenerationFC: Codable {
         let index: Int
         let action: ActionType
         let filepath: String
-        let editSummary: String?
+        let editInstructions: String?
         let referenceFilepaths: [String]?
         
         enum CodingKeys: String, CodingKey {
             case index
             case action
             case filepath
-            case editSummary = "edit_summary"
+            case editInstructions = "edit_instructions"
             case referenceFilepaths = "reference_filepaths"
         }
         
