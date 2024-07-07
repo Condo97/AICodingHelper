@@ -17,6 +17,9 @@ import SwiftUI
 struct MainView: View {
     
     @Binding var directory: String // = NSString(string: "/Users/alexcoundouriotis/Xcode Projects/AICodingHelper/AICodingHelper/Application/Files").expandingTildeInPath
+    @Binding var popupShowingCreateAIFile: Bool
+    @Binding var popupShowingCreateBlankFile: Bool
+    @Binding var popupShowingCreateFolder: Bool
     
     
     private static let defaultMultiFileParentFileSystemName = "TempSelection"
@@ -40,10 +43,6 @@ struct MainView: View {
     @State private var currentCodeGenerationPlanTokenEstimation: Int?
     
     private static let additionalTokensForEstimationPerFile: Int = Constants.Additional.additionalTokensForEstimationPerFile
-    
-    @State private var popupShowingCreateAIFile = false
-    @State private var popupShowingCreateBlankFile = false
-    @State private var popupShowingCreateFolder = false
     
     @State private var alertShowingWideScopeChatGenerationEstimatedTokensApproval: Bool = false
     @State private var alertShowingNotEnoughTokensToPerformTask: Bool = false
@@ -663,7 +662,11 @@ struct MainView: View {
 
 #Preview {
     
-    MainView(directory: .constant(NSString(string: "~/Downloads/test_dir").expandingTildeInPath))
+    MainView(
+        directory: .constant(NSString(string: "~/Downloads/test_dir").expandingTildeInPath),
+        popupShowingCreateAIFile: .constant(false),
+        popupShowingCreateBlankFile: .constant(false),
+        popupShowingCreateFolder: .constant(false))
         .frame(width: 650, height: 600)
         .environmentObject(FocusViewModel())
         .environmentObject(RemainingUpdater())

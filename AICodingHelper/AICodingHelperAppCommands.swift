@@ -4,10 +4,10 @@ struct AICodingHelperAppCommands: Commands {
     
     @Binding var baseFilepath: String
     
+    @Binding var isShowingNewAIFilePopup: Bool
+    @Binding var isShowingNewBlankFilePopup: Bool
+    @Binding var isShowingNewFolderPopup: Bool
     
-    @State private var isShowingNewAIFilePopup: Bool = false
-    @State private var isShowingNewBlankFilePopup: Bool = false
-    @State private var isShowingNewFolderPopup: Bool = false
     
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
@@ -17,10 +17,6 @@ struct AICodingHelperAppCommands: Commands {
                 Text("New AI File...")
             }
             .keyboardShortcut("N", modifiers: .command)
-            .aiFileCreatorPopup(
-                isPresented: $isShowingNewAIFilePopup,
-                baseFilepath: baseFilepath,
-                referenceFilepaths: [])
             
             Button("New Blank File...") {
                 isShowingNewBlankFilePopup = true

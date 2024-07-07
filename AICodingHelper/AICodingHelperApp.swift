@@ -19,6 +19,10 @@ struct AICodingHelperApp: App {
     
     @State private var directory: String?
     
+    @State private var popupShowingCreateAIFile = false
+    @State private var popupShowingCreateBlankFile = false
+    @State private var popupShowingCreateFolder = false
+    
     var directoryUnwrapped: Binding<String> {
         Binding(
             get: {
@@ -34,7 +38,11 @@ struct AICodingHelperApp: App {
         WindowGroup {
             ZStack {
                 if let directory = directory {
-                    MainView(directory: directoryUnwrapped)
+                    MainView(
+                        directory: directoryUnwrapped,
+                        popupShowingCreateAIFile: $popupShowingCreateAIFile,
+                        popupShowingCreateBlankFile: $popupShowingCreateBlankFile,
+                        popupShowingCreateFolder: $popupShowingCreateFolder)
                 } else {
                     FilePickerView(filePath: $directory)
                 }
@@ -62,7 +70,13 @@ struct AICodingHelperApp: App {
                 }
             }
         }
-        .commands { AICodingHelperAppCommands(baseFilepath: directoryUnwrapped) }
+        .commands {
+            AICodingHelperAppCommands(
+                baseFilepath: directoryUnwrapped,
+                isShowingNewAIFilePopup: $popupShowingCreateAIFile,
+                isShowingNewBlankFilePopup: $popupShowingCreateBlankFile,
+                isShowingNewFolderPopup: $popupShowingCreateFolder)
+        }
     }
     
 }
