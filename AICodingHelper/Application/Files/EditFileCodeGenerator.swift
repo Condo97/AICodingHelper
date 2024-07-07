@@ -111,7 +111,7 @@ class EditFileCodeGenerator {
             chatCompletionRequest: OAIChatCompletionRequest(
                 model: model.rawValue,
                 stream: true,
-                messages: inputMessages))
+                messages: inputMessages.reversed()))
         
         // Return getChat
         return try await getChat(getChatRequest: getChatRequest)

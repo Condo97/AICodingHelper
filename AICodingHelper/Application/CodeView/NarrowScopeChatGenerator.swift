@@ -35,7 +35,7 @@ class ChatGenerator {
         let userMessage2 = {
             var userMessage2_1 = "You are an AI coding helper in an IDE so all responses must be in \(language == nil ? "" : "in \(language!.rawValue) code") code that would be valid in an IDE."
             var userMessage2_2 = action.aiPrompt
-            return [userMessage2_1, userMessage2_2, input].joined(separator: "\n")
+            return [userMessage2_1, userMessage2_2, additionalInput, input].compactMap{$0}.joined(separator: "\n")
         }()
         
         try await streamChat(
@@ -73,7 +73,7 @@ class ChatGenerator {
                 model: model.rawValue,
                 responseFormat: OAIChatCompletionRequestResponseFormat(type: .text),
                 stream: true,
-                messages: messages))
+                messages: messages.reversed()))
         
         // Stream chat
         try await streamChat(getChatRequest: getChatRequest, scope: scope, stream: stream)

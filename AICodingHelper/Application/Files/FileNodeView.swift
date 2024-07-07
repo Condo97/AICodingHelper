@@ -1,15 +1,7 @@
-//
-//  FileNodeView.swift
-//  AICodingHelper
-//
-//  Created by Alex Coundouriotis on 6/26/24.
-//
-
 import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
 
-// TODO: ContextMenu for cut, copy, paste, and generate stuff
 struct FileNodeView: View {
     
     @ObservedObject var node: FileNode
@@ -23,7 +15,12 @@ struct FileNodeView: View {
     
     @State private var alertShowingRename = false
     @State private var newName: String = ""
-    
+    @State private var showCreateFolderAlert = false
+    @State private var showCreateFileAlert = false
+    @State private var newEntityName: String = ""
+    @State private var showAlertError: Bool = false
+    @State private var errorMessage: String = ""
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
@@ -42,10 +39,8 @@ struct FileNodeView: View {
                 Text(node.name)
                     .onTapGesture(count: 2) {
                         if node.isDirectory {
-                            // Expand node
                             node.toggleExpansion()
                         } else {
-                            // Open action
                             onAction(.open, node.path)
                         }
                     }
@@ -53,10 +48,8 @@ struct FileNodeView: View {
                         TapGesture(count: 1)
                             .onEnded {
                                 if NSEvent.modifierFlags.contains(.shift) {
-                                    // If shift is being held append node path to selectedFilepaths
                                     selectedFilepaths.append(node.path)
                                 } else {
-                                    // Otherwise set selectedFilepaths to node path
                                     selectedFilepaths = [node.path]
                                 }
                             }
@@ -68,10 +61,8 @@ struct FileNodeView: View {
             .padding(.vertical, 2)
             .background(
                 focused
-                ?
-                Colors.element.opacity(selectedFilepaths.contains(node.path) ? 0.3 : 0)
-                :
-                Color.gray.opacity(selectedFilepaths.contains(node.path) ? 0.3 : 0)
+                ? Colors.element.opacity(selectedFilepaths.contains(node.path) ? 0.3 : 0)
+                : Color.gray.opacity(selectedFilepaths.contains(node.path) ? 0.3 : 0)
             )
             .cornerRadius(5)
             .focusable()
@@ -87,14 +78,12 @@ struct FileNodeView: View {
                 if let provider = providers.first {
                     provider.loadObject(ofClass: NSString.self, completionHandler: { providerReading, error in
                         if let filepath = providerReading as? NSString {
-                            // If current node is directory move to that directory if not move to the directory the file is in.. The other item is dragged to this node so filepath is the other item and node.path is this node, so move the other filepath to this node's path
                             do {
                                 let directory = node.isDirectory ? node.path : (node.path as NSString).deletingLastPathComponent
-                                try FileManager.default.moveItem(atPath: filepath as String, toPath: URL(fileURLWithPath: directory).appendingPathComponent(filepath.lastPathComponent, conformingTo: .text).path)
+                                try FileManager.default.moveItem(atPath: filepath as String, toPath: URL(fileURLWithPath: directory).appendingPathComponent(filepath.lastPathComponent).path)
                             } catch {
-                                // TODO: Handle Errors
-                                print("Error moving item in FileNodeView... \(error)")
-                                return
+                                errorMessage = "Error moving item in FileNodeView... \(error)"
+                                showAlertError = true
                             }
                         }
                     })
@@ -111,7 +100,6 @@ struct FileNodeView: View {
             }
         }
         .contextMenu {
-            // Reveal in Finder
             Button(action: {
                 NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: node.path)])
             }) {
@@ -120,34 +108,92 @@ struct FileNodeView: View {
             
             Divider()
             
-            // Rename File
             Button(action: {
-                onAction(.rename, node.path)
+                alertShowingRename = true
             }) {
                 Text("Rename")
+            }
+            .alert("Rename File", isPresented: $alertShowingRename) {
+                TextField("New Name", text: $newName)
+                Button("Rename") {
+                    do {
+                        let newPath = URL(fileURLWithPath: (node.path as NSString).deletingLastPathComponent).appendingPathComponent(newName).path
+                        try FileManager.default.moveItem(atPath: node.path, toPath: newPath)
+                    } catch {
+                        errorMessage = "Error renaming item in FileNodeView... \(error)"
+                        showAlertError = true
+                    }
+                }
             }
             
             Divider()
             
-            // Create Folder
             Button(action: {
-                onAction(.newFolder, node.path)
+                showCreateFolderAlert = true
             }) {
                 Text("Create Folder")
             }
             
-            // Create File TODO: Add this
+            Button(action: {
+                showCreateFileAlert = true
+            }) {
+                Text("Create File")
+            }
+            .alert("Create File", isPresented: $showCreateFileAlert) {
+                TextField("File Name", text: $newEntityName)
+                Button("Create") {
+                    createFile(withName: newEntityName, atPath: node.path)
+                }
+            }
             
             Divider()
             
-            // Delete
             Button(action: {
-                onAction(.delete, node.path)
+                do {
+                    try FileManager.default.removeItem(atPath: node.path)
+                } catch {
+                    errorMessage = "Error deleting item in FileNodeView... \(error)"
+                    showAlertError = true
+                }
             }) {
                 Text("Delete")
             }
         }
-        
+        .alert(isPresented: $showAlertError) {
+            Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
+        }
+        .alert("Create Folder", isPresented: $showCreateFolderAlert) {
+            TextField("Folder Name", text: $newEntityName)
+            Button("Create") {
+                createFolder(withName: newEntityName, atPath: node.path)
+            }
+        }
+    }
+    
+    private func createFolder(withName name: String, atPath path: String) {
+        let folderPath = URL(fileURLWithPath: path).appendingPathComponent(name).path
+        if FileManager.default.fileExists(atPath: folderPath) {
+            errorMessage = "Folder already exists at path: \(folderPath)"
+            showAlertError = true
+        } else {
+            do {
+                try FileManager.default.createDirectory(atPath: folderPath, withIntermediateDirectories: false, attributes: nil)
+            } catch {
+                errorMessage = "Error creating folder: \(error)"
+                showAlertError = true
+            }
+        }
+    }
+    
+    private func createFile(withName name: String, atPath path: String) {
+        let filePath = URL(fileURLWithPath: path).appendingPathComponent(name).path
+        if FileManager.default.fileExists(atPath: filePath) {
+            errorMessage = "File already exists at path: \(filePath)"
+            showAlertError = true
+        } else {
+            FileManager.default.createFile(atPath: filePath, contents: nil, attributes: nil)
+        }
     }
     
 }
+
