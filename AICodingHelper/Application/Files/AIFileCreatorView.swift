@@ -9,6 +9,13 @@ import SwiftUI
 
 struct AIFileCreatorView: View {
     
+    @Binding var newFileName: String
+    @Binding var referenceFilepaths: [String]
+    @Binding var userPrompt: String
+    var onCancel: () -> Void
+    var onSubmit: () -> Void
+    
+    
     var body: some View {
         VStack {
             // Title
@@ -16,7 +23,7 @@ struct AIFileCreatorView: View {
             
             // File Name - A binding text field for the user to enter the name of the file
             
-            // Reference Files and Add Reference File - Shown as a side scrolling view it displays the filepaths' last path component which is the file name. This will be fed by a binding of filepaths which are the full filepaths for the files. You will also need to add the ability to add files from the user's file browser which will import the full filepaths into the binding and therefore update this view automatically.
+            // Reference Files and Add Reference File - Shown as a side scrolling view it displays the filepaths' last path component which is the file name. This will be fed by a binding of filepaths which are the full filepaths for the files. Also there will need to be an xmark image that lets the user know if they tap a file it will be removed from the list, which it should be. You will also need to add the ability to add files from the user's file browser which will import the full filepaths into the binding and therefore update this view automatically.
             
             // User Prompt - An additional binding TextEditor that is larger and allows for the user to enter in the functionality to prompt GPT with when creating the file
             
@@ -29,8 +36,8 @@ struct AIFileCreatorView: View {
 #Preview {
     
     ZStack {
-        AIFileCreatorView()
-            .background(Colors.foreground)
+//        AIFileCreatorView() // TODO: Reimplmenet with new bindings
+//            .background(Colors.foreground)
     }
     .frame(width: 550.0, height: 500.0)
     
