@@ -1,3 +1,10 @@
+//
+//  FileNodeView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
 import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
@@ -113,18 +120,6 @@ struct FileNodeView: View {
             }) {
                 Text("Rename")
             }
-            .alert("Rename File", isPresented: $alertShowingRename) {
-                TextField("New Name", text: $newName)
-                Button("Rename") {
-                    do {
-                        let newPath = URL(fileURLWithPath: (node.path as NSString).deletingLastPathComponent).appendingPathComponent(newName).path
-                        try FileManager.default.moveItem(atPath: node.path, toPath: newPath)
-                    } catch {
-                        errorMessage = "Error renaming item in FileNodeView... \(error)"
-                        showAlertError = true
-                    }
-                }
-            }
             
             Divider()
             
@@ -138,12 +133,6 @@ struct FileNodeView: View {
                 showCreateFileAlert = true
             }) {
                 Text("Create File")
-            }
-            .alert("Create File", isPresented: $showCreateFileAlert) {
-                TextField("File Name", text: $newEntityName)
-                Button("Create") {
-                    createFile(withName: newEntityName, atPath: node.path)
-                }
             }
             
             Divider()
@@ -159,19 +148,42 @@ struct FileNodeView: View {
                 Text("Delete")
             }
         }
-        .alert(isPresented: $showAlertError) {
-            Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
+        .alert("Rename File", isPresented: $alertShowingRename) {
+            TextField("New Name", text: $newName)
+            Button("Rename") {
+                do {
+                    let newPath = URL(fileURLWithPath: (node.path as NSString).deletingLastPathComponent).appendingPathComponent(newName).path
+                    try FileManager.default.moveItem(atPath: node.path, toPath: newPath)
+                } catch {
+                    errorMessage = "Error renaming item in FileNodeView... \(error)"
+                    showAlertError = true
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .alert("Create File", isPresented: $showCreateFileAlert) {
+            TextField("File Name", text: $newEntityName)
+            Button("Create") {
+                createFile(withName: newEntityName, atPath: node.path)
+            }
+            Button("Cancel", role: .cancel) {}
         }
         .alert("Create Folder", isPresented: $showCreateFolderAlert) {
             TextField("Folder Name", text: $newEntityName)
             Button("Create") {
                 createFolder(withName: newEntityName, atPath: node.path)
             }
+            Button("Cancel", role: .cancel) {}
+        }
+        .alert(isPresented: $showAlertError) {
+            Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
         }
     }
     
     private func createFolder(withName name: String, atPath path: String) {
-        let folderPath = URL(fileURLWithPath: path).appendingPathComponent(name).path
+        let directoryPath = node.isDirectory ? path : (path as NSString).deletingLastPathComponent
+        let folderPath = URL(fileURLWithPath: directoryPath).appendingPathComponent(name).path
+        
         if FileManager.default.fileExists(atPath: folderPath) {
             errorMessage = "Folder already exists at path: \(folderPath)"
             showAlertError = true
@@ -186,7 +198,9 @@ struct FileNodeView: View {
     }
     
     private func createFile(withName name: String, atPath path: String) {
-        let filePath = URL(fileURLWithPath: path).appendingPathComponent(name).path
+        let directoryPath = node.isDirectory ? path : (path as NSString).deletingLastPathComponent
+        let filePath = URL(fileURLWithPath: directoryPath).appendingPathComponent(name).path
+        
         if FileManager.default.fileExists(atPath: filePath) {
             errorMessage = "File already exists at path: \(filePath)"
             showAlertError = true
@@ -196,4 +210,3 @@ struct FileNodeView: View {
     }
     
 }
-
