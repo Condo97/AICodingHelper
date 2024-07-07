@@ -6,6 +6,7 @@
 //
 
 import CodeEditor
+import Foundation
 import SwiftUI
 
 //class TempMainViewModel: ObservableObject {
@@ -15,7 +16,7 @@ import SwiftUI
 
 struct MainView: View {
     
-    @State var directory: String = NSString(string: "/Users/alexcoundouriotis/Xcode Projects/AICodingHelper/AICodingHelper/Application/Files").expandingTildeInPath
+    @Binding var directory: String // = NSString(string: "/Users/alexcoundouriotis/Xcode Projects/AICodingHelper/AICodingHelper/Application/Files").expandingTildeInPath
     
     
     private static let defaultMultiFileParentFileSystemName = "TempSelection"
@@ -99,6 +100,24 @@ struct MainView: View {
             set: { value in
                 // No actions
             })
+    }
+    
+    private var fileOrFolderCreatorBaseFilepath: String {
+        if let fileBrowserSelectedFilepath = fileBrowserSelectedFilepaths[safe: 0] {
+            var isDirectory: ObjCBool = false
+            if FileManager.default.fileExists(atPath: fileBrowserSelectedFilepath, isDirectory: &isDirectory) {
+                if isDirectory.boolValue {
+                    // Return as is
+                    return fileBrowserSelectedFilepath
+                } else {
+                    // Return directory path from file
+                    return URL(fileURLWithPath: fileBrowserSelectedFilepath).deletingLastPathComponent().path
+                }
+            }
+        }
+        
+        // Return project directory otherwise
+        return directory
     }
     
     
@@ -501,14 +520,14 @@ struct MainView: View {
         })
         .aiFileCreatorPopup(
             isPresented: $popupShowingCreateAIFile,
-            baseFilepath: fileBrowserSelectedFilepaths[safe: 0] ?? directory,
+            baseFilepath: fileOrFolderCreatorBaseFilepath,
             referenceFilepaths: fileBrowserSelectedFilepaths)
         .blankFileCreatorPopup(
             isPresented: $popupShowingCreateBlankFile,
-            path: fileBrowserSelectedFilepaths[safe: 0] ?? directory)
+            path: fileOrFolderCreatorBaseFilepath)
         .folderCreatorPopup(
             isPresented: $popupShowingCreateFolder,
-            path: fileBrowserSelectedFilepaths[safe: 0] ?? directory)
+            path: fileOrFolderCreatorBaseFilepath)
         .onReceive(tabsViewModel.$openTab) { newValue in
             // Check open tab file validity
             if let filepath = newValue?.filepath,
@@ -644,7 +663,7 @@ struct MainView: View {
 
 #Preview {
     
-    MainView()
+    MainView(directory: .constant(NSString(string: "~/Downloads/test_dir").expandingTildeInPath))
         .frame(width: 650, height: 600)
         .environmentObject(FocusViewModel())
         .environmentObject(RemainingUpdater())

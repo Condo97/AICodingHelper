@@ -19,12 +19,22 @@ struct AICodingHelperApp: App {
     
     @State private var directory: String?
     
+    var directoryUnwrapped: Binding<String> {
+        Binding(
+            get: {
+                directory ?? ""
+            },
+            set: { value in
+                directory = value
+            })
+    }
+    
 
     var body: some Scene {
         WindowGroup {
             ZStack {
                 if let directory = directory {
-                    MainView(directory: directory)
+                    MainView(directory: directoryUnwrapped)
                 } else {
                     FilePickerView(filePath: $directory)
                 }
@@ -52,6 +62,7 @@ struct AICodingHelperApp: App {
                 }
             }
         }
+        .commands { AICodingHelperAppCommands(baseFilepath: directoryUnwrapped) }
     }
     
 }

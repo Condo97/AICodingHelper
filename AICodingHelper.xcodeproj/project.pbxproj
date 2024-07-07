@@ -114,6 +114,7 @@
 		BBBD40A22C3B12FB008917CC /* AIFileCreatorContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40A12C3B12FB008917CC /* AIFileCreatorContainer.swift */; };
 		BBBD40A42C3B21E4008917CC /* BlankFileCreatorPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40A32C3B21E4008917CC /* BlankFileCreatorPopup.swift */; };
 		BBBD40A62C3B2383008917CC /* FolderCreatorPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40A52C3B2383008917CC /* FolderCreatorPopup.swift */; };
+		BBBD40A82C3B4F96008917CC /* AICodingHelperAppCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40A72C3B4F96008917CC /* AICodingHelperAppCommands.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -245,6 +246,7 @@
 		BBBD40A12C3B12FB008917CC /* AIFileCreatorContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIFileCreatorContainer.swift; sourceTree = "<group>"; };
 		BBBD40A32C3B21E4008917CC /* BlankFileCreatorPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlankFileCreatorPopup.swift; sourceTree = "<group>"; };
 		BBBD40A52C3B2383008917CC /* FolderCreatorPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderCreatorPopup.swift; sourceTree = "<group>"; };
+		BBBD40A72C3B4F96008917CC /* AICodingHelperAppCommands.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AICodingHelperAppCommands.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -351,6 +353,7 @@
 				BB85612A2C2F0467001C11F8 /* Networking */,
 				BB8561832C2F2BCA001C11F8 /* Util */,
 				BB7FF80E2C2CAA9B000B60C3 /* AICodingHelperApp.swift */,
+				BBBD40A72C3B4F96008917CC /* AICodingHelperAppCommands.swift */,
 				BB7FF8492C2CACE0000B60C3 /* FileTestingPlayground.playground */,
 				BB7FF8122C2CAA9C000B60C3 /* Assets.xcassets */,
 				BB7FF81C2C2CAA9C000B60C3 /* AICodingHelper.entitlements */,
@@ -805,6 +808,7 @@
 				BB7FF80F2C2CAA9B000B60C3 /* AICodingHelperApp.swift in Sources */,
 				BB1405F32C36CE330036CFE8 /* GenerationError.swift in Sources */,
 				BB8E17CA2C3599D800E3F463 /* FocusableContent.swift in Sources */,
+				BBBD40A82C3B4F96008917CC /* AICodingHelperAppCommands.swift in Sources */,
 				BBBD40A22C3B12FB008917CC /* AIFileCreatorContainer.swift in Sources */,
 				BB8561532C2F0EEF001C11F8 /* OAIChatCompletionRequestMessage.swift in Sources */,
 				BB1405E42C362A1E0036CFE8 /* UserDefaultsHelper.swift in Sources */,
