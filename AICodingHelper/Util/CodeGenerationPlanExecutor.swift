@@ -66,7 +66,7 @@ class CodeGenerationPlanExecutor {
         // Build context by getting text from referenceFilepaths joined as the first and only string
         var context: [String] = []
         if let referenceFilepaths = referenceFilepaths {
-            context.append(referenceFilepaths.compactMap({FilePrettyPrinter.getFileContent(filepath: $0)}).joined(separator: "\n"))
+            context.append("FILES FOR REFERENCE: " + referenceFilepaths.compactMap({FilePrettyPrinter.getFileContent(filepath: $0)}).joined(separator: "\n"))
         }
         
         // Build additionalInput from instructions and editPrompt
@@ -84,3 +84,4 @@ class CodeGenerationPlanExecutor {
     }
     
 }
+
