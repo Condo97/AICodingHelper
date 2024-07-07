@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import UniformTypeIdentifiers
 
 
 // TODO: ContextMenu for cut, copy, paste, and generate stuff
@@ -83,6 +84,27 @@ struct FileNodeView: View {
                 if newValue {
                     focusViewModel.focus = .browser
                 }
+            }
+            .onDrag { NSItemProvider(object: NSString(string: node.path)) }
+            .onDrop(of: [.text], isTargeted: nil) { providers in
+                if let provider = providers.first {
+                    provider.loadObject(ofClass: NSString.self, completionHandler: { providerReading, error in
+                        if let filepath = providerReading as? NSString {
+                            // If current node is directory move to that directory if not move to the directory the file is in.. The other item is dragged to this node so filepath is the other item and node.path is this node, so move the other filepath to this node's path
+                            do {
+                                let directory = node.isDirectory ? node.path : (node.path as NSString).deletingLastPathComponent
+                                try FileManager.default.moveItem(atPath: filepath as String, toPath: URL(fileURLWithPath: directory).appendingPathComponent(filepath.lastPathComponent, conformingTo: .text).path)
+                            } catch {
+                                // TODO: Handle Errors
+                                print("Error moving item in FileNodeView... \(error)")
+                                return
+                            }
+                        }
+                    })
+                    
+                }
+                
+                return true
             }
             
             if node.isExpanded {
