@@ -15,30 +15,116 @@ struct AIFileCreatorView: View {
     var onCancel: () -> Void
     var onSubmit: () -> Void
     
+    @State private var isFileImporterPresented = false
     
     var body: some View {
-        VStack {
+        VStack(alignment: .leading, spacing: 16) {
             // Title
             Text("Create AI File")
+                .font(.title)
+                .fontWeight(.bold)
             
-            // File Name - A binding text field for the user to enter the name of the file
+            // File Name
+            VStack(alignment: .leading, spacing: 8) {
+                Text("File Name")
+                    .font(.headline)
+                TextField("Enter file name", text: $newFileName)
+            }
             
-            // Reference Files and Add Reference File - Shown as a side scrolling view it displays the filepaths' last path component which is the file name. This will be fed by a binding of filepaths which are the full filepaths for the files. Also there will need to be an xmark image that lets the user know if they tap a file it will be removed from the list, which it should be. You will also need to add the ability to add files from the user's file browser which will import the full filepaths into the binding and therefore update this view automatically.
+            // Reference Files
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Reference Files")
+                        .font(.headline)
+                    
+                    Button(action: {
+                        isFileImporterPresented = true
+                    }) {
+                        Image(systemName: "plus.circle")
+                    }
+                    
+                    Spacer()
+                }
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(referenceFilepaths, id: \.self) { path in
+                            HStack {
+                                Text(path.components(separatedBy: "/").last ?? "")
+                                Image(systemName: "xmark.circle")
+                                    .onTapGesture {
+                                        if let index = referenceFilepaths.firstIndex(of: path) {
+                                            referenceFilepaths.remove(at: index)
+                                        }
+                                    }
+                            }
+                            .padding(8)
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(8)
+                        }
+                    }
+                }
+            }
             
-            // User Prompt - An additional binding TextEditor that is larger and allows for the user to enter in the functionality to prompt GPT with when creating the file
+            // User Prompt
+            VStack(alignment: .leading, spacing: 8) {
+                Text("User Prompt")
+                    .font(.headline)
+                TextEditor(text: $userPrompt)
+                    .frame(height: 100)
+                    .scrollContentBackground(.hidden)
+                    .padding()
+                    .background(Colors.secondary.opacity(0.5))
+                    .clipShape(RoundedRectangle(cornerRadius: 8.0))
+            }
             
-            // Cancel and Submit - Both just call blank actions
+            // Cancel and Submit
+            HStack {
+                Spacer()
+                
+                Button(action: onCancel) {
+                    Text("Cancel")
+                        .padding([.top, .bottom], 8)
+                        .padding([.leading, .trailing])
+                        .cornerRadius(8)
+                }
+                .keyboardShortcut(.cancelAction)
+                
+                Button(action: onSubmit) {
+                    Text("Submit")
+                        .padding([.top, .bottom], 8)
+                        .padding([.leading, .trailing])
+                        .cornerRadius(8)
+                }
+                .keyboardShortcut(.defaultAction)
+            }
+            .padding(.vertical, 8)
+        }
+        .padding()
+        .fileImporter(isPresented: $isFileImporterPresented, allowedContentTypes: [.plainText], allowsMultipleSelection: true) { result in
+            do {
+                let selectedFiles = try result.get()
+                let paths = selectedFiles.map { $0.path }
+                referenceFilepaths.append(contentsOf: paths)
+            } catch {
+                print("Error selecting files: \(error.localizedDescription)")
+            }
         }
     }
-    
 }
 
 #Preview {
     
     ZStack {
-//        AIFileCreatorView() // TODO: Reimplmenet with new bindings
-//            .background(Colors.foreground)
+        AIFileCreatorView(
+            newFileName: .constant(""),
+            referenceFilepaths: .constant([]),
+            userPrompt: .constant(""),
+            onCancel: {},
+            onSubmit: {}
+        )
+        .padding()
     }
+    .background(Color.white)
     .frame(width: 550.0, height: 500.0)
-    
 }
