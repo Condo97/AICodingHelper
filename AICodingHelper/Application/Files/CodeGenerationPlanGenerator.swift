@@ -12,8 +12,8 @@ class CodeGenerationPlanGenerator {
     
     // Creates PlanCodeGenerationFC
     
-    private static let systemMessage = "Create a plan for generating code."
-    private static let additionalInstructionMessage = "Use the provided context and code to create a plan for generating code with the following instructions."
+    private static let systemMessage = "Create a detailed plan to prompt GPT in a series of steps to complete the task in the prompt. You may edit, create, delete files. Please make sure to include as many files as necessary for each step in the plan as they are the only files available for GPT to reference. You must include an index, action, and filepath. If making edits include reference_filepaths if any and edit_instructions with instructions to make the edits."
+    private static let additionalInstructionMessage = ""
     
     static func generatePlan(authToken: String, model: GPTModels, instructions: String, selectedFilepaths: [String]) async throws -> PlanCodeGenerationFC? {
         // Well this should be creating a list of tasks with CodeGenerationTask or something, right? So it should be before accepting codeGenerationTask. Also this one should not be added to the user's token count and stuff
