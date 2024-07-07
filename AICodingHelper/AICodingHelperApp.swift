@@ -36,11 +36,7 @@ struct AICodingHelperApp: App {
                 // Get and ensure authToken
                 let authToken: String
                 do {
-                    #if DEBUG
-                    authToken = try await AuthHelper.regenerate()
-                    #else
                     authToken = try await AuthHelper.ensure()
-                    #endif
                 } catch {
                     // TODO: Handle Errors
                     print("Error ensuring authToken in AICodingHelperApp... \(error)")

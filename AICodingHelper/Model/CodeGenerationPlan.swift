@@ -11,6 +11,7 @@ import Foundation
 struct CodeGenerationPlan {
     
     let model: GPTModels
+    let systemMessage: String
     let instructions: String // The action aiPrompt and userInput
     let copyCurrentFilesToTempFiles: Bool
     let planFC: PlanCodeGenerationFC

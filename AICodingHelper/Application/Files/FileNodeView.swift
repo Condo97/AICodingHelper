@@ -15,9 +15,9 @@ struct FileNodeView: View {
     
     @State private var alertShowingRename = false
     @State private var newName: String = ""
-    @State private var showCreateAIFileAlert = false
-    @State private var showCreateBlankFileAlert = false
-    @State private var showCreateFolderAlert = false
+    @State private var popupShowingCreateAIFile = false
+    @State private var popupShowingCreateBlankFile = false
+    @State private var popupShowingCreateFolder = false
     @State private var newEntityName: String = ""
     @State private var showAlertError: Bool = false
     @State private var errorMessage: String = ""
@@ -119,39 +119,31 @@ struct FileNodeView: View {
             }
         }
         .contextMenu {
-            Button(action: {
-                showCreateAIFileAlert = true
-            }) {
-                Text("New AI File...")
-            }
-            
-            Button(action: {
-                showCreateBlankFileAlert = true
-            }) {
-                Text("New Blank File...")
-            }
-            
-            Button(action: {
-                showCreateFolderAlert = true
-            }) {
-                Text("New Folder...")
-            }
+            Button("New AI File...", action: {
+                popupShowingCreateAIFile = true
+            })
             
             Divider()
             
-            Button(action: {
+            Button("New Blank File...", action: {
+                popupShowingCreateBlankFile = true
+            })
+            
+            Button("New Folder...", action: {
+                popupShowingCreateFolder = true
+            })
+            
+            Divider()
+            
+            Button("Reveal in Finder", action: {
                 NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: node.path)])
-            }) {
-                Text("Reveal in Finder")
-            }
+            })
             
             Divider()
             
-            Button(action: {
+            Button("Rename", action: {
                 alertShowingRename = true
-            }) {
-                Text("Rename")
-            }
+            })
             
             Divider()
             
@@ -166,23 +158,12 @@ struct FileNodeView: View {
                 Text("Delete")
             }
         }
-//        .alert("Create AI File", isPresented $showCreateAIFileAlert) {
-//
-//        }
-        .alert("Create Blank File", isPresented: $showCreateBlankFileAlert) {
-            TextField("File Name", text: $newEntityName)
-            Button("Create") {
-                createBlankFile(withName: newEntityName, atPath: node.path)
-            }
-            Button("Cancel", role: .cancel) {}
-        }
-        .alert("Create Folder", isPresented: $showCreateFolderAlert) {
-            TextField("Folder Name", text: $newEntityName)
-            Button("Create") {
-                createFolder(withName: newEntityName, atPath: node.path)
-            }
-            Button("Cancel", role: .cancel) {}
-        }
+        .aiFileCreatorPopup(
+            isPresented: $popupShowingCreateAIFile,
+            baseFilepath: node.isDirectory ? node.path : URL(fileURLWithPath: node.path).deletingLastPathComponent().path,
+            referenceFilepaths: selectedFilepaths)
+        .blankFileCreatorPopup(isPresented: $popupShowingCreateBlankFile, path: node.path)
+        .folderCreatorPopup(isPresented: $popupShowingCreateFolder, path: node.path)
         .alert("Rename File", isPresented: $alertShowingRename) {
             TextField("New Name", text: $newName)
             Button("Rename") {
@@ -196,38 +177,8 @@ struct FileNodeView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
-        .alert(isPresented: $showAlertError) {
-            Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
-        }
     }
     
-    private func createFolder(withName name: String, atPath path: String) {
-        let directoryPath = node.isDirectory ? path : (path as NSString).deletingLastPathComponent
-        let folderPath = URL(fileURLWithPath: directoryPath).appendingPathComponent(name).path
-        
-        if FileManager.default.fileExists(atPath: folderPath) {
-            errorMessage = "Folder already exists at path: \(folderPath)"
-            showAlertError = true
-        } else {
-            do {
-                try FileManager.default.createDirectory(atPath: folderPath, withIntermediateDirectories: false, attributes: nil)
-            } catch {
-                errorMessage = "Error creating folder: \(error)"
-                showAlertError = true
-            }
-        }
-    }
     
-    private func createBlankFile(withName name: String, atPath path: String) {
-        let directoryPath = node.isDirectory ? path : (path as NSString).deletingLastPathComponent
-        let filePath = URL(fileURLWithPath: directoryPath).appendingPathComponent(name).path
-        
-        if FileManager.default.fileExists(atPath: filePath) {
-            errorMessage = "File already exists at path: \(filePath)"
-            showAlertError = true
-        } else {
-            FileManager.default.createFile(atPath: filePath, contents: nil, attributes: nil)
-        }
-    }
     
 }

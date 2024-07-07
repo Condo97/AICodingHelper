@@ -40,12 +40,21 @@ struct MainView: View {
     
     private static let additionalTokensForEstimationPerFile: Int = Constants.Additional.additionalTokensForEstimationPerFile
     
+    @State private var popupShowingCreateAIFile = false
+    @State private var popupShowingCreateBlankFile = false
+    @State private var popupShowingCreateFolder = false
+    
     @State private var alertShowingWideScopeChatGenerationEstimatedTokensApproval: Bool = false
     @State private var alertShowingNotEnoughTokensToPerformTask: Bool = false
+    
+    @State private var alertShowingNewBlankFile: Bool = false
+    @State private var alertShowingNewFolder: Bool = false
     
     @State private var codeViewHasSelection: Bool = false
     
     @State private var isLoadingBrowser: Bool = false
+    
+    @State private var newEntityName: String = ""
     
     
     private var currentScope: Binding<Scope> {
@@ -139,6 +148,24 @@ struct MainView: View {
                     }
                 }
                 .toolbar {
+                    ToolbarItem {
+                        Menu("", systemImage: "plus") {
+                            Button("New AI File...") {
+                                popupShowingCreateAIFile = true
+                            }
+                            
+                            Divider()
+                            
+                            Button("New Blank File...") {
+                                popupShowingCreateBlankFile = true
+                            }
+                            
+                            Button("New Folder...") {
+                                popupShowingCreateFolder = true
+                            }
+                        }
+                    }
+                    
                     ToolbarItem {
                         Button(action: {
                             
@@ -239,6 +266,7 @@ struct MainView: View {
                                         guard let plan = try await CodeGenerationPlanner.makePlan(
                                             authToken: authToken,
                                             model: .GPT4o,
+                                            systemMessage: Constants.Additional.editSystemMessage,
                                             instructions: instructions,
                                             selectedFilepaths: [directory],
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
@@ -288,6 +316,7 @@ struct MainView: View {
                                         guard let plan = try await CodeGenerationPlanner.makePlan(
                                             authToken: authToken,
                                             model: .GPT4o,
+                                            systemMessage: Constants.Additional.editSystemMessage,
                                             instructions: instructions,
                                             selectedFilepaths: fileBrowserSelectedFilepaths,
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
@@ -372,6 +401,7 @@ struct MainView: View {
                                         guard let plan = try await CodeGenerationPlanner.makePlan(
                                             authToken: authToken,
                                             model: .GPT4o,
+                                            systemMessage: Constants.Additional.editSystemMessage,
                                             instructions: instructions,
                                             selectedFilepaths: [firstFileBrowserSelectedFilepath],
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
@@ -469,6 +499,16 @@ struct MainView: View {
         }, message: {
             Text("Purchase more tokens to perform this AI task.")
         })
+        .aiFileCreatorPopup(
+            isPresented: $popupShowingCreateAIFile,
+            baseFilepath: fileBrowserSelectedFilepaths[safe: 0] ?? directory,
+            referenceFilepaths: fileBrowserSelectedFilepaths)
+        .blankFileCreatorPopup(
+            isPresented: $popupShowingCreateBlankFile,
+            path: fileBrowserSelectedFilepaths[safe: 0] ?? directory)
+        .folderCreatorPopup(
+            isPresented: $popupShowingCreateFolder,
+            path: fileBrowserSelectedFilepaths[safe: 0] ?? directory)
         .onReceive(tabsViewModel.$openTab) { newValue in
             // Check open tab file validity
             if let filepath = newValue?.filepath,

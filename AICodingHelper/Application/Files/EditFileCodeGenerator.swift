@@ -56,7 +56,7 @@ class EditFileCodeGenerator {
         let fileContents = try String(contentsOfFile: filepath)
         
         // Create promptInput from additionalInput \n fileContents
-        let promptInput = additionalInput + fileContents
+        let promptInput = additionalInput + "\n" + fileContents
         
         // Get chat with userInputs as context with promptInput at the bottom
         let fileChatResponse = try await getChat(

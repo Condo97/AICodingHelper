@@ -40,7 +40,8 @@ struct AIFileCreatorView: View {
                     Button(action: {
                         isFileImporterPresented = true
                     }) {
-                        Image(systemName: "plus.circle")
+                        Image(systemName: "plus")
+                            .imageScale(.large)
                     }
                     
                     Spacer()
@@ -50,7 +51,23 @@ struct AIFileCreatorView: View {
                     HStack(spacing: 12) {
                         ForEach(referenceFilepaths, id: \.self) { path in
                             HStack {
-                                Text(path.components(separatedBy: "/").last ?? "")
+                                VStack(alignment: .leading) {
+                                    Text(URL(fileURLWithPath: path).lastPathComponent)
+                                    
+                                    var isDirectory: ObjCBool = false
+                                    if FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory) {
+                                        if isDirectory.boolValue {
+                                            Text("Directory")
+                                                .font(.footnote)
+                                                .opacity(0.4)
+                                        } else {
+                                            Text("File")
+                                                .font(.footnote)
+                                                .opacity(0.4)
+                                        }
+                                    }
+                                }
+                                    
                                 Image(systemName: "xmark.circle")
                                     .onTapGesture {
                                         if let index = referenceFilepaths.firstIndex(of: path) {
@@ -59,7 +76,7 @@ struct AIFileCreatorView: View {
                                     }
                             }
                             .padding(8)
-                            .background(Color.gray.opacity(0.2))
+                            .background(Colors.foreground)
                             .cornerRadius(8)
                         }
                     }
@@ -74,7 +91,7 @@ struct AIFileCreatorView: View {
                     .frame(height: 100)
                     .scrollContentBackground(.hidden)
                     .padding()
-                    .background(Colors.secondary.opacity(0.5))
+                    .background(Colors.foreground)
                     .clipShape(RoundedRectangle(cornerRadius: 8.0))
             }
             
@@ -101,11 +118,18 @@ struct AIFileCreatorView: View {
             .padding(.vertical, 8)
         }
         .padding()
+        .frame(minWidth: 500)
+        .background(Colors.secondary)
         .fileImporter(isPresented: $isFileImporterPresented, allowedContentTypes: [.plainText], allowsMultipleSelection: true) { result in
             do {
                 let selectedFiles = try result.get()
                 let paths = selectedFiles.map { $0.path }
-                referenceFilepaths.append(contentsOf: paths)
+                
+                for path in paths {
+                    if !referenceFilepaths.contains(path) {
+                        referenceFilepaths.append(path)
+                    }
+                }
             } catch {
                 print("Error selecting files: \(error.localizedDescription)")
             }
