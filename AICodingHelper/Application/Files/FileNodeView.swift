@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
 
-
 // TODO: ContextMenu for cut, copy, paste, and generate stuff
 struct FileNodeView: View {
     
@@ -18,14 +17,12 @@ struct FileNodeView: View {
     @Binding var selectedFilepaths: [String]
     var onAction: (_ action: FileActions, _ path: String) -> Void
     
-    
     @EnvironmentObject private var focusViewModel: FocusViewModel
     
     @FocusState private var focused
     
     @State private var alertShowingRename = false
     @State private var newName: String = ""
-    
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -114,19 +111,34 @@ struct FileNodeView: View {
             }
         }
         .contextMenu {
+            // Reveal in Finder
+            Button(action: {
+                NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: node.path)])
+            }) {
+                Text("Reveal in Finder")
+            }
+            
+            Divider()
+            
             // Rename File
             Button(action: {
                 onAction(.rename, node.path)
             }) {
                 Text("Rename")
             }
-
+            
+            Divider()
+            
             // Create Folder
             Button(action: {
                 onAction(.newFolder, node.path)
             }) {
                 Text("Create Folder")
             }
+            
+            // Create File TODO: Add this
+            
+            Divider()
             
             // Delete
             Button(action: {
@@ -139,4 +151,3 @@ struct FileNodeView: View {
     }
     
 }
-
