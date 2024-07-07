@@ -1,10 +1,3 @@
-//
-//  FileNodeView.swift
-//  AICodingHelper
-//
-//  Created by Alex Coundouriotis on 6/26/24.
-//
-
 import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
@@ -22,11 +15,13 @@ struct FileNodeView: View {
     
     @State private var alertShowingRename = false
     @State private var newName: String = ""
+    @State private var showCreateAIFileAlert = false
+    @State private var showCreateBlankFileAlert = false
     @State private var showCreateFolderAlert = false
-    @State private var showCreateFileAlert = false
     @State private var newEntityName: String = ""
     @State private var showAlertError: Bool = false
     @State private var errorMessage: String = ""
+    @State private var hovering: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -67,9 +62,9 @@ struct FileNodeView: View {
             .padding(.leading, CGFloat(level) * 15)
             .padding(.vertical, 2)
             .background(
-                focused
-                ? Colors.element.opacity(selectedFilepaths.contains(node.path) ? 0.3 : 0)
-                : Color.gray.opacity(selectedFilepaths.contains(node.path) ? 0.3 : 0)
+                focusViewModel.focus == .browser
+                ? Colors.element.opacity(selectedFilepaths.contains(node.path) ? 0.3 : hovering ? 0.1 : 0)
+                : Color.gray.opacity(selectedFilepaths.contains(node.path) ? 0.3 : hovering ? 0.1 : 0)
             )
             .cornerRadius(5)
             .focusable()
@@ -99,6 +94,23 @@ struct FileNodeView: View {
                 
                 return true
             }
+            .onHover { hovering in
+                self.hovering = hovering
+                
+                if hovering {
+                    NSCursor.arrow.push()
+                    NSCursor.pointingHand.set()
+                }
+            }
+//            .background(
+//                Rectangle()
+//                    .fill(Color.clear)
+//                    .onHover { hovering in
+//                        if hovering {
+//                            Color.lightGray
+//                        }
+//                }
+//            )
             
             if node.isExpanded {
                 ForEach(node.children) { childNode in
@@ -107,6 +119,26 @@ struct FileNodeView: View {
             }
         }
         .contextMenu {
+            Button(action: {
+                showCreateAIFileAlert = true
+            }) {
+                Text("New AI File...")
+            }
+            
+            Button(action: {
+                showCreateBlankFileAlert = true
+            }) {
+                Text("New Blank File...")
+            }
+            
+            Button(action: {
+                showCreateFolderAlert = true
+            }) {
+                Text("New Folder...")
+            }
+            
+            Divider()
+            
             Button(action: {
                 NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: node.path)])
             }) {
@@ -124,20 +156,6 @@ struct FileNodeView: View {
             Divider()
             
             Button(action: {
-                showCreateFolderAlert = true
-            }) {
-                Text("Create Folder")
-            }
-            
-            Button(action: {
-                showCreateFileAlert = true
-            }) {
-                Text("Create File")
-            }
-            
-            Divider()
-            
-            Button(action: {
                 do {
                     try FileManager.default.removeItem(atPath: node.path)
                 } catch {
@@ -147,6 +165,23 @@ struct FileNodeView: View {
             }) {
                 Text("Delete")
             }
+        }
+//        .alert("Create AI File", isPresented $showCreateAIFileAlert) {
+//
+//        }
+        .alert("Create Blank File", isPresented: $showCreateBlankFileAlert) {
+            TextField("File Name", text: $newEntityName)
+            Button("Create") {
+                createBlankFile(withName: newEntityName, atPath: node.path)
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .alert("Create Folder", isPresented: $showCreateFolderAlert) {
+            TextField("Folder Name", text: $newEntityName)
+            Button("Create") {
+                createFolder(withName: newEntityName, atPath: node.path)
+            }
+            Button("Cancel", role: .cancel) {}
         }
         .alert("Rename File", isPresented: $alertShowingRename) {
             TextField("New Name", text: $newName)
@@ -158,20 +193,6 @@ struct FileNodeView: View {
                     errorMessage = "Error renaming item in FileNodeView... \(error)"
                     showAlertError = true
                 }
-            }
-            Button("Cancel", role: .cancel) {}
-        }
-        .alert("Create File", isPresented: $showCreateFileAlert) {
-            TextField("File Name", text: $newEntityName)
-            Button("Create") {
-                createFile(withName: newEntityName, atPath: node.path)
-            }
-            Button("Cancel", role: .cancel) {}
-        }
-        .alert("Create Folder", isPresented: $showCreateFolderAlert) {
-            TextField("Folder Name", text: $newEntityName)
-            Button("Create") {
-                createFolder(withName: newEntityName, atPath: node.path)
             }
             Button("Cancel", role: .cancel) {}
         }
@@ -197,7 +218,7 @@ struct FileNodeView: View {
         }
     }
     
-    private func createFile(withName name: String, atPath path: String) {
+    private func createBlankFile(withName name: String, atPath path: String) {
         let directoryPath = node.isDirectory ? path : (path as NSString).deletingLastPathComponent
         let filePath = URL(fileURLWithPath: directoryPath).appendingPathComponent(name).path
         

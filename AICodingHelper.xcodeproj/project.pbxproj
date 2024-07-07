@@ -38,6 +38,7 @@
 		BB617C7C2C39DDDC00263D3F /* CodeGenerationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C7B2C39DDDC00263D3F /* CodeGenerationPlan.swift */; };
 		BB617C7E2C39DFA600263D3F /* CodeGenerationPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C7D2C39DFA600263D3F /* CodeGenerationPlanner.swift */; };
 		BB617C802C3A043200263D3F /* OAIChatCompletionResponseMessageToolCallFunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C7F2C3A043200263D3F /* OAIChatCompletionResponseMessageToolCallFunction.swift */; };
+		BB76D28E2C3B096C00AA13CF /* AIFileCreatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB76D28D2C3B096C00AA13CF /* AIFileCreatorView.swift */; };
 		BB7FF80F2C2CAA9B000B60C3 /* AICodingHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7FF80E2C2CAA9B000B60C3 /* AICodingHelperApp.swift */; };
 		BB7FF8132C2CAA9C000B60C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB7FF8122C2CAA9C000B60C3 /* Assets.xcassets */; };
 		BB7FF8162C2CAA9C000B60C3 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB7FF8152C2CAA9C000B60C3 /* Preview Assets.xcassets */; };
@@ -161,6 +162,7 @@
 		BB617C7B2C39DDDC00263D3F /* CodeGenerationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenerationPlan.swift; sourceTree = "<group>"; };
 		BB617C7D2C39DFA600263D3F /* CodeGenerationPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenerationPlanner.swift; sourceTree = "<group>"; };
 		BB617C7F2C3A043200263D3F /* OAIChatCompletionResponseMessageToolCallFunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionResponseMessageToolCallFunction.swift; sourceTree = "<group>"; };
+		BB76D28D2C3B096C00AA13CF /* AIFileCreatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIFileCreatorView.swift; sourceTree = "<group>"; };
 		BB7FF80B2C2CAA9B000B60C3 /* AICodingHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AICodingHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB7FF80E2C2CAA9B000B60C3 /* AICodingHelperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICodingHelperApp.swift; sourceTree = "<group>"; };
 		BB7FF8122C2CAA9C000B60C3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -407,15 +409,16 @@
 		BB7FF8452C2CABEF000B60C3 /* Files */ = {
 			isa = PBXGroup;
 			children = (
-				BB7FF84C2C2CADE2000B60C3 /* FileNode.swift */,
-				BB7FF84A2C2CADA4000B60C3 /* FileTree.swift */,
-				BB7FF84E2C2CAE00000B60C3 /* FileSystemView.swift */,
-				BB7FF8502C2CAE13000B60C3 /* FileNodeView.swift */,
-				BBB7C76E2C3312D600BEDD07 /* FileBrowserView.swift */,
-				BB8561A82C304C7E001C11F8 /* TabAddingFileSystemView.swift */,
-				BBB7C7652C32FE8D00BEDD07 /* EditFileCodeGenerator.swift */,
+				BB76D28D2C3B096C00AA13CF /* AIFileCreatorView.swift */,
 				BB617C712C39CDCE00263D3F /* CodeGenerationPlanGenerator.swift */,
 				BB617C7D2C39DFA600263D3F /* CodeGenerationPlanner.swift */,
+				BBB7C7652C32FE8D00BEDD07 /* EditFileCodeGenerator.swift */,
+				BBB7C76E2C3312D600BEDD07 /* FileBrowserView.swift */,
+				BB7FF84C2C2CADE2000B60C3 /* FileNode.swift */,
+				BB7FF8502C2CAE13000B60C3 /* FileNodeView.swift */,
+				BB7FF84E2C2CAE00000B60C3 /* FileSystemView.swift */,
+				BB7FF84A2C2CADA4000B60C3 /* FileTree.swift */,
+				BB8561A82C304C7E001C11F8 /* TabAddingFileSystemView.swift */,
 			);
 			path = Files;
 			sourceTree = "<group>";
@@ -770,6 +773,7 @@
 				BBB7C76A2C330C9400BEDD07 /* FilePrettyPrinter.swift in Sources */,
 				BB8561202C2CCEE5001C11F8 /* ActionType.swift in Sources */,
 				BB617C6E2C39C65600263D3F /* PlanCodeGenerationFC.swift in Sources */,
+				BB76D28E2C3B096C00AA13CF /* AIFileCreatorView.swift in Sources */,
 				BB85614F2C2F0991001C11F8 /* CompletionContentType.swift in Sources */,
 				BB617C652C39C3D300263D3F /* OAIChatCompletionResponseChoice.swift in Sources */,
 				BB617C722C39CDCE00263D3F /* CodeGenerationPlanGenerator.swift in Sources */,

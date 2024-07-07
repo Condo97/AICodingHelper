@@ -48,34 +48,6 @@ struct MainView: View {
     @State private var isLoadingBrowser: Bool = false
     
     
-//    private var currentWideScopeName: Binding<String> {
-//        Binding(
-//            get: {
-//                if fileBrowserSelectedFilepaths.count == 1 {
-//                    if let file = fileBrowserSelectedFilepaths[safe: 0],
-//                       FileSystem.from(path: NSString(string: file).expandingTildeInPath)?.fileType == .folder {
-//                        // If fileBrowserSelectedFilepaths contains one object and when transforemd to a FileSystem is type of folder return "Directory"
-//                        return "Directory"
-//                    } else {
-//                        // Otherwise and if fileBrowserSelectedFilepaths contains one object return "File"
-//                        return "File"
-//                    }
-//                } else if fileBrowserSelectedFilepaths.count > 1 {
-//                    // If there are multiple files in fileBrowserSelectedFilepaths return "Files"
-//                    return "Files"
-//                } else if fileBrowserSelectedFilepaths.count == 0 {
-//                    // If there are no files in fileBrowserSelectedFilepaths return "Project"
-//                    return "Project"
-//                }
-//                
-//                // Return blank string
-//                return ""
-//            },
-//            set: { value in
-//                
-//            })
-//    }
-    
     private var currentScope: Binding<Scope> {
         Binding(
             get: {
@@ -120,36 +92,6 @@ struct MainView: View {
             })
     }
     
-//    private var currentScopeNameForGenerationControls: Binding<String> {
-//        Binding(
-//            get: {
-//                switch currentScope.wrappedValue {
-//                case .project:
-//                    return "Project"
-//                case .multifile:
-//                    return "Files"
-//                case .file:
-//                    if focusViewModel.focus == .editor {
-//                        // Always file if focus is editor
-//                        return "File"
-//                    } else if focusViewModel.focus == .browser,
-//                              let firstFileBrowserSelectedFilepath = fileBrowserSelectedFilepaths[safe: 0],
-//                              FileSystem.from(path: fileBrowserSelectedFilepaths[0])?.fileType == .folder {
-//                            // If the first selected filepath filetype after creating from FileSystem is a folder return folder
-//                            return "Folder"
-//                    }
-//                    
-//                    // Otherwise return file
-//                    return "File"
-//                case .highlight:
-//                    return "Highlight"
-//                }
-//            },
-//            set: { value in
-//                
-//            })
-//    }
-    
     
     var body: some View {
         ZStack {
@@ -188,46 +130,10 @@ struct MainView: View {
                                         focusViewModel.focus = .editor
                                     }
                                 }
-//                                .disabled(isCodeEditorEditingDisabled.wrappedValue)
-//                                .overlay {
-//                                    if isCodeEditorEditingDisabled.wrappedValue {
-//                                        ZStack {
-//                                            Colors.foreground
-//                                                .opacity(0.4)
-//
-//                                            VStack {
-//                                                Text(chatGenerator.isLoading ? "Loading..." : "Streaming...")
-//
-//                                                ProgressView()
-//                                                    .tint(Colors.foregroundText)
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                                .focusable(onFocusChange: { focused in
-//                                    print("Test")
-//                                })
-//                                .focused($testFocusState)
-//                                .onChange(of: testFocusState) { newValue in
-//                                    print("Test")
-//                                }
-//                                .simultaneousGesture(
-//                                    TapGesture()
-//                                        .onEnded({
-//                                            focusViewModel.focus = .browser
-//                                        }))
-//                                .focused($focusedView, equals: .editor)
                         } else {
                             // No Tabs View
                             VStack {
-                                //                            }
-                                //                            CodeView(codeViewModel: .constant(CodeViewModel(filepath: nil)))
-                                //                            CodeEditorContainer(fileText: .constant(""), fileSelection: .constant("".startIndex..<"".startIndex), fileLanguage: .constant(.swift))
                                 CodeEditor(source: "")
-                                
-                                //                            Text("No File Selected")
-                                
-                                // TODO: File Selection Buttons and stuff
                             }
                         }
                     }
