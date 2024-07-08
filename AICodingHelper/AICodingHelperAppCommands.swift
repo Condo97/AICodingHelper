@@ -1,12 +1,13 @@
+import Foundation
 import SwiftUI
 
 struct AICodingHelperAppCommands: Commands {
     
     @Binding var baseFilepath: String
-    
     @Binding var isShowingNewAIFilePopup: Bool
     @Binding var isShowingNewBlankFilePopup: Bool
     @Binding var isShowingNewFolderPopup: Bool
+    @Binding var isShowingOpenFileImporter: Bool
     
     
     var body: some Commands {
@@ -22,39 +23,35 @@ struct AICodingHelperAppCommands: Commands {
                 isShowingNewBlankFilePopup = true
             }
             .keyboardShortcut("N", modifiers: [.shift, .command])
-        }
-        
-        CommandGroup(after: .newItem) {
+            
             Button("New Folder...") {
                 isShowingNewFolderPopup = true
             }
             .keyboardShortcut("N", modifiers: [.shift, .command, .option])
-        }
-        
-        CommandGroup(before: .saveItem) {
-            Button(action: {
-                // Save File Action
-            }) {
-                Text("Save As...")
-            }
-            .keyboardShortcut("S", modifiers: [.command, .shift])
-        }
-        
-        CommandMenu("Custom Menu") {
-            Button(action: {
-                // Custom Action
-            }) {
-                Text("Custom Command 1")
-            }
-            .keyboardShortcut("1", modifiers: .command)
             
-            Button(action: {
-                // Another Custom Action
-            }) {
-                Text("Custom Command 2")
+            Divider()
+            
+            Button("Open Folder...") {
+                isShowingOpenFileImporter = true
             }
-            .keyboardShortcut("2", modifiers: .command)
+            .keyboardShortcut("O", modifiers: [.command])
         }
+        
+//        CommandMenu("Custom Menu") {
+//            Button(action: {
+//                // Custom Action
+//            }) {
+//                Text("Custom Command 1")
+//            }
+//            .keyboardShortcut("1", modifiers: .command)
+//            
+//            Button(action: {
+//                // Another Custom Action
+//            }) {
+//                Text("Custom Command 2")
+//            }
+//            .keyboardShortcut("2", modifiers: .command)
+//        }
     }
     
 }

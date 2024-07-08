@@ -22,7 +22,7 @@
 		BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4D2C36D29200263D3F /* TokenCalculator.swift */; };
 		BB617C502C38568400263D3F /* FilepathCodeGenerationPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */; };
 		BB617C542C3885D900263D3F /* FileActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C532C3885D900263D3F /* FileActions.swift */; };
-		BB617C572C389D1000263D3F /* FilePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C562C389D1000263D3F /* FilePickerView.swift */; };
+		BB617C572C389D1000263D3F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C562C389D1000263D3F /* HomeView.swift */; };
 		BB617C592C39AB9400263D3F /* FunctionCallRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C582C39AB9400263D3F /* FunctionCallRequest.swift */; };
 		BB617C5B2C39ABE200263D3F /* OAICompletionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C5A2C39ABE200263D3F /* OAICompletionResponse.swift */; };
 		BB617C5F2C39C32200263D3F /* OAIChatCompletionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C5E2C39C32200263D3F /* OAIChatCompletionResponse.swift */; };
@@ -115,6 +115,7 @@
 		BBBD40A42C3B21E4008917CC /* BlankFileCreatorPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40A32C3B21E4008917CC /* BlankFileCreatorPopup.swift */; };
 		BBBD40A62C3B2383008917CC /* FolderCreatorPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40A52C3B2383008917CC /* FolderCreatorPopup.swift */; };
 		BBBD40A82C3B4F96008917CC /* AICodingHelperAppCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40A72C3B4F96008917CC /* AICodingHelperAppCommands.swift */; };
+		BBBD40AB2C3B5E9D008917CC /* GrantedPermissionsDirectoryImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40AA2C3B5E9D008917CC /* GrantedPermissionsDirectoryImporter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -150,7 +151,7 @@
 		BB617C4D2C36D29200263D3F /* TokenCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenCalculator.swift; sourceTree = "<group>"; };
 		BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilepathCodeGenerationPrompt.swift; sourceTree = "<group>"; };
 		BB617C532C3885D900263D3F /* FileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActions.swift; sourceTree = "<group>"; };
-		BB617C562C389D1000263D3F /* FilePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePickerView.swift; sourceTree = "<group>"; };
+		BB617C562C389D1000263D3F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		BB617C582C39AB9400263D3F /* FunctionCallRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FunctionCallRequest.swift; sourceTree = "<group>"; };
 		BB617C5A2C39ABE200263D3F /* OAICompletionResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAICompletionResponse.swift; sourceTree = "<group>"; };
 		BB617C5E2C39C32200263D3F /* OAIChatCompletionResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionResponse.swift; sourceTree = "<group>"; };
@@ -247,6 +248,7 @@
 		BBBD40A32C3B21E4008917CC /* BlankFileCreatorPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlankFileCreatorPopup.swift; sourceTree = "<group>"; };
 		BBBD40A52C3B2383008917CC /* FolderCreatorPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderCreatorPopup.swift; sourceTree = "<group>"; };
 		BBBD40A72C3B4F96008917CC /* AICodingHelperAppCommands.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AICodingHelperAppCommands.swift; sourceTree = "<group>"; };
+		BBBD40AA2C3B5E9D008917CC /* GrantedPermissionsDirectoryImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrantedPermissionsDirectoryImporter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -283,12 +285,12 @@
 			path = Error;
 			sourceTree = "<group>";
 		};
-		BB617C552C389D0100263D3F /* FilePicker */ = {
+		BB617C552C389D0100263D3F /* Home */ = {
 			isa = PBXGroup;
 			children = (
-				BB617C562C389D1000263D3F /* FilePickerView.swift */,
+				BB617C562C389D1000263D3F /* HomeView.swift */,
 			);
-			path = FilePicker;
+			path = Home;
 			sourceTree = "<group>";
 		};
 		BB617C5C2C39AC1400263D3F /* Stream */ = {
@@ -392,8 +394,9 @@
 			isa = PBXGroup;
 			children = (
 				BB8561A12C2F9313001C11F8 /* CodeView */,
-				BB617C552C389D0100263D3F /* FilePicker */,
+				BBBD40A92C3B5DAF008917CC /* Common */,
 				BB7FF8452C2CABEF000B60C3 /* Files */,
+				BB617C552C389D0100263D3F /* Home */,
 				BB7FF83F2C2CAAFA000B60C3 /* Main */,
 				BB8561232C2CD2F9001C11F8 /* NarrowScopeControls */,
 				BB8561AA2C305250001C11F8 /* Tabs */,
@@ -607,6 +610,14 @@
 				BB8E17BF2C3369A900E3F463 /* WideScopeControlSwitch.swift */,
 			);
 			path = WideScopeControls;
+			sourceTree = "<group>";
+		};
+		BBBD40A92C3B5DAF008917CC /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				BBBD40AA2C3B5E9D008917CC /* GrantedPermissionsDirectoryImporter.swift */,
+			);
+			path = Common;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -826,6 +837,7 @@
 				BB8561882C2F2D22001C11F8 /* HTTPSClient.swift in Sources */,
 				BB1405EA2C362CA50036CFE8 /* AuthRequest.swift in Sources */,
 				BB7FF84B2C2CADA4000B60C3 /* FileTree.swift in Sources */,
+				BBBD40AB2C3B5E9D008917CC /* GrantedPermissionsDirectoryImporter.swift in Sources */,
 				BB8561132C2CBB18001C11F8 /* CodeEditorLanguageResolver.swift in Sources */,
 				BB8E17C02C3369A900E3F463 /* WideScopeControlSwitch.swift in Sources */,
 				BB85614D2C2F097F001C11F8 /* CompletionRole.swift in Sources */,
@@ -845,7 +857,7 @@
 				BB85617C2C2F236A001C11F8 /* SocketStream.swift in Sources */,
 				BB8561A52C2F9787001C11F8 /* CodeViewModel.swift in Sources */,
 				BB617C762C39D35800263D3F /* CodeGenerationPlanExecutor.swift in Sources */,
-				BB617C572C389D1000263D3F /* FilePickerView.swift in Sources */,
+				BB617C572C389D1000263D3F /* HomeView.swift in Sources */,
 				BB7FF84F2C2CAE00000B60C3 /* FileSystemView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

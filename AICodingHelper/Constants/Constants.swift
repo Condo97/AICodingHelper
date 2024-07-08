@@ -72,6 +72,7 @@ struct Constants {
         
         static let generateOptionCopyCurrentFilesToTempFile = "generateOptionCopyCurrentFilesToTempFile"
         static let generateOptionUseEntireProjectAsContext = "generateOptionUseEntireProjectAsContext"
+        static let recentProjectFolders = "recentProjectFolders"
     }
     
 }

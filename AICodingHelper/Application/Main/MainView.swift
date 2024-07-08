@@ -539,6 +539,13 @@ struct MainView: View {
                 }
             }
         }
+        .onChange(of: directory) { newValue in
+            // Remove all tabs
+            DispatchQueue.main.async {
+                tabsViewModel.openTab = nil
+                tabsViewModel.openTabs = []
+            }
+        }
 //        .onAppear {
 //            Task {
 //                if let fileSystem = FileSystem.from(path: NSString(string: directory).expandingTildeInPath) {

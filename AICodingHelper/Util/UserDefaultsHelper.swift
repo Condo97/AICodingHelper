@@ -28,4 +28,13 @@ class UserDefaultsHelper {
         }
     }
     
+    static var recentProjectFolders: [String] {
+        get {
+            UserDefaults.standard.stringArray(forKey: Constants.UserDefaults.recentProjectFolders) ?? []
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Constants.UserDefaults.recentProjectFolders)
+        }
+    }
+    
 }

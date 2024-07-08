@@ -22,6 +22,7 @@ struct AICodingHelperApp: App {
     @State private var popupShowingCreateAIFile = false
     @State private var popupShowingCreateBlankFile = false
     @State private var popupShowingCreateFolder = false
+    @State private var isShowingOpenFileImporter = false
     
     var directoryUnwrapped: Binding<String> {
         Binding(
@@ -44,9 +45,10 @@ struct AICodingHelperApp: App {
                         popupShowingCreateBlankFile: $popupShowingCreateBlankFile,
                         popupShowingCreateFolder: $popupShowingCreateFolder)
                 } else {
-                    FilePickerView(filePath: $directory)
+                    HomeView(isShowingOpenFileImporter: $isShowingOpenFileImporter)
                 }
             }
+            .grantedPermissionsDirectoryImporter(isPresented: $isShowingOpenFileImporter, filepath: $directory)
             .environmentObject(focusViewModel)
             .environmentObject(remainingUpdater)
             .environmentObject(undoUpdater)
@@ -75,7 +77,8 @@ struct AICodingHelperApp: App {
                 baseFilepath: directoryUnwrapped,
                 isShowingNewAIFilePopup: $popupShowingCreateAIFile,
                 isShowingNewBlankFilePopup: $popupShowingCreateBlankFile,
-                isShowingNewFolderPopup: $popupShowingCreateFolder)
+                isShowingNewFolderPopup: $popupShowingCreateFolder,
+                isShowingOpenFileImporter: $isShowingOpenFileImporter)
         }
     }
     
