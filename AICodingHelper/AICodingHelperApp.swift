@@ -32,6 +32,7 @@ struct AICodingHelperApp: App {
             ZStack {
                 if directory.isEmpty {
                     HomeView(
+                        filepath: $directory,
                         isShowingCreateAIProject: $isShowingCreateAIProject,
                         isShowingCreateBlankProject: $isShowingCreateBlankProject,
                         isShowingOpenFileImporter: $isShowingOpenFileImporter)

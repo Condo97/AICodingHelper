@@ -33,6 +33,10 @@ class UserDefaultsHelper {
             UserDefaults.standard.stringArray(forKey: Constants.UserDefaults.recentProjectFolders) ?? []
         }
         set {
+            guard !recentProjectFolders.contains(newValue) else {
+                return
+            }
+            
             UserDefaults.standard.set(newValue, forKey: Constants.UserDefaults.recentProjectFolders)
         }
     }
