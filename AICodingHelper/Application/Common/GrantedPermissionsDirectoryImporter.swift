@@ -11,7 +11,7 @@ import SwiftUI
 struct GrantedPermissionsDirectoryImporter: ViewModifier {
     
     @Binding var isPresented: Bool
-    @Binding var filepath: String?
+    @Binding var filepath: String
     
     
     func body(content: Content) -> some View {
@@ -47,7 +47,7 @@ struct GrantedPermissionsDirectoryImporter: ViewModifier {
 
 extension View {
     
-    func grantedPermissionsDirectoryImporter(isPresented: Binding<Bool>, filepath: Binding<String?>) -> some View {
+    func grantedPermissionsDirectoryImporter(isPresented: Binding<Bool>, filepath: Binding<String>) -> some View {
         self
             .modifier(GrantedPermissionsDirectoryImporter(isPresented: isPresented, filepath: filepath))
     }

@@ -7,12 +7,28 @@
 
 import SwiftUI
 
-struct AIProjectCreatorPopup: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+struct AIProjectCreatorPopup: ViewModifier {
+    
+    @Binding var isPresented: Bool
+    @Binding var baseFilepath: String
+    
+    func body(content: Content) -> some View {
+        content
+            .sheet(isPresented: $isPresented) {
+                AIProjectCreatorContainer(
+                    isPresented: $isPresented,
+                    baseFilepath: $baseFilepath)
+            }
     }
+    
 }
 
-#Preview {
-    AIProjectCreatorPopup()
+
+extension View {
+    
+    func aiProjectCreatorPopup(isPresented: Binding<Bool>, baseFilepath: Binding<String>) -> some View {
+        self
+            .modifier(AIProjectCreatorPopup(isPresented: isPresented, baseFilepath: baseFilepath))
+    }
+    
 }

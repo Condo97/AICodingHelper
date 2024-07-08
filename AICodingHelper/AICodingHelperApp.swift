@@ -17,41 +17,42 @@ struct AICodingHelperApp: App {
     @StateObject private var remainingUpdater: RemainingUpdater = RemainingUpdater()
     @StateObject private var undoUpdater: UndoUpdater = UndoUpdater()
     
-    @State private var directory: String?
+    @State private var directory: String = ""
     
     @State private var popupShowingCreateAIFile = false
     @State private var popupShowingCreateBlankFile = false
     @State private var popupShowingCreateFolder = false
+    @State private var isShowingCreateAIProject = false
+    @State private var isShowingCreateBlankProject = false
     @State private var isShowingOpenFileImporter = false
-    
-    var directoryUnwrapped: Binding<String> {
-        Binding(
-            get: {
-                directory ?? ""
-            },
-            set: { value in
-                directory = value
-            })
-    }
     
 
     var body: some Scene {
         WindowGroup {
             ZStack {
-                if let directory = directory {
+                if directory.isEmpty {
+                    HomeView(
+                        isShowingCreateAIProject: $isShowingCreateAIProject,
+                        isShowingCreateBlankProject: $isShowingCreateBlankProject,
+                        isShowingOpenFileImporter: $isShowingOpenFileImporter)
+                } else {
                     MainView(
-                        directory: directoryUnwrapped,
+                        directory: $directory,
                         popupShowingCreateAIFile: $popupShowingCreateAIFile,
                         popupShowingCreateBlankFile: $popupShowingCreateBlankFile,
                         popupShowingCreateFolder: $popupShowingCreateFolder)
-                } else {
-                    HomeView(isShowingOpenFileImporter: $isShowingOpenFileImporter)
                 }
             }
+            .grantedPermissionsDirectoryCreator(isPresented: $isShowingCreateBlankProject, projectFolderPath: $directory)
             .grantedPermissionsDirectoryImporter(isPresented: $isShowingOpenFileImporter, filepath: $directory)
+            .aiProjectCreatorPopup(isPresented: $isShowingCreateAIProject, baseFilepath: $directory)
             .environmentObject(focusViewModel)
             .environmentObject(remainingUpdater)
             .environmentObject(undoUpdater)
+            .onChange(of: directory) { newValue in
+                // If directory is changed save to recent project folders
+                UserDefaultsHelper.recentProjectFolders.append(newValue)
+            }
             .task {
                 // Get and ensure authToken
                 let authToken: String
@@ -74,7 +75,9 @@ struct AICodingHelperApp: App {
         }
         .commands {
             AICodingHelperAppCommands(
-                baseFilepath: directoryUnwrapped,
+                baseFilepath: $directory,
+                isShowingNewAIProject: $isShowingCreateAIProject,
+                isShowingNewBlankProject: $isShowingCreateBlankProject,
                 isShowingNewAIFilePopup: $popupShowingCreateAIFile,
                 isShowingNewBlankFilePopup: $popupShowingCreateBlankFile,
                 isShowingNewFolderPopup: $popupShowingCreateFolder,

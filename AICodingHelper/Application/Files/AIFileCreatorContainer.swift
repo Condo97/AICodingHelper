@@ -14,6 +14,9 @@ struct AIFileCreatorContainer: View {
     @State var referenceFilepaths: [String] // This is a state because if it is changed it should not propogate to the parent
     
     
+    private static let fileGeneratorSystemMessage = "You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language. You only respond to the one requested file. All files will be provided in turn, so therefore you will respond to each individually to preserve correct formatting to the IDE since it is looking to receive one file."
+    
+    
     @EnvironmentObject private var remainingUpdater: RemainingUpdater
     
     @State private var isLoading: Bool = false
@@ -54,12 +57,13 @@ struct AIFileCreatorContainer: View {
             if isLoading {
                 ZStack {
                     Colors.foreground
-                        .opacity(0.6)
+                        .opacity(0.4)
                     
                     VStack {
                         Text("Creating File...")
                         
                         ProgressView()
+                            .tint(Colors.foregroundText)
                     }
                 }
             }
@@ -87,7 +91,7 @@ struct AIFileCreatorContainer: View {
         let newFileFilepath = URL(fileURLWithPath: baseFilepath).appendingPathComponent(newFileName, conformingTo: .text).path
         
         // Create systemMessage
-        let systemMessage: String = "You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language. You only respond to the one requested file. All files will be provided in turn, so therefore you will respond to each individually to preserve correct formatting to the IDE since it is looking to receive one file."
+        let systemMessage: String = AIFileCreatorContainer.fileGeneratorSystemMessage
         
         // Create instructions
         let instructions: String = {
@@ -111,7 +115,7 @@ struct AIFileCreatorContainer: View {
         // Create CodeGenerationPlan with create and edit action for new file
         let codeGenerationPlan = CodeGenerationPlan(
             model: .GPT4o,
-            systemMessage: systemMessage,
+            editActionSystemMessage: systemMessage,
             instructions: instructions,
             copyCurrentFilesToTempFiles: false,
             planFC: PlanCodeGenerationFC(

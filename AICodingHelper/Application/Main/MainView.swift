@@ -284,7 +284,7 @@ struct MainView: View {
                                         guard let plan = try await CodeGenerationPlanner.makePlan(
                                             authToken: authToken,
                                             model: .GPT4o,
-                                            systemMessage: Constants.Additional.editSystemMessage,
+                                            editActionSystemMessage: Constants.Additional.editSystemMessage,
                                             instructions: instructions,
                                             selectedFilepaths: [directory],
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
@@ -334,7 +334,7 @@ struct MainView: View {
                                         guard let plan = try await CodeGenerationPlanner.makePlan(
                                             authToken: authToken,
                                             model: .GPT4o,
-                                            systemMessage: Constants.Additional.editSystemMessage,
+                                            editActionSystemMessage: Constants.Additional.editSystemMessage,
                                             instructions: instructions,
                                             selectedFilepaths: fileBrowserSelectedFilepaths,
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
@@ -419,7 +419,7 @@ struct MainView: View {
                                         guard let plan = try await CodeGenerationPlanner.makePlan(
                                             authToken: authToken,
                                             model: .GPT4o,
-                                            systemMessage: Constants.Additional.editSystemMessage,
+                                            editActionSystemMessage: Constants.Additional.editSystemMessage,
                                             instructions: instructions,
                                             selectedFilepaths: [firstFileBrowserSelectedFilepath],
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
@@ -567,7 +567,7 @@ struct MainView: View {
         
         guard currentCodeGenerationPlanTokenEstimation + MainView.additionalTokensForEstimationPerFile < remainingUpdater.remaining else {
             // TODO: Handle Errors
-            print("Could not unwrap currentCodeGenerationPlanTokenEstimation in MainView!")
+            print("Current code generation plan token estimation plus additional tokens for estimation per file exceeds remaining tokens!")
             return
         }
         

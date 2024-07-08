@@ -14,7 +14,7 @@ class CodeGenerationPlanExecutor {
         try await generateAndRefactor(
             authToken: authToken,
             model: plan.model,
-            systemMessage: plan.systemMessage,
+            systemMessage: plan.editActionSystemMessage,
             instructions: plan.instructions,
             copyCurrentFilesToTempFiles: plan.copyCurrentFilesToTempFiles,
             planFC: plan.planFC)
