@@ -19,8 +19,6 @@ struct GrantedPermissionsDirectoryCreator: ViewModifier {
                 if newValue {
                     DispatchQueue.main.async {
                         createProjectFolder()
-                        
-                        isPresented = false
                     }
                 }
             }
@@ -42,6 +40,10 @@ struct GrantedPermissionsDirectoryCreator: ViewModifier {
 //                let folderUrl = url.appendingPathComponent(dialog.nameFieldStringValue)
                 try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
                 projectFolderPath = url.path
+                
+                DispatchQueue.main.async {
+                    self.isPresented = false
+                }
             } catch {
                 print("Failed to create directory: \(error.localizedDescription)")
             }

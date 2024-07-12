@@ -11,8 +11,11 @@ import SwiftUI
 struct AICodingHelperApp: App {
     
     
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.openWindow) private var openWindow
     @Environment(\.undoManager) private var undoManager
     
+    @StateObject private var codeEditorSettingsViewModel: CodeEditorSettingsViewModel = CodeEditorSettingsViewModel()
     @StateObject private var focusViewModel: FocusViewModel = FocusViewModel()
     @StateObject private var remainingUpdater: RemainingUpdater = RemainingUpdater()
     @StateObject private var undoUpdater: UndoUpdater = UndoUpdater()
@@ -24,7 +27,7 @@ struct AICodingHelperApp: App {
     @State private var popupShowingCreateFolder = false
     @State private var isShowingCreateAIProject = false
     @State private var isShowingCreateBlankProject = false
-    @State private var isShowingOpenFileImporter = false
+    @State private var isShowingOpenProjectImporter = false
     
 
     var body: some Scene {
@@ -35,7 +38,7 @@ struct AICodingHelperApp: App {
                         filepath: $directory,
                         isShowingCreateAIProject: $isShowingCreateAIProject,
                         isShowingCreateBlankProject: $isShowingCreateBlankProject,
-                        isShowingOpenFileImporter: $isShowingOpenFileImporter)
+                        isShowingOpenFileImporter: $isShowingOpenProjectImporter)
                 } else {
                     MainView(
                         directory: $directory,
@@ -45,14 +48,15 @@ struct AICodingHelperApp: App {
                 }
             }
             .grantedPermissionsDirectoryCreator(isPresented: $isShowingCreateBlankProject, projectFolderPath: $directory)
-            .grantedPermissionsDirectoryImporter(isPresented: $isShowingOpenFileImporter, filepath: $directory)
+            .grantedPermissionsDirectoryImporter(isPresented: $isShowingOpenProjectImporter, filepath: $directory)
             .aiProjectCreatorPopup(isPresented: $isShowingCreateAIProject, baseFilepath: $directory)
+            .environmentObject(codeEditorSettingsViewModel)
             .environmentObject(focusViewModel)
             .environmentObject(remainingUpdater)
             .environmentObject(undoUpdater)
             .onChange(of: directory) { newValue in
-                // If directory is changed save to recent project folders
-                UserDefaultsHelper.recentProjectFolders.append(newValue)
+                // If directory is changed save to recent project filepaths
+                RecentProjectHelper.recentProjectFilepaths.append(newValue)
             }
             .task {
                 // Get and ensure authToken
@@ -76,13 +80,17 @@ struct AICodingHelperApp: App {
         }
         .commands {
             AICodingHelperAppCommands(
-                baseFilepath: $directory,
+                availableCommands: .all,
                 isShowingNewAIProject: $isShowingCreateAIProject,
                 isShowingNewBlankProject: $isShowingCreateBlankProject,
                 isShowingNewAIFilePopup: $popupShowingCreateAIFile,
                 isShowingNewBlankFilePopup: $popupShowingCreateBlankFile,
                 isShowingNewFolderPopup: $popupShowingCreateFolder,
-                isShowingOpenFileImporter: $isShowingOpenFileImporter)
+                isShowingOpenFileImporter: $isShowingOpenProjectImporter)
+        }
+        Settings {
+            SettingsView()
+                .environmentObject(codeEditorSettingsViewModel)
         }
     }
     

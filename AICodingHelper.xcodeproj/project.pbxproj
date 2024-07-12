@@ -19,6 +19,8 @@
 		BB1405EE2C36CBF00036CFE8 /* CalculateTokensResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405ED2C36CBF00036CFE8 /* CalculateTokensResponse.swift */; };
 		BB1405F02C36CC560036CFE8 /* CalculateTokensRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405EF2C36CC560036CFE8 /* CalculateTokensRequest.swift */; };
 		BB1405F32C36CE330036CFE8 /* GenerationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405F22C36CE330036CFE8 /* GenerationError.swift */; };
+		BB53E33A2C4180BF003FC84E /* ConstantsUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB53E3392C4180BF003FC84E /* ConstantsUpdater.swift */; };
+		BB53E33C2C418125003FC84E /* GetImportantConstantsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB53E33B2C418125003FC84E /* GetImportantConstantsResponse.swift */; };
 		BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4D2C36D29200263D3F /* TokenCalculator.swift */; };
 		BB617C502C38568400263D3F /* FilepathCodeGenerationPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */; };
 		BB617C542C3885D900263D3F /* FileActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C532C3885D900263D3F /* FileActions.swift */; };
@@ -120,6 +122,15 @@
 		BBBD40AF2C3C28C5008917CC /* AIProjectCreatorContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40AE2C3C28C5008917CC /* AIProjectCreatorContainer.swift */; };
 		BBBD40B12C3C28E5008917CC /* AIProjectCreatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40B02C3C28E5008917CC /* AIProjectCreatorView.swift */; };
 		BBBD40B32C3C44B9008917CC /* AIProjectCreatorPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40B22C3C44B9008917CC /* AIProjectCreatorPopup.swift */; };
+		BBBD40B52C3CA588008917CC /* BookmarkHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40B42C3CA588008917CC /* BookmarkHelper.swift */; };
+		BBBD40B72C3CA61D008917CC /* RecentProjectHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40B62C3CA61D008917CC /* RecentProjectHelper.swift */; };
+		BBBD40B92C3CBD79008917CC /* DismissOnAppearView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40B82C3CBD79008917CC /* DismissOnAppearView.swift */; };
+		BBBD40BB2C3CC145008917CC /* AvailableCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40BA2C3CC145008917CC /* AvailableCommands.swift */; };
+		BBBD40BD2C3D6324008917CC /* CodeEditorSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40BC2C3D6324008917CC /* CodeEditorSettingsViewModel.swift */; };
+		BBBD40C22C3D63A4008917CC /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40C12C3D63A4008917CC /* SettingsView.swift */; };
+		BBBD40C42C3D655C008917CC /* ProductUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40C32C3D655C008917CC /* ProductUpdater.swift */; };
+		BBBD40C62C3D6678008917CC /* IAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40C52C3D6678008917CC /* IAPManager.swift */; };
+		BBBD40C92C3D6954008917CC /* UltraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40C82C3D6954008917CC /* UltraView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -152,6 +163,8 @@
 		BB1405ED2C36CBF00036CFE8 /* CalculateTokensResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculateTokensResponse.swift; sourceTree = "<group>"; };
 		BB1405EF2C36CC560036CFE8 /* CalculateTokensRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculateTokensRequest.swift; sourceTree = "<group>"; };
 		BB1405F22C36CE330036CFE8 /* GenerationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationError.swift; sourceTree = "<group>"; };
+		BB53E3392C4180BF003FC84E /* ConstantsUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstantsUpdater.swift; sourceTree = "<group>"; };
+		BB53E33B2C418125003FC84E /* GetImportantConstantsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetImportantConstantsResponse.swift; sourceTree = "<group>"; };
 		BB617C4D2C36D29200263D3F /* TokenCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenCalculator.swift; sourceTree = "<group>"; };
 		BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilepathCodeGenerationPrompt.swift; sourceTree = "<group>"; };
 		BB617C532C3885D900263D3F /* FileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActions.swift; sourceTree = "<group>"; };
@@ -257,6 +270,15 @@
 		BBBD40AE2C3C28C5008917CC /* AIProjectCreatorContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProjectCreatorContainer.swift; sourceTree = "<group>"; };
 		BBBD40B02C3C28E5008917CC /* AIProjectCreatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProjectCreatorView.swift; sourceTree = "<group>"; };
 		BBBD40B22C3C44B9008917CC /* AIProjectCreatorPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProjectCreatorPopup.swift; sourceTree = "<group>"; };
+		BBBD40B42C3CA588008917CC /* BookmarkHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkHelper.swift; sourceTree = "<group>"; };
+		BBBD40B62C3CA61D008917CC /* RecentProjectHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentProjectHelper.swift; sourceTree = "<group>"; };
+		BBBD40B82C3CBD79008917CC /* DismissOnAppearView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissOnAppearView.swift; sourceTree = "<group>"; };
+		BBBD40BA2C3CC145008917CC /* AvailableCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableCommands.swift; sourceTree = "<group>"; };
+		BBBD40BC2C3D6324008917CC /* CodeEditorSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeEditorSettingsViewModel.swift; sourceTree = "<group>"; };
+		BBBD40C12C3D63A4008917CC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		BBBD40C32C3D655C008917CC /* ProductUpdater.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProductUpdater.swift; sourceTree = "<group>"; };
+		BBBD40C52C3D6678008917CC /* IAPManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IAPManager.swift; sourceTree = "<group>"; };
+		BBBD40C82C3D6954008917CC /* UltraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UltraView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -407,7 +429,9 @@
 				BB617C552C389D0100263D3F /* Home */,
 				BB7FF83F2C2CAAFA000B60C3 /* Main */,
 				BB8561232C2CD2F9001C11F8 /* NarrowScopeControls */,
+				BBBD40BE2C3D638D008917CC /* Settings */,
 				BB8561AA2C305250001C11F8 /* Tabs */,
+				BBBD40C72C3D6949008917CC /* Ultra */,
 				BBB7C75E2C3256E400BEDD07 /* WideScopeControls */,
 			);
 			path = Application;
@@ -463,6 +487,7 @@
 				BB8561262C2CE257001C11F8 /* Scope.swift */,
 				BB8561922C2F358B001C11F8 /* GPTModels.swift */,
 				BB8E17BD2C3366D100E3F463 /* GenerateOptions.swift */,
+				BBBD40BA2C3CC145008917CC /* AvailableCommands.swift */,
 				BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */,
 				BB8E17C92C3599D800E3F463 /* FocusableContent.swift */,
 				BB617C532C3885D900263D3F /* FileActions.swift */,
@@ -554,6 +579,7 @@
 				BB8561892C2F2D49001C11F8 /* RegisterUserResponse.swift */,
 				BB85617F2C2F2B98001C11F8 /* StatusResponse.swift */,
 				BB617C5A2C39ABE200263D3F /* OAICompletionResponse.swift */,
+				BB53E33B2C418125003FC84E /* GetImportantConstantsResponse.swift */,
 			);
 			path = Response;
 			sourceTree = "<group>";
@@ -574,6 +600,11 @@
 				BB617C4D2C36D29200263D3F /* TokenCalculator.swift */,
 				BB617C6F2C39C6DE00263D3F /* FunctionCallParser.swift */,
 				BB617C752C39D35800263D3F /* CodeGenerationPlanExecutor.swift */,
+				BBBD40B42C3CA588008917CC /* BookmarkHelper.swift */,
+				BBBD40B62C3CA61D008917CC /* RecentProjectHelper.swift */,
+				BBBD40C32C3D655C008917CC /* ProductUpdater.swift */,
+				BBBD40C52C3D6678008917CC /* IAPManager.swift */,
+				BB53E3392C4180BF003FC84E /* ConstantsUpdater.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -582,6 +613,7 @@
 			isa = PBXGroup;
 			children = (
 				BB8561102C2CB78D001C11F8 /* CodeEditorContainer.swift */,
+				BBBD40BC2C3D6324008917CC /* CodeEditorSettingsViewModel.swift */,
 				BB8561122C2CBB18001C11F8 /* CodeEditorLanguageResolver.swift */,
 				BB8561172C2CC246001C11F8 /* CodeEditorLanguageSelector.swift */,
 				BB8561982C2F846C001C11F8 /* CodeView.swift */,
@@ -628,8 +660,25 @@
 				BBBD40B22C3C44B9008917CC /* AIProjectCreatorPopup.swift */,
 				BBBD40AA2C3B5E9D008917CC /* GrantedPermissionsDirectoryImporter.swift */,
 				BBBD40AC2C3C24A5008917CC /* GrantedPermissionsDirectoryCreator.swift */,
+				BBBD40B82C3CBD79008917CC /* DismissOnAppearView.swift */,
 			);
 			path = Common;
+			sourceTree = "<group>";
+		};
+		BBBD40BE2C3D638D008917CC /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				BBBD40C12C3D63A4008917CC /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		BBBD40C72C3D6949008917CC /* Ultra */ = {
+			isa = PBXGroup;
+			children = (
+				BBBD40C82C3D6954008917CC /* UltraView.swift */,
+			);
+			path = Ultra;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -769,6 +818,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB617C672C39C41C00263D3F /* OAIChatCompletionResponseMessage.swift in Sources */,
+				BBBD40BD2C3D6324008917CC /* CodeEditorSettingsViewModel.swift in Sources */,
 				BBB7C7622C32571200BEDD07 /* WideScopeControlsView.swift in Sources */,
 				BB85618C2C2F2D6D001C11F8 /* BlankRequest.swift in Sources */,
 				BB85618A2C2F2D49001C11F8 /* RegisterUserResponse.swift in Sources */,
@@ -790,6 +840,7 @@
 				BB617C7E2C39DFA600263D3F /* CodeGenerationPlanner.swift in Sources */,
 				BBB7C7522C31B13500BEDD07 /* FileMonitor.swift in Sources */,
 				BB8561162C2CBD7D001C11F8 /* Colors.swift in Sources */,
+				BBBD40C42C3D655C008917CC /* ProductUpdater.swift in Sources */,
 				BB8561182C2CC246001C11F8 /* CodeEditorLanguageSelector.swift in Sources */,
 				BB1405EC2C362CBD0036CFE8 /* GetRemainingTokensResponse.swift in Sources */,
 				BB617C502C38568400263D3F /* FilepathCodeGenerationPrompt.swift in Sources */,
@@ -824,6 +875,7 @@
 				BB1405F02C36CC560036CFE8 /* CalculateTokensRequest.swift in Sources */,
 				BB8561592C2F0F88001C11F8 /* OAIChatCompletionRequestMessageContentText.swift in Sources */,
 				BBB7C75A2C31FD2E00BEDD07 /* FileSystem.swift in Sources */,
+				BBBD40B72C3CA61D008917CC /* RecentProjectHelper.swift in Sources */,
 				BBBD40AF2C3C28C5008917CC /* AIProjectCreatorContainer.swift in Sources */,
 				BB8E17BE2C3366D100E3F463 /* GenerateOptions.swift in Sources */,
 				BBBD40A42C3B21E4008917CC /* BlankFileCreatorPopup.swift in Sources */,
@@ -847,10 +899,13 @@
 				BBB7C7542C31F52D00BEDD07 /* ResponseFormatType.swift in Sources */,
 				BB8561552C2F0F54001C11F8 /* OAIChatCompletionRequest.swift in Sources */,
 				BB617C592C39AB9400263D3F /* FunctionCallRequest.swift in Sources */,
+				BB53E33C2C418125003FC84E /* GetImportantConstantsResponse.swift in Sources */,
 				BB617C802C3A043200263D3F /* OAIChatCompletionResponseMessageToolCallFunction.swift in Sources */,
+				BBBD40B92C3CBD79008917CC /* DismissOnAppearView.swift in Sources */,
 				BB617C702C39C6DE00263D3F /* FunctionCallParser.swift in Sources */,
 				BB8561882C2F2D22001C11F8 /* HTTPSClient.swift in Sources */,
 				BB1405EA2C362CA50036CFE8 /* AuthRequest.swift in Sources */,
+				BBBD40BB2C3CC145008917CC /* AvailableCommands.swift in Sources */,
 				BB7FF84B2C2CADA4000B60C3 /* FileTree.swift in Sources */,
 				BBBD40AB2C3B5E9D008917CC /* GrantedPermissionsDirectoryImporter.swift in Sources */,
 				BB8561132C2CBB18001C11F8 /* CodeEditorLanguageResolver.swift in Sources */,
@@ -864,16 +919,21 @@
 				BB1405E02C360CC40036CFE8 /* ProgressTracker.swift in Sources */,
 				BBBD40B12C3C28E5008917CC /* AIProjectCreatorView.swift in Sources */,
 				BB8561252C2CD30A001C11F8 /* NarrowScopeControlButton.swift in Sources */,
+				BBBD40C62C3D6678008917CC /* IAPManager.swift in Sources */,
 				BBB7C76F2C3312D600BEDD07 /* FileBrowserView.swift in Sources */,
 				BB8561932C2F358B001C11F8 /* GPTModels.swift in Sources */,
 				BB8561222C2CD11E001C11F8 /* Constants.swift in Sources */,
+				BB53E33A2C4180BF003FC84E /* ConstantsUpdater.swift in Sources */,
 				BB8561992C2F846C001C11F8 /* CodeView.swift in Sources */,
 				BB8561822C2F2BC7001C11F8 /* AuthHelper.swift in Sources */,
+				BBBD40B52C3CA588008917CC /* BookmarkHelper.swift in Sources */,
 				BB7FF84D2C2CADE2000B60C3 /* FileNode.swift in Sources */,
+				BBBD40C92C3D6954008917CC /* UltraView.swift in Sources */,
 				BB85617C2C2F236A001C11F8 /* SocketStream.swift in Sources */,
 				BB8561A52C2F9787001C11F8 /* CodeViewModel.swift in Sources */,
 				BB617C762C39D35800263D3F /* CodeGenerationPlanExecutor.swift in Sources */,
 				BB617C572C389D1000263D3F /* HomeView.swift in Sources */,
+				BBBD40C22C3D63A4008917CC /* SettingsView.swift in Sources */,
 				BB7FF84F2C2CAE00000B60C3 /* FileSystemView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1043,6 +1103,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "AI+CODE";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1071,6 +1132,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "AI+CODE";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1204,7 +1266,7 @@
 			repositoryURL = "git@github.com:Condo97/CodeEditor.git";
 			requirement = {
 				kind = revision;
-				revision = 771a73404838f9b7d939ffebe221c5942cc2b90c;
+				revision = f36acb52739de677d24bdde00a229304112ba16c;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

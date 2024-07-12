@@ -24,7 +24,8 @@ struct MainView: View {
     
     private static let defaultMultiFileParentFileSystemName = "TempSelection"
     
-    
+
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.undoManager) private var undoManager
     
     @EnvironmentObject private var focusViewModel: FocusViewModel
@@ -43,6 +44,8 @@ struct MainView: View {
     @State private var currentCodeGenerationPlanTokenEstimation: Int?
     
     private static let additionalTokensForEstimationPerFile: Int = Constants.Additional.additionalTokensForEstimationPerFile
+    
+    @State private var navigationSplitViewColumnVisibility: NavigationSplitViewVisibility = .doubleColumn
     
     @State private var alertShowingWideScopeChatGenerationEstimatedTokensApproval: Bool = false
     @State private var alertShowingNotEnoughTokensToPerformTask: Bool = false
@@ -123,7 +126,7 @@ struct MainView: View {
     var body: some View {
         ZStack {
             VStack {
-                NavigationSplitView(sidebar: {
+                NavigationSplitView(columnVisibility: $navigationSplitViewColumnVisibility, sidebar: {
                     // File Browser
                     FileBrowserView(
                         baseDirectory: $directory,
@@ -133,7 +136,9 @@ struct MainView: View {
                 }) {
                     // Tab View
                     VStack(spacing: 0.0) {
-                        TabsView(tabsViewModel: tabsViewModel)
+                        if !tabsViewModel.openTabs.isEmpty {
+                            TabsView(tabsViewModel: tabsViewModel)
+                        }
                         
                         if let openTab = tabsViewModel.openTab {
                             // Code View
@@ -159,8 +164,15 @@ struct MainView: View {
                                 }
                         } else {
                             // No Tabs View
+//                            VStack {
+//                                CodeEditor(source: "")
+//                            }
                             VStack {
-                                CodeEditor(source: "")
+                                Text("Double-Click a File to Open")
+                                
+                                Button("Go Home") {
+                                    directory = ""
+                                }
                             }
                         }
                     }
@@ -544,6 +556,12 @@ struct MainView: View {
             DispatchQueue.main.async {
                 tabsViewModel.openTab = nil
                 tabsViewModel.openTabs = []
+            }
+        }
+        .onAppear {
+            // If directory isEmpty onAppear dismiss
+            if directory.isEmpty {
+                dismiss.callAsFunction()
             }
         }
 //        .onAppear {

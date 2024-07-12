@@ -109,13 +109,15 @@ class CodeViewModel: ObservableObject, Identifiable {
         
         // Get input for scope
         let input: String = {
+            let selectionPrefix = "THE SELECTION TO MODIFY:\n"
+            
             // If scope is highlight and highlighted text is valid set input to highlight
             if scope == .highlight && openedFileTextSelection.lowerBound >= openedFileText.startIndex && openedFileTextSelection.upperBound <= openedFileText.endIndex {
-                return String(openedFileText[openedFileTextSelection])
+                return selectionPrefix + String(openedFileText[openedFileTextSelection])
             }
             
             // Otherwise set to openedFileText
-            return openedFileText
+            return selectionPrefix + openedFileText
         }()
         
         // If scope is highlight and highlighted text is valid add opened file text to context

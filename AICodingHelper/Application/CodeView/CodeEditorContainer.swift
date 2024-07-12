@@ -15,6 +15,9 @@ struct CodeEditorContainer: View {
     @Binding var fileLanguage: CodeEditor.Language?
     
     
+    @EnvironmentObject private var codeEditorSettingsViewModel: CodeEditorSettingsViewModel
+    
+    
     @State private var fontSize: CGFloat? = nil
     
     
@@ -30,6 +33,7 @@ struct CodeEditorContainer: View {
                 source: $fileText,
                 selection: $fileSelection,
                 language: $fileLanguage,
+                theme: $codeEditorSettingsViewModel.theme,
                 fontSize: $fontSize,
 //                inset: CGSize(width: 0, height: 140.0),
                 allowsUndo: false)

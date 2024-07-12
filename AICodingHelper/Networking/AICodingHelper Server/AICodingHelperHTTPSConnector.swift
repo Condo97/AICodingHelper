@@ -39,6 +39,35 @@ class AICodingHelperHTTPSConnector {
         }
     }
     
+    static func getImportantConstants() async throws -> GetImportantConstantsResponse {
+        let (data, response) = try await HTTPSClient.post(
+            url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.getImportantConstants)")!,
+            body: BlankRequest(),
+            headers: nil)
+        
+        do {
+            let getImportantConstantsResponse = try JSONDecoder().decode(GetImportantConstantsResponse.self, from: data)
+            
+            return getImportantConstantsResponse
+        } catch {
+            // Catch as StatusResponse
+            let statusResponse = try JSONDecoder().decode(StatusResponse.self, from: data)
+            
+            // Regenerate AuthToken if necessary
+            if statusResponse.success == 5 {
+                Task {
+                    do {
+                        try await AuthHelper.regenerate()
+                    } catch {
+                        print("Error regenerating authToken in HTTPSConnector... \(error)")
+                    }
+                }
+            }
+            
+            throw error
+        }
+    }
+    
     static func getRemaining(request: AuthRequest) async throws -> GetRemainingTokensResponse {
         let (data, response) = try await HTTPSClient.post(
             url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.getRemainingTokens)")!,

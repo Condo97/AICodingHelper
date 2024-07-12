@@ -15,6 +15,7 @@ class FileTree: ObservableObject {
     init(rootDirectory: String) {
         let expandedPath = NSString(string: rootDirectory).expandingTildeInPath
         rootNode = FileNode(path: expandedPath)
+        rootNode.isExpanded = true
         rootNode.discoverChildren()
     }
     
@@ -25,6 +26,7 @@ class FileTree: ObservableObject {
         // Update the root node
         let expandedPath = NSString(string: newDirectory).expandingTildeInPath
         rootNode = FileNode(path: expandedPath)
+        rootNode.isExpanded = true
         rootNode.discoverChildren()
         
         // Reapply the expanded paths

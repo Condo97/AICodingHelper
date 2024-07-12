@@ -6,7 +6,7 @@
       "kind" : "remoteSourceControl",
       "location" : "git@github.com:Condo97/CodeEditor.git",
       "state" : {
-        "revision" : "771a73404838f9b7d939ffebe221c5942cc2b90c"
+        "revision" : "f36acb52739de677d24bdde00a229304112ba16c"
       }
     },
     {

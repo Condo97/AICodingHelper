@@ -3,7 +3,7 @@ import SwiftUI
 
 struct AICodingHelperAppCommands: Commands {
     
-    @Binding var baseFilepath: String
+    @State var availableCommands: AvailableCommands
     @Binding var isShowingNewAIProject: Bool
     @Binding var isShowingNewBlankProject: Bool
     @Binding var isShowingNewAIFilePopup: Bool
@@ -14,39 +14,45 @@ struct AICodingHelperAppCommands: Commands {
     
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
-            Button("New AI Project...", action: {
-                isShowingNewAIProject = true
-            })
+            if availableCommands.contains(.newAIProject) {
+                Button("New AI Project...", action: {
+                    isShowingNewAIProject = true
+                })
+            }
             
-            Button("New Blank Project...", action: {
-                isShowingNewBlankProject = true
-            })
+            if availableCommands.contains(.newBlankProject) {
+                Button("New Blank Project...", action: {
+                    isShowingNewBlankProject = true
+                })
+            }
             
-            
-            if baseFilepath.isEmpty {
-                // No Filepath Commands
-            } else {
-                // File Showing Commands
+            if availableCommands.contains(.newAIFile) {
                 Button(action: {
                     isShowingNewAIFilePopup = true
                 }) {
                     Text("New AI File...")
                 }
                 .keyboardShortcut("N", modifiers: .command)
-                
+            }
+            
+            if availableCommands.contains(.newBlankFile) {
                 Button("New Blank File...") {
                     isShowingNewBlankFilePopup = true
                 }
                 .keyboardShortcut("N", modifiers: [.shift, .command])
-                
+            }
+            
+            if availableCommands.contains(.newFolder) {
                 Button("New Folder...") {
                     isShowingNewFolderPopup = true
                 }
                 .keyboardShortcut("N", modifiers: [.shift, .command, .option])
-                
-                Divider()
-                
-                Button("Open Folder...") {
+            }
+            
+            Divider()
+            
+            if availableCommands.contains(.openProject) {
+                Button("Open Project...") {
                     isShowingOpenFileImporter = true
                 }
                 .keyboardShortcut("O", modifiers: [.command])

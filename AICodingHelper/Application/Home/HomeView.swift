@@ -8,6 +8,8 @@ struct HomeView: View {
     @Binding var isShowingCreateBlankProject: Bool
     @Binding var isShowingOpenFileImporter: Bool
     
+    @FocusState private var focusedRecentProject
+    
     @State var softSelectedFilepath: String = ""
     
     var body: some View {
@@ -37,9 +39,9 @@ struct HomeView: View {
                                 .opacity(0.6)
                         }
                         .padding()
+                        .background(Colors.secondary)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .background(Colors.secondary)
                     .clipShape(RoundedRectangle(cornerRadius: 14.0))
                     
                     Button(action: {
@@ -61,9 +63,9 @@ struct HomeView: View {
                                 .opacity(0.6)
                         }
                         .padding()
+                        .background(Colors.secondary)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .background(Colors.secondary)
                     .clipShape(RoundedRectangle(cornerRadius: 14.0))
                     
                     Button(action: {
@@ -79,9 +81,9 @@ struct HomeView: View {
                                 .opacity(0.6)
                         }
                         .padding()
+                        .background(Colors.secondary)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .background(Colors.secondary)
                     .clipShape(RoundedRectangle(cornerRadius: 14.0))
                 }
                 .padding()
@@ -92,7 +94,7 @@ struct HomeView: View {
                     VStack(alignment: .leading, spacing: 0.0) {
                         Spacer()
                         
-                        ForEach(UserDefaultsHelper.recentProjectFolders, id: \.self) { filepath in
+                        ForEach(RecentProjectHelper.recentProjectFilepaths, id: \.self) { filepath in
                             Button(action: {
                                 if filepath == softSelectedFilepath {
                                     // If user has soft selected the filepath the next click will open the file
@@ -120,12 +122,22 @@ struct HomeView: View {
                                             .foregroundStyle(Colors.elementText)
                                     }
                                 }
-                                .padding(.horizontal)
-                                .padding(.vertical, 8)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
                                 .frame(maxWidth: .infinity)
-                                .background(filepath == softSelectedFilepath ? Colors.element : Color.clear)
+                                .background(filepath == softSelectedFilepath ? Colors.element : Colors.secondary)
+                                .clipShape(RoundedRectangle(cornerRadius: 14.0))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
                             }
                             .buttonStyle(PlainButtonStyle())
+                            .focusable()
+                            .focused($focusedRecentProject)
+                            .focusEffectDisabledVersionCheck()
+                            .onDeleteCommand(perform: {
+                                // Remove from RecentProjectHelper recentProjectFilepaths
+                                RecentProjectHelper.recentProjectFilepaths.removeAll(where: {$0 == softSelectedFilepath})
+                            })
                             
                             Divider()
                         }
@@ -136,7 +148,7 @@ struct HomeView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .frame(width: 650.0, height: 500.0)
+        .frame(minWidth: 650.0, minHeight: 500.0)
     }
 }
 
