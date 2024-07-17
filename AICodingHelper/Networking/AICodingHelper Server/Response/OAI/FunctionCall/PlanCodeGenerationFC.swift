@@ -10,7 +10,7 @@ import Foundation
 
 struct PlanCodeGenerationFC: Codable {
     
-    struct Step: Codable {
+    struct Step: Codable, Identifiable {
         
         enum ActionType: String, Codable {
             case edit
@@ -18,11 +18,12 @@ struct PlanCodeGenerationFC: Codable {
             case delete
         }
         
-        let index: Int
-        let action: ActionType
-        let filepath: String
-        let editInstructions: String?
-        let referenceFilepaths: [String]?
+        let id = UUID()
+        var index: Int
+        var action: ActionType
+        var filepath: String
+        var editInstructions: String?
+        var referenceFilepaths: [String]?
         
         enum CodingKeys: String, CodingKey {
             case index
@@ -34,7 +35,7 @@ struct PlanCodeGenerationFC: Codable {
         
     }
     
-    let steps: [Step]
+    var steps: [Step]
     
     enum CodingKeys: String, CodingKey {
         case steps

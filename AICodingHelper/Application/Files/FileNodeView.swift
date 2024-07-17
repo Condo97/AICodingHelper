@@ -27,40 +27,22 @@ struct FileNodeView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 if node.isDirectory {
-                    Image(systemName: node.isExpanded ? "arrowtriangle.down.fill" : "arrowtriangle.right.fill")
-                        .padding(.trailing, 2)
-                        .onTapGesture {
-                            node.toggleExpansion()
-                        }
+                    HStack(spacing: 0.0) {
+                        Image(systemName: node.isExpanded ? "arrowtriangle.down.fill" : "arrowtriangle.right")
+                            .imageScale(.small)
+                        Image(systemName: node.isExpanded ? "folder" : "folder")
+                    }
                 } else {
-                    Image(systemName: "doc.fill")
-                        .foregroundColor(.blue)
-                        .padding(.trailing, 2)
+                    Image(systemName: "doc.text")
+//                        .foregroundColor(.blue)
                 }
                 
                 Text(node.name)
-                    .onTapGesture(count: 2) {
-                        if node.isDirectory {
-                            node.toggleExpansion()
-                        } else {
-                            onAction(.open, node.path)
-                        }
-                    }
-                    .simultaneousGesture(
-                        TapGesture(count: 1)
-                            .onEnded {
-                                if NSEvent.modifierFlags.contains(.shift) {
-                                    selectedFilepaths.append(node.path)
-                                } else {
-                                    selectedFilepaths = [node.path]
-                                }
-                            }
-                    )
                 
                 Spacer()
             }
             .padding(.leading, CGFloat(level) * 15)
-            .padding(.vertical, 2)
+            .padding(.vertical, 3)
             .background(
                 focusViewModel.focus == .browser
                 ? Colors.element.opacity(selectedFilepaths.contains(node.path) ? 0.3 : hovering ? 0.1 : 0)
@@ -75,6 +57,23 @@ struct FileNodeView: View {
                     focusViewModel.focus = .browser
                 }
             }
+            .onTapGesture(count: 2) {
+                if node.isDirectory {
+                    node.toggleExpansion()
+                } else {
+                    onAction(.open, node.path)
+                }
+            }
+            .simultaneousGesture(
+                TapGesture(count: 1)
+                    .onEnded {
+                        if NSEvent.modifierFlags.contains(.shift) {
+                            selectedFilepaths.append(node.path)
+                        } else {
+                            selectedFilepaths = [node.path]
+                        }
+                    }
+            )
             .onDrag { NSItemProvider(object: NSString(string: node.path)) }
             .onDrop(of: [.text], isTargeted: nil) { providers in
                 if let provider = providers.first {
@@ -179,6 +178,5 @@ struct FileNodeView: View {
         }
     }
     
-    
-    
 }
+

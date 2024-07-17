@@ -10,21 +10,30 @@ import Foundation
 
 class CodeGenerationPlanExecutor {
 
-    static func generateAndRefactor(authToken: String, plan: CodeGenerationPlan) async throws {
+    static func generateAndRefactor(authToken: String, openAIKey: String?, plan: CodeGenerationPlan, progressTracker: ProgressTracker) async throws {
+        // Setup progresTracker
+        await MainActor.run {
+            progressTracker.startEstimation(totalTasks: plan.planFC.steps.compactMap({$0.action == .edit}).count)
+        }
+        
+        // Generate and refactor
         try await generateAndRefactor(
             authToken: authToken,
+            openAIKey: openAIKey,
             model: plan.model,
             systemMessage: plan.editActionSystemMessage,
             instructions: plan.instructions,
             copyCurrentFilesToTempFiles: plan.copyCurrentFilesToTempFiles,
-            planFC: plan.planFC)
+            planFC: plan.planFC,
+            progressTracker: progressTracker)
     }
     
-    static func generateAndRefactor(authToken: String, model: GPTModels, systemMessage: String, instructions: String, copyCurrentFilesToTempFiles: Bool, planFC: PlanCodeGenerationFC) async throws {
+    static func generateAndRefactor(authToken: String, openAIKey: String?, model: GPTModels, systemMessage: String, instructions: String, copyCurrentFilesToTempFiles: Bool, planFC: PlanCodeGenerationFC, progressTracker: ProgressTracker) async throws {
         for step in planFC.steps {
             do {
                 try await executeStep(
                     authToken: authToken,
+                    openAIKey: openAIKey,
                     model: model,
                     systemMessage: systemMessage,
                     instructions: instructions,
@@ -33,14 +42,19 @@ class CodeGenerationPlanExecutor {
             } catch {
                 print("Error executing step in CodeGenerationPlanExecutor, continuing... \(error)")
             }
+            
+            await MainActor.run {
+                progressTracker.completeTask()
+            }
         }
     }
     
-    static func executeStep(authToken: String, model: GPTModels, systemMessage: String, instructions: String, copyCurrentFileToTempFile: Bool, step: PlanCodeGenerationFC.Step) async throws {
+    static func executeStep(authToken: String, openAIKey: String?, model: GPTModels, systemMessage: String, instructions: String, copyCurrentFileToTempFile: Bool, step: PlanCodeGenerationFC.Step) async throws {
         switch step.action {
         case .edit:
             try await performEdit(
                 authToken: authToken,
+                openAIKey: openAIKey,
                 model: model,
                 systemMessage: systemMessage,
                 instructions: instructions,
@@ -56,14 +70,34 @@ class CodeGenerationPlanExecutor {
     }
     
     static func performCreate(filepath: String) {
-        FileManager.default.createFile(atPath: filepath, contents: nil)
+        // Create file if there is an extension, otherwise create a folder
+        let fileManager = FileManager.default
+        let pathExtension = (filepath as NSString).pathExtension
+        
+        if pathExtension.isEmpty {
+            // No extension present, create a folder
+            do {
+                try fileManager.createDirectory(atPath: filepath, withIntermediateDirectories: true, attributes: nil)
+                print("Folder created at \(filepath)")
+            } catch {
+                print("Error creating folder at \(filepath): \(error)")
+            }
+        } else {
+            // Extension is present, create a file
+            let created = fileManager.createFile(atPath: filepath, contents: nil, attributes: nil)
+            if created {
+                print("File created at \(filepath)")
+            } else {
+                print("Error creating file at \(filepath)")
+            }
+        }
     }
     
     static func performDelete(filepath: String) throws {
         try FileManager.default.trashItem(at: URL(fileURLWithPath: filepath), resultingItemURL: nil)
     }
     
-    static func performEdit(authToken: String, model: GPTModels, systemMessage: String, instructions: String, editPrompt: String?, editFilepath: String, referenceFilepaths: [String]?, copyCurrentFileToTempFile: Bool) async throws {
+    static func performEdit(authToken: String, openAIKey: String?, model: GPTModels, systemMessage: String, instructions: String, editPrompt: String?, editFilepath: String, referenceFilepaths: [String]?, copyCurrentFileToTempFile: Bool) async throws {
         // Build context by getting text from referenceFilepaths joined as the first and only string
         var context: [String] = []
         if let referenceFilepaths = referenceFilepaths {
@@ -76,6 +110,7 @@ class CodeGenerationPlanExecutor {
         // Refactor file
         try await EditFileCodeGenerator.refactorFile(
             authToken: authToken,
+            openAIKey: openAIKey,
             model: model,
             additionalInput: additionalInput,
             filepath: editFilepath,

@@ -20,14 +20,15 @@ struct MainView: View {
     @Binding var popupShowingCreateAIFile: Bool
     @Binding var popupShowingCreateBlankFile: Bool
     @Binding var popupShowingCreateFolder: Bool
+    @Binding var popupShowingOpenProject: Bool
     
     
     private static let defaultMultiFileParentFileSystemName = "TempSelection"
     
 
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.undoManager) private var undoManager
     
+    @EnvironmentObject private var activeSubscriptionUpdater: ActiveSubscriptionUpdater
     @EnvironmentObject private var focusViewModel: FocusViewModel
     @EnvironmentObject private var remainingUpdater: RemainingUpdater
     
@@ -52,10 +53,14 @@ struct MainView: View {
     
     @State private var alertShowingNewBlankFile: Bool = false
     @State private var alertShowingNewFolder: Bool = false
+    @State private var alertShowingInvalidOpenAIKey: Bool = false
+    
+    @State private var isShowingUltraView: Bool = false
     
     @State private var codeViewHasSelection: Bool = false
     
     @State private var isLoadingBrowser: Bool = false
+    @State private var isLoadingGenerationPlan: Bool = false
     
     @State private var newEntityName: String = ""
     
@@ -127,12 +132,16 @@ struct MainView: View {
         ZStack {
             VStack {
                 NavigationSplitView(columnVisibility: $navigationSplitViewColumnVisibility, sidebar: {
-                    // File Browser
-                    FileBrowserView(
-                        baseDirectory: $directory,
-                        selectedFilepaths: $fileBrowserSelectedFilepaths,
-                        tabsViewModel: tabsViewModel)
-                    .frame(idealWidth: 250.0)
+                    ZStack {
+                        if !directory.isEmpty {
+                            // File Browser
+                            FileBrowserView(
+                                baseDirectory: $directory,
+                                selectedFilepaths: $fileBrowserSelectedFilepaths,
+                                tabsViewModel: tabsViewModel)
+                        }
+                    }
+                    .navigationSplitViewColumnWidth(ideal: 250.0)
                 }) {
                     // Tab View
                     VStack(spacing: 0.0) {
@@ -156,22 +165,20 @@ struct MainView: View {
                                 codeViewModel: openTabBinding,
                                 hasSelection: $codeViewHasSelection)
                                 .focused($editorFocused)
-                                .onChange(of: editorFocused) { newValue in
-                                    if newValue {
-                                        // Change focus in focusViewModel when focus state is changed
-                                        focusViewModel.focus = .editor
-                                    }
-                                }
                         } else {
                             // No Tabs View
 //                            VStack {
 //                                CodeEditor(source: "")
 //                            }
                             VStack {
-                                Text("Double-Click a File to Open")
+                                if directory.isEmpty {
+                                    Text("No Project Selected")
+                                } else {
+                                    Text("Double-Click a File to Open")
+                                }
                                 
-                                Button("Go Home") {
-                                    directory = ""
+                                Button("Open Project \(Image(systemName: "folder"))") {
+                                    popupShowingOpenProject = true
                                 }
                             }
                         }
@@ -198,12 +205,38 @@ struct MainView: View {
                     
                     ToolbarItem {
                         Button(action: {
-                            
+                            isShowingUltraView = true
                         }) {
                             HStack {
                                 Text(Image(systemName: "sparkles"))
                                 
-                                Text("\(remainingUpdater.remaining ?? 0)")
+                                if activeSubscriptionUpdater.openAIKey != nil {
+                                    if activeSubscriptionUpdater.openAIKeyIsValid {
+                                        Text("Using OpenAI Key")
+                                    } else {
+                                        Text("\(remainingUpdater.remaining ?? 0)")
+                                        
+                                        Image(systemName: "exclamationmark.circle")
+                                            .imageScale(.medium)
+                                            .foregroundStyle(.red)
+                                    }
+                                } else {
+                                    Text("\(remainingUpdater.remaining ?? 0)")
+                                }
+                            }
+                        }
+                    }
+                }
+                .overlay {
+                    if isLoadingGenerationPlan {
+                        ZStack {
+                            Colors.foreground
+                                .opacity(0.6)
+                            
+                            VStack {
+                                Text("Planning Generation...")
+                                
+                                ProgressView()
                             }
                         }
                     }
@@ -212,7 +245,7 @@ struct MainView: View {
                     if isLoadingBrowser {
                         ZStack {
                             Colors.foreground
-                                .opacity(0.4)
+                                .opacity(0.6)
                             
                             VStack {
                                 Text("**Performing \(currentScope.wrappedValue.name.capitalized) AI Task**")
@@ -254,7 +287,11 @@ struct MainView: View {
                         scope: currentScope,
                         focusViewModel: focusViewModel,
                         selectedFilepaths: $fileBrowserSelectedFilepaths,
-                        onSubmit: { actionType, userInput, generateOptions in
+                        onSubmit: { actionType, userInput, referenceFilepaths, generateOptions in
+                            // Reset values
+                            self.currentCodeGenerationPlan = nil
+                            self.currentCodeGenerationPlanTokenEstimation = nil
+                            
                             Task {
                                 // Ensure authToken
                                 let authToken: String
@@ -265,6 +302,9 @@ struct MainView: View {
                                     print("Error ensuring authToken in MainView... \(error)")
                                     return
                                 }
+                                
+                                // Get openAIKey
+                                let openAIKey: String? = activeSubscriptionUpdater.openAIKeyIsValid ? activeSubscriptionUpdater.openAIKey : nil
                                 
                                 // Create alternateContextFilepaths and add directory if generateOptions useEntireProject is included
                                 var alternateContextFilepaths: [String] = []
@@ -277,16 +317,16 @@ struct MainView: View {
                                 case .project:
                                     // Generate with wide scope generator using single object array with directory as filepaths
                                     do {
-                                        // Defer setting isLoadingBrowser to false
+                                        // Defer setting isLoadingGenerationPlan to false
                                         defer {
                                             DispatchQueue.main.async {
-                                                self.isLoadingBrowser = false
+                                                self.isLoadingGenerationPlan = false
                                             }
                                         }
                                         
-                                        // Set isLoadingBrowser to true
+                                        // Set isLoadingGenerationPlan to true
                                         DispatchQueue.main.async {
-                                            self.isLoadingBrowser = true
+                                            self.isLoadingGenerationPlan = true
                                         }
                                         
                                         // Create instructions from action aiPrompt and userInput
@@ -295,10 +335,11 @@ struct MainView: View {
                                         // Create Plan and set to currentCodeGenerationPlan
                                         guard let plan = try await CodeGenerationPlanner.makePlan(
                                             authToken: authToken,
+                                            openAIKey: openAIKey,
                                             model: .GPT4o,
                                             editActionSystemMessage: Constants.Additional.editSystemMessage,
                                             instructions: instructions,
-                                            selectedFilepaths: [directory],
+                                            selectedFilepaths: referenceFilepaths,//[directory],
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
                                             // TODO: Handle Errors
                                             print("Could not unwrap plan after making plan in MainView!")
@@ -320,6 +361,10 @@ struct MainView: View {
                                         DispatchQueue.main.async {
                                             self.alertShowingWideScopeChatGenerationEstimatedTokensApproval = true
                                         }
+                                    } catch GenerationError.invalidOpenAIKey {
+                                        // If received invalidOpenAIKey set openAIKeyIsValid to false and show alert
+                                        activeSubscriptionUpdater.openAIKeyIsValid = false
+                                        alertShowingInvalidOpenAIKey = true
                                     } catch {
                                         // TODO: Handle Errors
                                         print("Error building refactor files task in MainView... \(error)")
@@ -327,16 +372,16 @@ struct MainView: View {
                                 case .multifile:
                                     // Generate with wide scope generator
                                     do {
-                                        // Defer setting isLoadingBrowser to false
+                                        // Defer setting isLoadingGenerationPlan to false
                                         defer {
                                             DispatchQueue.main.async {
-                                                self.isLoadingBrowser = false
+                                                self.isLoadingGenerationPlan = false
                                             }
                                         }
                                         
-                                        // Set isLoadingBrowser to true
+                                        // Set isLoadingGenerationPlan to true
                                         DispatchQueue.main.async {
-                                            self.isLoadingBrowser = true
+                                            self.isLoadingGenerationPlan = true
                                         }
                                         
                                         // Create instructions from action aiPrompt and userInput
@@ -345,10 +390,11 @@ struct MainView: View {
                                         // Create Plan and set to currentCodeGenerationPlan
                                         guard let plan = try await CodeGenerationPlanner.makePlan(
                                             authToken: authToken,
+                                            openAIKey: openAIKey,
                                             model: .GPT4o,
                                             editActionSystemMessage: Constants.Additional.editSystemMessage,
                                             instructions: instructions,
-                                            selectedFilepaths: fileBrowserSelectedFilepaths,
+                                            selectedFilepaths: referenceFilepaths,//fileBrowserSelectedFilepaths,
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
                                             // TODO: Handle Errors
                                             print("Could not unwrap plan after making plan in MainView!")
@@ -370,6 +416,10 @@ struct MainView: View {
                                         DispatchQueue.main.async {
                                             self.alertShowingWideScopeChatGenerationEstimatedTokensApproval = true
                                         }
+                                    } catch GenerationError.invalidOpenAIKey {
+                                        // If received invalidOpenAIKey set openAIKeyIsValid to false and show alert
+                                        activeSubscriptionUpdater.openAIKeyIsValid = false
+                                        alertShowingInvalidOpenAIKey = true
                                     } catch {
                                         // TODO: Handle Errors
                                         print("Error refactoring files in MainView... \(error)")
@@ -386,6 +436,7 @@ struct MainView: View {
                                         // Generate with openTab narrow scope generator
                                         await openTab.generate(
                                             authToken: authToken,
+                                            openAIKey: openAIKey,
                                             remainingTokens: remainingUpdater.remaining,
                                             action: actionType,
                                             additionalInput: userInput,
@@ -412,16 +463,16 @@ struct MainView: View {
                                     
                                     // Generate with wide scope generator
                                     do {
-                                        // Defer setting isLoadingBrowser to false
+                                        // Defer setting isLoadingGenerationPlan to false
                                         defer {
                                             DispatchQueue.main.async {
-                                                self.isLoadingBrowser = false
+                                                self.isLoadingGenerationPlan = false
                                             }
                                         }
                                         
-                                        // Set isLoadingBrowser to true
+                                        // Set isLoadingGenerationPlan to true
                                         DispatchQueue.main.async {
-                                            self.isLoadingBrowser = true
+                                            self.isLoadingGenerationPlan = true
                                         }
                                         
                                         // Create instructions from action aiPrompt and userInput
@@ -430,10 +481,11 @@ struct MainView: View {
                                         // Create Plan and set to currentCodeGenerationPlan
                                         guard let plan = try await CodeGenerationPlanner.makePlan(
                                             authToken: authToken,
+                                            openAIKey: openAIKey,
                                             model: .GPT4o,
                                             editActionSystemMessage: Constants.Additional.editSystemMessage,
                                             instructions: instructions,
-                                            selectedFilepaths: [firstFileBrowserSelectedFilepath],
+                                            selectedFilepaths: referenceFilepaths,//[firstFileBrowserSelectedFilepath],
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
                                             // TODO: Handle Errors
                                             print("Could not unwrap plan after making plan in MainView!")
@@ -443,18 +495,24 @@ struct MainView: View {
                                             self.currentCodeGenerationPlan = plan
                                         }
                                         
-                                        // Estimate tokens for plan and set to currentCodeGenerationPlanTokenEstimation
-                                        let tokenEstimation = await TokenCalculator.getEstimatedTokens(
-                                            authToken: authToken,
-                                            codeGenerationPlan: plan)
-                                        DispatchQueue.main.async {
-                                            self.currentCodeGenerationPlanTokenEstimation = tokenEstimation
+                                        // If openAIKey is nil or empty estimate tokens for plan and set to currentCodeGenerationPlanTokenEstimation, otherwise set token estimation to nil
+                                        if openAIKey == nil || openAIKey!.isEmpty {
+                                            let tokenEstimation = await TokenCalculator.getEstimatedTokens(
+                                                authToken: authToken,
+                                                codeGenerationPlan: plan)
+                                            DispatchQueue.main.async {
+                                                self.currentCodeGenerationPlanTokenEstimation = tokenEstimation
+                                            }
                                         }
                                         
                                         // Set alertShowingWideScopeChatGenerationEstimatedTokensApproval alert to true
                                         DispatchQueue.main.async {
                                             self.alertShowingWideScopeChatGenerationEstimatedTokensApproval = true
                                         }
+                                    } catch GenerationError.invalidOpenAIKey {
+                                        // If received invalidOpenAIKey set openAIKeyIsValid to false and show alert
+                                        activeSubscriptionUpdater.openAIKeyIsValid = false
+                                        alertShowingInvalidOpenAIKey = true
                                     } catch {
                                         // TODO: Handle Errors
                                         print("Error refactoring files in MainView... \(error)")
@@ -468,6 +526,7 @@ struct MainView: View {
                                         
                                         await openTab.generate(
                                             authToken: authToken,
+                                            openAIKey: openAIKey,
                                             remainingTokens: remainingUpdater.remaining,
                                             action: actionType,
                                             additionalInput: userInput,
@@ -499,6 +558,7 @@ struct MainView: View {
                     .padding()
                     .padding(.bottom)
                     .padding(.bottom)
+                    .disabled(isLoadingBrowser || isLoadingGenerationPlan)
                 }
             }
         }
@@ -507,27 +567,71 @@ struct MainView: View {
 //                Text("")
 //            }
 //        }
-        .alert("Approve AI Task", isPresented: $alertShowingWideScopeChatGenerationEstimatedTokensApproval, actions: {
-            Button("Cancel", role: .cancel) {
-                
+        .sheet(isPresented: $alertShowingWideScopeChatGenerationEstimatedTokensApproval) {
+            var currentCodeGenerationPlanUnwrappedBinding: Binding<CodeGenerationPlan> {
+                Binding(
+                    get: {
+                        currentCodeGenerationPlan ?? CodeGenerationPlan(
+                            model: .GPT4o,
+                            editActionSystemMessage: "",
+                            instructions: "",
+                            copyCurrentFilesToTempFiles: true,
+                            planFC: PlanCodeGenerationFC(steps: []))
+                    },
+                    set: { value in
+                        currentCodeGenerationPlan = value
+                    })
             }
-            
-            Button("Start") {
-                refactorFiles()
-            }
-        }, message: {
-            Text("Task Details:\n")
+            ApprovePlanView(
+                plan: currentCodeGenerationPlanUnwrappedBinding,
+                tokenEstimation: $currentCodeGenerationPlanTokenEstimation,
+                onCancel: {
+                    // Set current code generation plan and its token estimation to nil
+                    currentCodeGenerationPlan = nil
+                    currentCodeGenerationPlanTokenEstimation = nil
+                    
+                    // Dismiss
+                    alertShowingWideScopeChatGenerationEstimatedTokensApproval = false
+                },
+                onStart: {
+                    // Refactor files
+                    refactorFiles()
+                    
+                    // Dismiss
+                    alertShowingWideScopeChatGenerationEstimatedTokensApproval = false
+                })
+        }
+        .sheet(isPresented: $isShowingUltraView) {
+            UltraView(isPresented: $isShowingUltraView)
+        }
+//        .alert("Approve AI Task", isPresented: $alertShowingWideScopeChatGenerationEstimatedTokensApproval, actions: {
+//            Button("Cancel", role: .cancel) {
+//                
+//            }
+//            
+//            Button("Start") {
+//                refactorFiles()
+//            }
+//        }, message: {
+//            Text("Task Details:\n")
+////            +
+////            Text("• \(currentWideScopeChatGenerationTask?.filepathCodeGenerationPrompts.count ?? -1) Files\n")
 //            +
-//            Text("• \(currentWideScopeChatGenerationTask?.filepathCodeGenerationPrompts.count ?? -1) Files\n")
-            +
-            Text("• \(currentCodeGenerationPlanTokenEstimation ?? -1) Est. Tokens")
-        })
+//            Text("• \(currentCodeGenerationPlanTokenEstimation ?? -1) Est. Tokens")
+//        })
         .alert("More Tokens Needed", isPresented: $alertShowingNotEnoughTokensToPerformTask, actions: {
             Button("Close") {
                 
             }
         }, message: {
             Text("Purchase more tokens to perform this AI task.")
+        })
+        .alert("Invalid OpenAI Key", isPresented: $alertShowingInvalidOpenAIKey, actions: {
+            Button("Close") {
+                
+            }
+        }, message: {
+            Text("Your Open AI API Key is invalid and your plan will be used until it is updated. If you believe this is an error please report it!")
         })
         .aiFileCreatorPopup(
             isPresented: $popupShowingCreateAIFile,
@@ -558,10 +662,18 @@ struct MainView: View {
                 tabsViewModel.openTabs = []
             }
         }
-        .onAppear {
-            // If directory isEmpty onAppear dismiss
-            if directory.isEmpty {
-                dismiss.callAsFunction()
+        .onChange(of: editorFocused) { newValue in
+            if newValue {
+                // Change focus in focusViewModel when focus state is changed
+                focusViewModel.focus = .editor
+            }
+        }
+        .onReceive(focusViewModel.$focus) { newValue in
+            // Set editorFocused to reflect focusViewModel when changed if it does not
+            if newValue == .editor && !editorFocused {
+                editorFocused = true
+            } else if newValue != .editor && editorFocused {
+                editorFocused = false
             }
         }
 //        .onAppear {
@@ -612,11 +724,20 @@ struct MainView: View {
                 return
             }
             
+            // Get openAIKey
+            let openAIKey = activeSubscriptionUpdater.openAIKey
+            
             // Generate and refactor
             do {
                 try await CodeGenerationPlanExecutor.generateAndRefactor(
                     authToken: authToken,
-                    plan: currentCodeGenerationPlan)
+                    openAIKey: openAIKey,
+                    plan: currentCodeGenerationPlan,
+                    progressTracker: progressTracker)
+            } catch GenerationError.invalidOpenAIKey {
+                // If received invalidOpenAIKey set openAIKeyIsValid to false and show alert
+                activeSubscriptionUpdater.openAIKeyIsValid = false
+                alertShowingInvalidOpenAIKey = true
             } catch {
                 // TODO: Handle Errors
                 print("Error generating and refactoring çode in MainView... \(error)")
@@ -691,8 +812,10 @@ struct MainView: View {
         directory: .constant(NSString(string: "~/Downloads/test_dir").expandingTildeInPath),
         popupShowingCreateAIFile: .constant(false),
         popupShowingCreateBlankFile: .constant(false),
-        popupShowingCreateFolder: .constant(false))
+        popupShowingCreateFolder: .constant(false),
+        popupShowingOpenProject: .constant(false))
         .frame(width: 650, height: 600)
+        .environmentObject(ActiveSubscriptionUpdater())
         .environmentObject(FocusViewModel())
         .environmentObject(RemainingUpdater())
     

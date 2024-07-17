@@ -10,9 +10,11 @@ import Foundation
 struct AuthRequest: Codable {
     
     var authToken: String
+    var openAIKey: String?
     
     enum CodingKeys: String, CodingKey {
         case authToken
+        case openAIKey
     }
     
 }

@@ -35,6 +35,8 @@ class CodeViewModel: ObservableObject, Identifiable {
     @Published var narrowScopeStreamGenerationInitialSelection: Range<String.Index>?
     @Published var narrowScopeStreamGenerationCursorPosition: String.Index?
     
+    @Published var invalidOpenAIKey: Bool = false
+    
     @Published var isLoading: Bool = false
     @Published var isStreaming: Bool = false
     
@@ -90,7 +92,7 @@ class CodeViewModel: ObservableObject, Identifiable {
     }
     
     @MainActor // What does this do? It seems to silence the undoManager data race beacuse of not using a main actor isolated context but what is it actually doing
-    func generate(authToken: String, remainingTokens: Int, action: ActionType, additionalInput: String?, scope: Scope, context: [String], undoManager: UndoManager?, options: GenerateOptions) async {
+    func generate(authToken: String, openAIKey: String?, remainingTokens: Int, action: ActionType, additionalInput: String?, scope: Scope, context: [String], undoManager: UndoManager?, options: GenerateOptions) async {
         // Defer setting isLoading and isStreaming to false
         defer {
             DispatchQueue.main.async {
@@ -134,26 +136,27 @@ class CodeViewModel: ObservableObject, Identifiable {
         
         // TODO: Include entire project in context generate option implemetation
         
-        // Calculate tokens with action, input, context, and additionalInput to ensure it is within user's remaining tokens, otherwise throw estimatedTokensHitsLimit error
-        let estimatedTokens: Int
-        do {
-            estimatedTokens = try await TokenCalculator.calculateTokens(
-                authToken: authToken,
-                inputs: [
-                    action.aiPrompt,
-                    input,
-                ] + context + [
-                    additionalInput ?? ""
-                ]
-            )
-            
-            if estimatedTokens + additionalTokensForEstimation > remainingTokens {
-                throw GenerationError.estimatedTokensHitsLimit
+        // If no openAIKey, calculate tokens with action, input, context, and additionalInput to ensure it is within user's remaining tokens, otherwise throw estimatedTokensHitsLimit error
+        if openAIKey == nil || openAIKey!.isEmpty {
+            do {
+                let estimatedTokens = try await TokenCalculator.calculateTokens(
+                    authToken: authToken,
+                    inputs: [
+                        action.aiPrompt,
+                        input,
+                    ] + context + [
+                        additionalInput ?? ""
+                    ]
+                )
+                
+                if estimatedTokens + additionalTokensForEstimation > remainingTokens {
+                    throw GenerationError.estimatedTokensHitsLimit
+                }
+            } catch {
+                // TODO: Handle Errors
+                print("Error estimating tokens in CodeViewModel... \(error)")
+                return
             }
-        } catch {
-            // TODO: Handle Errors
-            print("Error estimating tokens in CodeViewModel... \(error)")
-            return
         }
         
         // Do generation
@@ -161,6 +164,7 @@ class CodeViewModel: ObservableObject, Identifiable {
             var firstChat = true
             try await ChatGenerator.streamChat(
                 authToken: authToken,
+                openAIKey: openAIKey,
                 model: .GPT4o,
                 action: action,
                 additionalInput: additionalInput,
@@ -237,6 +241,8 @@ class CodeViewModel: ObservableObject, Identifiable {
                         }
                     }
                 })
+        } catch GenerationError.invalidOpenAIKey {
+            invalidOpenAIKey = true
         } catch {
             print("Error streaming chat in CodeViewModel... \(error)")
         }

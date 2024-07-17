@@ -30,10 +30,14 @@ struct CodeView: View {
     
     @Environment(\.undoManager) private var undoManager
     
+    @EnvironmentObject private var activeSubscriptionUpdater: ActiveSubscriptionUpdater
+    
     
 //    @StateObject private var chatGenerator: NarrowScopeChatGenerator = NarrowScopeChatGenerator() // This is probably what is causing the view to receive updates when generating a chat and not deleing before generating chat and undoing, but now it works with codeViewMode_ObservedObject just fine
     
     @State private var cachedCodeEditorContainerFileTextForUndo: String? // The previous code editor container file text, since we're updating the undo on selection, to prevent undo from saving when the selector is moved
+    
+    @State private var alertShowingInvalidOpenAIKey: Bool = false
     
     
     private var isCodeEditorEditingDisabled: Binding<Bool> {
@@ -142,6 +146,20 @@ struct CodeView: View {
         .onChange(of: codeViewModel.openedFileTextSelection) { newValue in
             hasSelection = newValue.lowerBound != newValue.upperBound
         }
+        .onReceive(codeViewModel.$invalidOpenAIKey) { newValue in
+            if newValue {
+                // Set openAIKeyIsValid to false and show alert
+                activeSubscriptionUpdater.openAIKeyIsValid = false
+                alertShowingInvalidOpenAIKey = true
+            }
+        }
+        .alert("Invalid OpenAI Key", isPresented: $alertShowingInvalidOpenAIKey, actions: {
+            Button("Close") {
+                
+            }
+        }, message: {
+            Text("Your Open AI API Key is invalid and your plan will be used until it is updated. If you believe this is an error please report it!")
+        })
 //        .onReceive(chatGenerator.$isStreaming) { newValue in
 //            // Do scope related actions on successful stream start TODO: Make sure isStreaming only sets true on successful stream
 //            switch chatGenerator.streamingChatScope {
@@ -274,6 +292,7 @@ struct CodeView: View {
         codeViewModel: .constant(CodeViewModel(filepath: "~/Downloads/test_dir/testing.txt")),
         hasSelection: .constant(false)
     )
+    .environmentObject(ActiveSubscriptionUpdater())
     .environmentObject(UndoUpdater())
 }
 

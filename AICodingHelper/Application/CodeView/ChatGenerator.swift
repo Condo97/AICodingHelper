@@ -11,7 +11,7 @@ import Foundation
 
 class ChatGenerator {
     
-    static func streamChat(authToken: String, model: GPTModels, action: ActionType, additionalInput: String?, language: CodeEditor.Language?, responseFormat: ResponseFormatType = .text, context: [String], input: String, scope: Scope, stream: (GetChatResponse) async -> Void) async throws {
+    static func streamChat(authToken: String, openAIKey: String?, model: GPTModels, action: ActionType, additionalInput: String?, language: CodeEditor.Language?, responseFormat: ResponseFormatType = .text, context: [String], input: String, scope: Scope, stream: (GetChatResponse) async -> Void) async throws {
         /* Should look something like
          System
             You are an AI coding helper service in an IDE so you must format all your responses in <language> code that would be valid in an IDE.
@@ -40,6 +40,7 @@ class ChatGenerator {
         
         try await streamChat(
             authToken: authToken,
+            openAIKey: openAIKey,
             model: model,
             responseFormat: responseFormat,
             systemMessage: systemMessage,
@@ -48,7 +49,7 @@ class ChatGenerator {
             stream: stream)
     }
     
-    static func streamChat(authToken: String, model: GPTModels, responseFormat: ResponseFormatType, systemMessage: String?, userInputs: [String], scope: Scope, stream: (GetChatResponse) async -> Void) async throws {
+    static func streamChat(authToken: String, openAIKey: String?, model: GPTModels, responseFormat: ResponseFormatType, systemMessage: String?, userInputs: [String], scope: Scope, stream: (GetChatResponse) async -> Void) async throws {
         // Create messages and add messages
         var messages: [OAIChatCompletionRequestMessage] = []
         
@@ -69,6 +70,7 @@ class ChatGenerator {
         // Create getChatRequest
         let getChatRequest = GetChatRequest(
             authToken: authToken,
+            openAIKey: openAIKey,
             chatCompletionRequest: OAIChatCompletionRequest(
                 model: model.rawValue,
                 responseFormat: OAIChatCompletionRequestResponseFormat(type: .text),
@@ -123,6 +125,7 @@ class ChatGenerator {
                     let statusResponse = try JSONDecoder().decode(StatusResponse.self, from: messageData)
                     
                     if statusResponse.success == 5 {
+                        // Regenerate authToken
                         Task {
                             do {
                                 try await AuthHelper.regenerate()
@@ -130,6 +133,9 @@ class ChatGenerator {
                                 print("Error regenerating authToken in HTTPSConnector... \(error)")
                             }
                         }
+                    } else if statusResponse.success == 60 {
+                        // Invalid response so throw invalidOpenAIKey
+                        throw GenerationError.invalidOpenAIKey
                     }
                     continue
                 }
@@ -150,9 +156,13 @@ class ChatGenerator {
 //                    }
 //                }
             }
-        } catch {
-            // TODO: Handle Errors, though this may be normal
-            print("Error parsing stream response in AICodingHelperNetworkClient... \(error)")
+        } catch let error as NSError {
+            if error.domain == NSPOSIXErrorDomain && error.code == 57 {
+                // TODO: Handle Errors, though this may be normal
+                print("Error parsing stream response in AICodingHelperNetworkClient... \(error)")
+            }
+            
+            throw error
         }
     }
     

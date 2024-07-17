@@ -11,5 +11,6 @@ import Foundation
 enum GenerationError: Error {
     
     case estimatedTokensHitsLimit
+    case invalidOpenAIKey
     
 }

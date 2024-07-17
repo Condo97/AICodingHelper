@@ -12,6 +12,8 @@ struct GrantedPermissionsDirectoryImporter: ViewModifier {
     
     @Binding var isPresented: Bool
     @Binding var filepath: String
+    @State var canChooseDirectories: Bool = true
+    @State var canChooseFiles: Bool = false
     
     
     func body(content: Content) -> some View {
@@ -32,9 +34,9 @@ struct GrantedPermissionsDirectoryImporter: ViewModifier {
         dialog.title = "Choose a file"
         dialog.showsResizeIndicator = true
         dialog.showsHiddenFiles = false
-        dialog.canChooseDirectories = true
+        dialog.canChooseDirectories = canChooseDirectories
         dialog.canCreateDirectories = true
-        dialog.canChooseFiles = false
+        dialog.canChooseFiles = canChooseFiles
         dialog.allowsMultipleSelection = false
         
         if dialog.runModal() == .OK, let url = dialog.url {
@@ -47,9 +49,9 @@ struct GrantedPermissionsDirectoryImporter: ViewModifier {
 
 extension View {
     
-    func grantedPermissionsDirectoryImporter(isPresented: Binding<Bool>, filepath: Binding<String>) -> some View {
+    func grantedPermissionsDirectoryImporter(isPresented: Binding<Bool>, filepath: Binding<String>, canChooseDirectories: Bool = true, canChooseFiles: Bool = false) -> some View {
         self
-            .modifier(GrantedPermissionsDirectoryImporter(isPresented: isPresented, filepath: filepath))
+            .modifier(GrantedPermissionsDirectoryImporter(isPresented: isPresented, filepath: filepath, canChooseDirectories: canChooseDirectories, canChooseFiles: canChooseFiles))
     }
     
 }

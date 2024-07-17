@@ -25,32 +25,33 @@ struct WideScopeControlButton<Content: View>: View {
             ZStack {
                 foregroundColor
                 
-                HStack {
+                VStack {
                     label
                         .frame(width: 28.0, height: 28.0)
+                        .padding(4)
                     
-                    VStack(alignment: .leading) {
-                        title
-                            .lineLimit(1)
-                        
-                        if let subtitle = subtitle {
-                            Text(subtitle)
-                                .lineLimit(2)
-                                .font(.system(size: 12.0, weight: .light))
-                                .minimumScaleFactor(0.5)
-                                .opacity(0.6)
-                        }
+                    title
+                        .lineLimit(1)
+                    
+                    if let subtitle = subtitle {
+                        Text(subtitle)
+                            .lineLimit(2)
+//                            .font(.system(size: 10.0))
+                            .font(.footnote)
+                            .opacity(0.6)
+                            .frame(height: 38.0, alignment: .top)
                     }
                     
-                    Spacer()
-                    
-                    Image(systemName: "chevron.right")
-                        .imageScale(.medium)
+//                    Spacer()
+//                    
+//                    Image(systemName: "chevron.right")
+//                        .imageScale(.medium)
                 }
+                .padding(4)
             }
 //            .frame(width: size.width, height: size.height)
         }
-        .buttonStyle(PlainButtonStyle())
+//        .buttonStyle(PlainButtonStyle())
         .help(hoverDescription)
     }
     
@@ -63,7 +64,7 @@ struct WideScopeControlButton<Content: View>: View {
             .font(.system(size: 100.0))
             .minimumScaleFactor(0.01),
         title: .constant(Text("Comment")),
-        subtitle: .constant("Analyze all comments."),
+        subtitle: .constant("Analyze all comments and stuff this should be two lines.."),
         hoverDescription: .constant("Analyze all comments."),
         foregroundColor: Colors.foreground,
         action: {

@@ -14,11 +14,14 @@ struct AIProjectCreatorContainer: View {
     
     // Basically the goal is to create a code generation plan to create a project, we will need to generate a plan and then generate the project so there may need to be a popup confirming how many tokens it will be, or maybe it can just be on that window like the submit button could be diabled and be changed with a different word like it could say "Next...", which will then disable the button and either an alert will pop up confirming the generation or the next button will become "Generate" and the token count will appear to the left but idk I like the first one better lol
     
+    @EnvironmentObject private var activeSubscriptionUpdater: ActiveSubscriptionUpdater
     @EnvironmentObject private var remainingUpdater: RemainingUpdater
     
     private static let generatePlanBaseInstructions: String = "Create a plan to create and code a project for the specified requirements."
     private static let createProjectSystemMessage: String = "You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language. You only respond to the one requested file. All files will be provided in turn, so therefore you will respond to each individually to preserve correct formatting to the IDE since it is looking to receive one file."// "You are creating a project in code for the specified language formatted for an IDE."
     private static let additionalTokensForEstimationPerFile: Int = Constants.Additional.additionalTokensForEstimationPerFile
+    
+    @StateObject private var progressTracker: ProgressTracker = ProgressTracker()
     
     @State private var referenceFilepaths: [String] = []
     @State private var language: String = ""
@@ -70,12 +73,16 @@ struct AIProjectCreatorContainer: View {
                         return
                     }
                     
+                    // Get openAIKey
+                    let openAIKey = activeSubscriptionUpdater.openAIKey
+                    
                     // Get instructions from generatePlanBaseInstructions + "\nProject Base Filepath " + baseFilepath + "\nProject Language " + language + "\n" + userPrompt or blank if empty
                     let instructions = AIProjectCreatorContainer.generatePlanBaseInstructions + "\nProject Base Filepath " + baseFilepath + "\nProject Language " + language + (userPrompt.isEmpty ? "" : "\n" + userPrompt)
                     
                     // Generate plan
                     guard let plan = try await CodeGenerationPlanner.makePlan(
                         authToken: authToken,
+                        openAIKey: openAIKey,
                         model: .GPT4o,
                         editActionSystemMessage: AIProjectCreatorContainer.createProjectSystemMessage,
                         instructions: instructions,
@@ -183,11 +190,16 @@ struct AIProjectCreatorContainer: View {
             return
         }
         
+        // Get openAIKey
+        let openAIKey = activeSubscriptionUpdater.openAIKey
+        
         // Generate and refactor
         do {
             try await CodeGenerationPlanExecutor.generateAndRefactor(
                 authToken: authToken,
-                plan: plan)
+                openAIKey: openAIKey,
+                plan: plan,
+                progressTracker: progressTracker)
         } catch {
             // TODO: Handle Errors
             print("Error generating and refactoring çode in MainView... \(error)")

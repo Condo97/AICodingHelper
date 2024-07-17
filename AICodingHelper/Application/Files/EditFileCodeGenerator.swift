@@ -10,7 +10,7 @@ import Foundation
 
 class EditFileCodeGenerator {
     
-    static func refactorFiles(authToken: String, wideScopeChatGenerationTask: CodeGenerationTask, progressTracker: ProgressTracker) async throws {
+    static func refactorFiles(authToken: String, openAIKey: String?, wideScopeChatGenerationTask: CodeGenerationTask, progressTracker: ProgressTracker) async throws {
         // Start progress tracker estimation with totalTasks as filepathCodeGenerationPrompts count
         DispatchQueue.main.async {
             progressTracker.startEstimation(totalTasks: wideScopeChatGenerationTask.filepathCodeGenerationPrompts.count)
@@ -21,6 +21,7 @@ class EditFileCodeGenerator {
             do {
                 try await refactorFile(
                     authToken: authToken,
+                    openAIKey: openAIKey,
                     filepathCodeGenerationPrompt: filepathCodeGenerationPrompt,
                     copyCurrentFileToTempFile: wideScopeChatGenerationTask.copyCurrentFilesToTempFiles)
             } catch {
@@ -34,10 +35,11 @@ class EditFileCodeGenerator {
         }
     }
     
-    static func refactorFile(authToken: String, filepathCodeGenerationPrompt: FilepathCodeGenerationPrompt, copyCurrentFileToTempFile: Bool) async throws {
+    static func refactorFile(authToken: String, openAIKey: String?, filepathCodeGenerationPrompt: FilepathCodeGenerationPrompt, copyCurrentFileToTempFile: Bool) async throws {
         // Refactor files
         try await refactorFile(
             authToken: authToken,
+            openAIKey: openAIKey,
             model: filepathCodeGenerationPrompt.model,
             additionalInput: filepathCodeGenerationPrompt.additionalInput,
             filepath: filepathCodeGenerationPrompt.filepath,
@@ -51,7 +53,7 @@ class EditFileCodeGenerator {
      
      Automatically uses filepaths as context unless alternateContextFilepaths are specified
      */
-    static func refactorFile(authToken: String, model: GPTModels, additionalInput: String, filepath: String, systemMessage: String, context: [String], copyCurrentFileToTempFile: Bool) async throws {
+    static func refactorFile(authToken: String, openAIKey: String?, model: GPTModels, additionalInput: String, filepath: String, systemMessage: String, context: [String], copyCurrentFileToTempFile: Bool) async throws {
         // Get file contents using currentItemPath
         let fileContents = try String(contentsOfFile: filepath)
         
@@ -61,6 +63,7 @@ class EditFileCodeGenerator {
         // Get chat with userInputs as context with promptInput at the bottom
         let fileChatResponse = try await getChat(
             authToken: authToken,
+            openAIKey: openAIKey,
             model: model,
             systemMessage: systemMessage,
             userInputs: context + [promptInput])
@@ -79,7 +82,7 @@ class EditFileCodeGenerator {
         
     
     
-    private static func getChat(authToken: String, model: GPTModels, systemMessage: String?, userInputs: [String]) async throws -> String? {
+    private static func getChat(authToken: String, openAIKey: String?, model: GPTModels, systemMessage: String?, userInputs: [String]) async throws -> String? {
         // Create inputMessages array
         var inputMessages: [OAIChatCompletionRequestMessage] = []
         
@@ -108,6 +111,7 @@ class EditFileCodeGenerator {
         // Create GetChatRequest
         let getChatRequest = GetChatRequest(
             authToken: authToken,
+            openAIKey: openAIKey,
             chatCompletionRequest: OAIChatCompletionRequest(
                 model: model.rawValue,
                 stream: true,
@@ -169,6 +173,8 @@ class EditFileCodeGenerator {
                                 print("Error regenerating authToken in HTTPSConnector... \(error)")
                             }
                         }
+                    } else if statusResponse.success == 60 {
+                        throw GenerationError.invalidOpenAIKey
                     }
                     continue
                 }

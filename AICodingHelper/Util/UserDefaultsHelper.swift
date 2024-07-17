@@ -154,4 +154,13 @@ class UserDefaultsHelper {
         }
     }
     
+    static var shareURL: String {
+        get {
+            UserDefaults.standard.string(forKey: Constants.UserDefaults.shareURL) ?? Constants.Additional.defaultShareURL
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Constants.UserDefaults.shareURL)
+        }
+    }
+    
 }

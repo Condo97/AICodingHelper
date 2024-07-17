@@ -21,6 +21,13 @@
 		BB1405F32C36CE330036CFE8 /* GenerationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405F22C36CE330036CFE8 /* GenerationError.swift */; };
 		BB53E33A2C4180BF003FC84E /* ConstantsUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB53E3392C4180BF003FC84E /* ConstantsUpdater.swift */; };
 		BB53E33C2C418125003FC84E /* GetImportantConstantsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB53E33B2C418125003FC84E /* GetImportantConstantsResponse.swift */; };
+		BB53E33F2C418E33003FC84E /* PlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB53E33E2C418E33003FC84E /* PlanView.swift */; };
+		BB57C24C2C458236008ED9F6 /* RegisterTransactionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C24B2C458236008ED9F6 /* RegisterTransactionRequest.swift */; };
+		BB57C24E2C45C700008ED9F6 /* IsActiveResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C24D2C45C700008ED9F6 /* IsActiveResponse.swift */; };
+		BB57C2502C45CA74008ED9F6 /* Subscriptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C24F2C45CA74008ED9F6 /* Subscriptions.swift */; };
+		BB57C2522C45CB35008ED9F6 /* ActiveSubscriptionUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2512C45CB35008ED9F6 /* ActiveSubscriptionUpdater.swift */; };
+		BB57C2542C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2532C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift */; };
+		BB57C2572C480F83008ED9F6 /* OpenAIKeyEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2562C480F83008ED9F6 /* OpenAIKeyEntryView.swift */; };
 		BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4D2C36D29200263D3F /* TokenCalculator.swift */; };
 		BB617C502C38568400263D3F /* FilepathCodeGenerationPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */; };
 		BB617C542C3885D900263D3F /* FileActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C532C3885D900263D3F /* FileActions.swift */; };
@@ -77,7 +84,7 @@
 		BB8561702C2F2080001C11F8 /* ChatCompletionDelta.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB85616F2C2F2080001C11F8 /* ChatCompletionDelta.swift */; };
 		BB8561742C2F20AD001C11F8 /* ChatCompletionUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561732C2F20AD001C11F8 /* ChatCompletionUsage.swift */; };
 		BB8561762C2F20C1001C11F8 /* GetChatResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561752C2F20C1001C11F8 /* GetChatResponse.swift */; };
-		BB8561782C2F2161001C11F8 /* NarrowScopeChatGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561772C2F2161001C11F8 /* NarrowScopeChatGenerator.swift */; };
+		BB8561782C2F2161001C11F8 /* ChatGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561772C2F2161001C11F8 /* ChatGenerator.swift */; };
 		BB85617A2C2F234B001C11F8 /* WebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561792C2F234B001C11F8 /* WebSocketClient.swift */; };
 		BB85617C2C2F236A001C11F8 /* SocketStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB85617B2C2F236A001C11F8 /* SocketStream.swift */; };
 		BB85617E2C2F2392001C11F8 /* AICodingHelperWebSocketConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB85617D2C2F2392001C11F8 /* AICodingHelperWebSocketConnector.swift */; };
@@ -131,6 +138,13 @@
 		BBBD40C42C3D655C008917CC /* ProductUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40C32C3D655C008917CC /* ProductUpdater.swift */; };
 		BBBD40C62C3D6678008917CC /* IAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40C52C3D6678008917CC /* IAPManager.swift */; };
 		BBBD40C92C3D6954008917CC /* UltraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBD40C82C3D6954008917CC /* UltraView.swift */; };
+		BBEA61F92C4191980078B4C4 /* PlanStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBEA61F82C4191980078B4C4 /* PlanStepView.swift */; };
+		BBEA61FB2C41988D0078B4C4 /* PlanStepFilepathEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBEA61FA2C41988D0078B4C4 /* PlanStepFilepathEditView.swift */; };
+		BBEA61FD2C419D6F0078B4C4 /* CreatePlanStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBEA61FC2C419D6F0078B4C4 /* CreatePlanStepView.swift */; };
+		BBEA61FF2C419E180078B4C4 /* PlanStepEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBEA61FE2C419E180078B4C4 /* PlanStepEditView.swift */; };
+		BBEA62012C41A0FF0078B4C4 /* PlanStepReorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBEA62002C41A0FF0078B4C4 /* PlanStepReorderView.swift */; };
+		BBEA62032C41A1470078B4C4 /* PlanStepPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBEA62022C41A1470078B4C4 /* PlanStepPreviewView.swift */; };
+		BBEA62052C41A5680078B4C4 /* ApprovePlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBEA62042C41A5680078B4C4 /* ApprovePlanView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -165,6 +179,13 @@
 		BB1405F22C36CE330036CFE8 /* GenerationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationError.swift; sourceTree = "<group>"; };
 		BB53E3392C4180BF003FC84E /* ConstantsUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstantsUpdater.swift; sourceTree = "<group>"; };
 		BB53E33B2C418125003FC84E /* GetImportantConstantsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetImportantConstantsResponse.swift; sourceTree = "<group>"; };
+		BB53E33E2C418E33003FC84E /* PlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanView.swift; sourceTree = "<group>"; };
+		BB57C24B2C458236008ED9F6 /* RegisterTransactionRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterTransactionRequest.swift; sourceTree = "<group>"; };
+		BB57C24D2C45C700008ED9F6 /* IsActiveResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IsActiveResponse.swift; sourceTree = "<group>"; };
+		BB57C24F2C45CA74008ED9F6 /* Subscriptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subscriptions.swift; sourceTree = "<group>"; };
+		BB57C2512C45CB35008ED9F6 /* ActiveSubscriptionUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSubscriptionUpdater.swift; sourceTree = "<group>"; };
+		BB57C2532C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidateOpenAIKeyResponse.swift; sourceTree = "<group>"; };
+		BB57C2562C480F83008ED9F6 /* OpenAIKeyEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIKeyEntryView.swift; sourceTree = "<group>"; };
 		BB617C4D2C36D29200263D3F /* TokenCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenCalculator.swift; sourceTree = "<group>"; };
 		BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilepathCodeGenerationPrompt.swift; sourceTree = "<group>"; };
 		BB617C532C3885D900263D3F /* FileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActions.swift; sourceTree = "<group>"; };
@@ -226,7 +247,7 @@
 		BB85616F2C2F2080001C11F8 /* ChatCompletionDelta.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCompletionDelta.swift; sourceTree = "<group>"; };
 		BB8561732C2F20AD001C11F8 /* ChatCompletionUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCompletionUsage.swift; sourceTree = "<group>"; };
 		BB8561752C2F20C1001C11F8 /* GetChatResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetChatResponse.swift; sourceTree = "<group>"; };
-		BB8561772C2F2161001C11F8 /* NarrowScopeChatGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrowScopeChatGenerator.swift; sourceTree = "<group>"; };
+		BB8561772C2F2161001C11F8 /* ChatGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGenerator.swift; sourceTree = "<group>"; };
 		BB8561792C2F234B001C11F8 /* WebSocketClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketClient.swift; sourceTree = "<group>"; };
 		BB85617B2C2F236A001C11F8 /* SocketStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketStream.swift; sourceTree = "<group>"; };
 		BB85617D2C2F2392001C11F8 /* AICodingHelperWebSocketConnector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICodingHelperWebSocketConnector.swift; sourceTree = "<group>"; };
@@ -279,6 +300,13 @@
 		BBBD40C32C3D655C008917CC /* ProductUpdater.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProductUpdater.swift; sourceTree = "<group>"; };
 		BBBD40C52C3D6678008917CC /* IAPManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IAPManager.swift; sourceTree = "<group>"; };
 		BBBD40C82C3D6954008917CC /* UltraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UltraView.swift; sourceTree = "<group>"; };
+		BBEA61F82C4191980078B4C4 /* PlanStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanStepView.swift; sourceTree = "<group>"; };
+		BBEA61FA2C41988D0078B4C4 /* PlanStepFilepathEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanStepFilepathEditView.swift; sourceTree = "<group>"; };
+		BBEA61FC2C419D6F0078B4C4 /* CreatePlanStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePlanStepView.swift; sourceTree = "<group>"; };
+		BBEA61FE2C419E180078B4C4 /* PlanStepEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanStepEditView.swift; sourceTree = "<group>"; };
+		BBEA62002C41A0FF0078B4C4 /* PlanStepReorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanStepReorderView.swift; sourceTree = "<group>"; };
+		BBEA62022C41A1470078B4C4 /* PlanStepPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanStepPreviewView.swift; sourceTree = "<group>"; };
+		BBEA62042C41A5680078B4C4 /* ApprovePlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApprovePlanView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -313,6 +341,29 @@
 				BB1405F22C36CE330036CFE8 /* GenerationError.swift */,
 			);
 			path = Error;
+			sourceTree = "<group>";
+		};
+		BB53E33D2C418E22003FC84E /* Plan */ = {
+			isa = PBXGroup;
+			children = (
+				BB53E33E2C418E33003FC84E /* PlanView.swift */,
+				BBEA62042C41A5680078B4C4 /* ApprovePlanView.swift */,
+				BBEA62002C41A0FF0078B4C4 /* PlanStepReorderView.swift */,
+				BBEA61FC2C419D6F0078B4C4 /* CreatePlanStepView.swift */,
+				BBEA61F82C4191980078B4C4 /* PlanStepView.swift */,
+				BBEA62022C41A1470078B4C4 /* PlanStepPreviewView.swift */,
+				BBEA61FE2C419E180078B4C4 /* PlanStepEditView.swift */,
+				BBEA61FA2C41988D0078B4C4 /* PlanStepFilepathEditView.swift */,
+			);
+			path = Plan;
+			sourceTree = "<group>";
+		};
+		BB57C2552C480F60008ED9F6 /* OpenAIKeyEntry */ = {
+			isa = PBXGroup;
+			children = (
+				BB57C2562C480F83008ED9F6 /* OpenAIKeyEntryView.swift */,
+			);
+			path = OpenAIKeyEntry;
 			sourceTree = "<group>";
 		};
 		BB617C552C389D0100263D3F /* Home */ = {
@@ -429,6 +480,8 @@
 				BB617C552C389D0100263D3F /* Home */,
 				BB7FF83F2C2CAAFA000B60C3 /* Main */,
 				BB8561232C2CD2F9001C11F8 /* NarrowScopeControls */,
+				BB57C2552C480F60008ED9F6 /* OpenAIKeyEntry */,
+				BB53E33D2C418E22003FC84E /* Plan */,
 				BBBD40BE2C3D638D008917CC /* Settings */,
 				BB8561AA2C305250001C11F8 /* Tabs */,
 				BBBD40C72C3D6949008917CC /* Ultra */,
@@ -493,6 +546,7 @@
 				BB617C532C3885D900263D3F /* FileActions.swift */,
 				BB617C732C39CE1B00263D3F /* CodeGenerationTask.swift */,
 				BB617C7B2C39DDDC00263D3F /* CodeGenerationPlan.swift */,
+				BB57C24F2C45CA74008ED9F6 /* Subscriptions.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -538,8 +592,8 @@
 		BB85612D2C2F047E001C11F8 /* OAI */ = {
 			isa = PBXGroup;
 			children = (
-				BB617C6C2C39C64800263D3F /* FunctionCall */,
 				BB617C5D2C39AC3100263D3F /* Completion */,
+				BB617C6C2C39C64800263D3F /* FunctionCall */,
 				BB617C5C2C39AC1400263D3F /* Stream */,
 			);
 			path = OAI;
@@ -565,6 +619,7 @@
 				BB85618B2C2F2D6D001C11F8 /* BlankRequest.swift */,
 				BB85612E2C2F04FB001C11F8 /* GetChatRequest.swift */,
 				BB617C582C39AB9400263D3F /* FunctionCallRequest.swift */,
+				BB57C24B2C458236008ED9F6 /* RegisterTransactionRequest.swift */,
 			);
 			path = Request;
 			sourceTree = "<group>";
@@ -580,6 +635,8 @@
 				BB85617F2C2F2B98001C11F8 /* StatusResponse.swift */,
 				BB617C5A2C39ABE200263D3F /* OAICompletionResponse.swift */,
 				BB53E33B2C418125003FC84E /* GetImportantConstantsResponse.swift */,
+				BB57C24D2C45C700008ED9F6 /* IsActiveResponse.swift */,
+				BB57C2532C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift */,
 			);
 			path = Response;
 			sourceTree = "<group>";
@@ -605,6 +662,7 @@
 				BBBD40C32C3D655C008917CC /* ProductUpdater.swift */,
 				BBBD40C52C3D6678008917CC /* IAPManager.swift */,
 				BB53E3392C4180BF003FC84E /* ConstantsUpdater.swift */,
+				BB57C2512C45CB35008ED9F6 /* ActiveSubscriptionUpdater.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -612,13 +670,13 @@
 		BB8561A12C2F9313001C11F8 /* CodeView */ = {
 			isa = PBXGroup;
 			children = (
+				BB8561772C2F2161001C11F8 /* ChatGenerator.swift */,
 				BB8561102C2CB78D001C11F8 /* CodeEditorContainer.swift */,
 				BBBD40BC2C3D6324008917CC /* CodeEditorSettingsViewModel.swift */,
 				BB8561122C2CBB18001C11F8 /* CodeEditorLanguageResolver.swift */,
 				BB8561172C2CC246001C11F8 /* CodeEditorLanguageSelector.swift */,
 				BB8561982C2F846C001C11F8 /* CodeView.swift */,
 				BB8561A42C2F9787001C11F8 /* CodeViewModel.swift */,
-				BB8561772C2F2161001C11F8 /* NarrowScopeChatGenerator.swift */,
 			);
 			path = CodeView;
 			sourceTree = "<group>";
@@ -822,11 +880,13 @@
 				BBB7C7622C32571200BEDD07 /* WideScopeControlsView.swift in Sources */,
 				BB85618C2C2F2D6D001C11F8 /* BlankRequest.swift in Sources */,
 				BB85618A2C2F2D49001C11F8 /* RegisterUserResponse.swift in Sources */,
+				BB57C2572C480F83008ED9F6 /* OpenAIKeyEntryView.swift in Sources */,
 				BB617C742C39CE1B00263D3F /* CodeGenerationTask.swift in Sources */,
 				BB617C7C2C39DDDC00263D3F /* CodeGenerationPlan.swift in Sources */,
-				BB8561782C2F2161001C11F8 /* NarrowScopeChatGenerator.swift in Sources */,
+				BB8561782C2F2161001C11F8 /* ChatGenerator.swift in Sources */,
 				BB1405E62C362B450036CFE8 /* BindingUserDefaultsHelper.swift in Sources */,
 				BB1405E22C360D180036CFE8 /* FileCounter.swift in Sources */,
+				BB57C2522C45CB35008ED9F6 /* ActiveSubscriptionUpdater.swift in Sources */,
 				BB8561762C2F20C1001C11F8 /* GetChatResponse.swift in Sources */,
 				BB8561572C2F0F6A001C11F8 /* OAIChatCompletionRequestMessageContent.swift in Sources */,
 				BB617C6B2C39C4B300263D3F /* OAIChatCompletionResponseMessageToolCall.swift in Sources */,
@@ -840,6 +900,7 @@
 				BB617C7E2C39DFA600263D3F /* CodeGenerationPlanner.swift in Sources */,
 				BBB7C7522C31B13500BEDD07 /* FileMonitor.swift in Sources */,
 				BB8561162C2CBD7D001C11F8 /* Colors.swift in Sources */,
+				BBEA61F92C4191980078B4C4 /* PlanStepView.swift in Sources */,
 				BBBD40C42C3D655C008917CC /* ProductUpdater.swift in Sources */,
 				BB8561182C2CC246001C11F8 /* CodeEditorLanguageSelector.swift in Sources */,
 				BB1405EC2C362CBD0036CFE8 /* GetRemainingTokensResponse.swift in Sources */,
@@ -877,6 +938,8 @@
 				BBB7C75A2C31FD2E00BEDD07 /* FileSystem.swift in Sources */,
 				BBBD40B72C3CA61D008917CC /* RecentProjectHelper.swift in Sources */,
 				BBBD40AF2C3C28C5008917CC /* AIProjectCreatorContainer.swift in Sources */,
+				BBEA62012C41A0FF0078B4C4 /* PlanStepReorderView.swift in Sources */,
+				BBEA61FD2C419D6F0078B4C4 /* CreatePlanStepView.swift in Sources */,
 				BB8E17BE2C3366D100E3F463 /* GenerateOptions.swift in Sources */,
 				BBBD40A42C3B21E4008917CC /* BlankFileCreatorPopup.swift in Sources */,
 				BB8561632C2F16ED001C11F8 /* OAIChatCompletionRequestMessageContentType.swift in Sources */,
@@ -887,8 +950,10 @@
 				BB1405F32C36CE330036CFE8 /* GenerationError.swift in Sources */,
 				BB8E17CA2C3599D800E3F463 /* FocusableContent.swift in Sources */,
 				BBBD40A82C3B4F96008917CC /* AICodingHelperAppCommands.swift in Sources */,
+				BB57C2542C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift in Sources */,
 				BBBD40A22C3B12FB008917CC /* AIFileCreatorContainer.swift in Sources */,
 				BB8561532C2F0EEF001C11F8 /* OAIChatCompletionRequestMessage.swift in Sources */,
+				BBEA61FB2C41988D0078B4C4 /* PlanStepFilepathEditView.swift in Sources */,
 				BB1405E42C362A1E0036CFE8 /* UserDefaultsHelper.swift in Sources */,
 				BBB7C7682C330ABE00BEDD07 /* FileCopier.swift in Sources */,
 				BB8561742C2F20AD001C11F8 /* ChatCompletionUsage.swift in Sources */,
@@ -901,6 +966,7 @@
 				BB617C592C39AB9400263D3F /* FunctionCallRequest.swift in Sources */,
 				BB53E33C2C418125003FC84E /* GetImportantConstantsResponse.swift in Sources */,
 				BB617C802C3A043200263D3F /* OAIChatCompletionResponseMessageToolCallFunction.swift in Sources */,
+				BB57C24E2C45C700008ED9F6 /* IsActiveResponse.swift in Sources */,
 				BBBD40B92C3CBD79008917CC /* DismissOnAppearView.swift in Sources */,
 				BB617C702C39C6DE00263D3F /* FunctionCallParser.swift in Sources */,
 				BB8561882C2F2D22001C11F8 /* HTTPSClient.swift in Sources */,
@@ -909,16 +975,21 @@
 				BB7FF84B2C2CADA4000B60C3 /* FileTree.swift in Sources */,
 				BBBD40AB2C3B5E9D008917CC /* GrantedPermissionsDirectoryImporter.swift in Sources */,
 				BB8561132C2CBB18001C11F8 /* CodeEditorLanguageResolver.swift in Sources */,
+				BBEA61FF2C419E180078B4C4 /* PlanStepEditView.swift in Sources */,
 				BB8E17C02C3369A900E3F463 /* WideScopeControlSwitch.swift in Sources */,
 				BB85614D2C2F097F001C11F8 /* CompletionRole.swift in Sources */,
 				BB8561802C2F2B98001C11F8 /* StatusResponse.swift in Sources */,
 				BB617C612C39C38000263D3F /* OAIChatCompletionResponseUsage.swift in Sources */,
+				BB53E33F2C418E33003FC84E /* PlanView.swift in Sources */,
 				BB8561AE2C305276001C11F8 /* TabView.swift in Sources */,
 				BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */,
 				BB8E17C82C349B2900E3F463 /* TabsViewModel.swift in Sources */,
 				BB1405E02C360CC40036CFE8 /* ProgressTracker.swift in Sources */,
+				BBEA62032C41A1470078B4C4 /* PlanStepPreviewView.swift in Sources */,
+				BBEA62052C41A5680078B4C4 /* ApprovePlanView.swift in Sources */,
 				BBBD40B12C3C28E5008917CC /* AIProjectCreatorView.swift in Sources */,
 				BB8561252C2CD30A001C11F8 /* NarrowScopeControlButton.swift in Sources */,
+				BB57C2502C45CA74008ED9F6 /* Subscriptions.swift in Sources */,
 				BBBD40C62C3D6678008917CC /* IAPManager.swift in Sources */,
 				BBB7C76F2C3312D600BEDD07 /* FileBrowserView.swift in Sources */,
 				BB8561932C2F358B001C11F8 /* GPTModels.swift in Sources */,
@@ -933,6 +1004,7 @@
 				BB8561A52C2F9787001C11F8 /* CodeViewModel.swift in Sources */,
 				BB617C762C39D35800263D3F /* CodeGenerationPlanExecutor.swift in Sources */,
 				BB617C572C389D1000263D3F /* HomeView.swift in Sources */,
+				BB57C24C2C458236008ED9F6 /* RegisterTransactionRequest.swift in Sources */,
 				BBBD40C22C3D63A4008917CC /* SettingsView.swift in Sources */,
 				BB7FF84F2C2CAE00000B60C3 /* FileSystemView.swift in Sources */,
 			);

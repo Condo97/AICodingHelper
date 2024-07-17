@@ -15,7 +15,7 @@ class CodeGenerationPlanGenerator {
     private static let systemMessage = "Create a detailed plan to prompt GPT in a series of steps to complete the task in the prompt. You may edit, create, delete files. Please make sure to include as many files as necessary for each step in the plan as they are the only files available for GPT to reference. You must include an index, action, and filepath. If making edits include reference_filepaths if any and edit_instructions with instructions to make the edits. When creating a file make sure to edit it in a future step to give it content." // TODO: Maybe remove the last sentence here
     private static let additionalInstructionMessage = ""
     
-    static func generatePlan(authToken: String, model: GPTModels, instructions: String, selectedFilepaths: [String]) async throws -> PlanCodeGenerationFC? {
+    static func generatePlan(authToken: String, openAIKey: String?, model: GPTModels, instructions: String, selectedFilepaths: [String]) async throws -> PlanCodeGenerationFC? {
         // Well this should be creating a list of tasks with CodeGenerationTask or something, right? So it should be before accepting codeGenerationTask. Also this one should not be added to the user's token count and stuff
         
         // Create input from additionalInstructionsMessage + instructions + selectedFilepaths
@@ -23,15 +23,17 @@ class CodeGenerationPlanGenerator {
         
         return try await planCodeGeneration(
             authToken: authToken,
+            openAIKey: openAIKey,
             model: model,
             input: input,
             systemMessage: systemMessage)
     }
     
-    static func planCodeGeneration(authToken: String, model: GPTModels, input: String, systemMessage: String) async throws -> PlanCodeGenerationFC? {
+    static func planCodeGeneration(authToken: String, openAIKey: String?, model: GPTModels, input: String, systemMessage: String) async throws -> PlanCodeGenerationFC? {
         // Create PlanCodeGenerationRequest
         let planCodeGenerationRequest = FunctionCallRequest(
             authToken: authToken,
+            openAIKey: openAIKey,
             model: model,
             systemMessage: systemMessage,
             input: input)

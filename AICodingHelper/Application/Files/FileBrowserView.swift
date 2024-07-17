@@ -14,15 +14,25 @@ struct FileBrowserView: View {
     @ObservedObject var tabsViewModel: TabsViewModel
     
     
-//    @State private var currentWideScope: Scope?
+    @State private var searchText: String = ""
     
     
     var body: some View {
-        ZStack {
+        VStack(spacing: 0.0) {
+            // Search bar
+            HStack {
+                Image(systemName: "magnifyingglass")
+                TextField("Search", text: $searchText)
+                    .textFieldStyle(.plain)
+            }
+            .padding()
+            .background(Color.foreground)
+            
             // File Browser
             TabAddingFileSystemView(
                 directory: $baseDirectory,
                 selectedFilepaths: $selectedFilepaths,
+                searchText: $searchText,
                 tabsViewModel: tabsViewModel)
         }
     }
@@ -35,5 +45,6 @@ struct FileBrowserView: View {
         baseDirectory: .constant("~/Downloads/test_dir"),
         selectedFilepaths: .constant([]),
         tabsViewModel: TabsViewModel())
+    .environmentObject(FocusViewModel())
     
 }

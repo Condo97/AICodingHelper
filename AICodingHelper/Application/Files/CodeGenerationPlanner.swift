@@ -12,10 +12,11 @@ class CodeGenerationPlanner {
     
     // Creates CodeGenerationPlan
     
-    static func makePlan(authToken: String, model: GPTModels, editActionSystemMessage: String, instructions: String, selectedFilepaths: [String], copyCurrentFilesToTempFiles: Bool) async throws -> CodeGenerationPlan? {
+    static func makePlan(authToken: String, openAIKey: String?, model: GPTModels, editActionSystemMessage: String, instructions: String, selectedFilepaths: [String], copyCurrentFilesToTempFiles: Bool) async throws -> CodeGenerationPlan? {
         // Ensure unwrap PlanCodeGenerationFC from CodeGenerationPlanGenerator
         guard let planCodeGeneratorFC = try await CodeGenerationPlanGenerator.generatePlan(
             authToken: authToken,
+            openAIKey: openAIKey,
             model: model,
             instructions: instructions,
             selectedFilepaths: selectedFilepaths) else {

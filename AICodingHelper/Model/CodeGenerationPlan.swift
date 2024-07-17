@@ -10,10 +10,10 @@ import Foundation
 
 struct CodeGenerationPlan {
     
-    let model: GPTModels
-    let editActionSystemMessage: String
-    let instructions: String // The action aiPrompt and userInput
-    let copyCurrentFilesToTempFiles: Bool
-    let planFC: PlanCodeGenerationFC
+    var model: GPTModels
+    var editActionSystemMessage: String
+    var instructions: String // The action aiPrompt and userInput
+    var copyCurrentFilesToTempFiles: Bool
+    var planFC: PlanCodeGenerationFC
     
 }

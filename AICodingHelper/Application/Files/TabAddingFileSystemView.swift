@@ -11,6 +11,7 @@ struct TabAddingFileSystemView: View {
     
     @Binding var directory: String
     @Binding var selectedFilepaths: [String]
+    @Binding var searchText: String
     @ObservedObject var tabsViewModel: TabsViewModel
     
     @Environment(\.undoManager) var undoManager
@@ -46,6 +47,9 @@ struct TabAddingFileSystemView: View {
                         
                         // Set openTab to pathTab
                         tabsViewModel.openTab = pathTab
+                        
+                        // Set focus to editor
+                        focusViewModel.focus = .editor
                     }
                 case .rename:
                     renameFileNewName = URL(fileURLWithPath: path).lastPathComponent
@@ -119,6 +123,7 @@ struct TabAddingFileSystemView: View {
     TabAddingFileSystemView(
         directory: .constant(""),
         selectedFilepaths: .constant([]),
+        searchText: .constant(""),
         tabsViewModel: TabsViewModel()
     )
     

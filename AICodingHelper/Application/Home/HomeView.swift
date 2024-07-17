@@ -16,7 +16,7 @@ struct HomeView: View {
         VStack {
             HStack(spacing: 0.0) {
                 VStack(alignment: .leading) {
-                    Text("AICodingHelper")
+                    Text("AI+CODE")
                         .font(.title)
                         .fontWeight(.bold)
                     
@@ -146,6 +146,7 @@ struct HomeView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
+                .background(Colors.secondary)
             }
         }
         .frame(minWidth: 650.0, minHeight: 500.0)

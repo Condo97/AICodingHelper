@@ -68,6 +68,35 @@ class AICodingHelperHTTPSConnector {
         }
     }
     
+    static func getIsActive(request: AuthRequest) async throws -> IsActiveResponse {
+        let (data, response) = try await HTTPSClient.post(
+            url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.getIsActive)")!,
+            body: request,
+            headers: nil)
+        
+        do {
+            let isActiveResponse = try JSONDecoder().decode(IsActiveResponse.self, from: data)
+            
+            return isActiveResponse
+        } catch {
+            // Catch as StatusResponse
+            let statusResponse = try JSONDecoder().decode(StatusResponse.self, from: data)
+            
+            // Regenerate AuthToken if necessary
+            if statusResponse.success == 5 {
+                Task {
+                    do {
+                        try await AuthHelper.regenerate()
+                    } catch {
+                        print("Error regenerating authToken in HTTPSConnector... \(error)")
+                    }
+                }
+            }
+            
+            throw error
+        }
+    }
+    
     static func getRemaining(request: AuthRequest) async throws -> GetRemainingTokensResponse {
         let (data, response) = try await HTTPSClient.post(
             url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.getRemainingTokens)")!,
@@ -120,10 +149,29 @@ class AICodingHelperHTTPSConnector {
                         print("Error regenerating authToken in HTTPSConnector... \(error)")
                     }
                 }
+            } else if statusResponse.success == 60 {
+                throw GenerationError.invalidOpenAIKey
             }
             
             throw error
         }
+    }
+    
+    static func registerTransaction(authToken: String, transactionID: UInt64) async throws -> IsActiveResponse {
+        let request = RegisterTransactionRequest(authToken: authToken, transactionId: transactionID)
+        
+        return try await registerTransaction(request: request)
+    }
+    
+    static func registerTransaction(request: RegisterTransactionRequest) async throws -> IsActiveResponse {
+        let (data, response) = try await HTTPSClient.post(
+            url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.registerTransaction)")!,
+            body: request,
+            headers: nil)
+        
+        let isActiveResponse = try JSONDecoder().decode(IsActiveResponse.self, from: data)
+        
+        return isActiveResponse
     }
     
     static func registerUser() async throws -> RegisterUserResponse {
@@ -136,6 +184,35 @@ class AICodingHelperHTTPSConnector {
             let registerUserResponse = try JSONDecoder().decode(RegisterUserResponse.self, from: data)
             
             return registerUserResponse
+        } catch {
+            // Catch as StatusResponse
+            let statusResponse = try JSONDecoder().decode(StatusResponse.self, from: data)
+            
+            // Regenerate AuthToken if necessary
+            if statusResponse.success == 5 {
+                Task {
+                    do {
+                        try await AuthHelper.regenerate()
+                    } catch {
+                        print("Error regenerating authToken in HTTPSConnector... \(error)")
+                    }
+                }
+            }
+            
+            throw error
+        }
+    }
+    
+    static func validateOpenAIKey(request: AuthRequest) async throws -> ValidateOpenAIKeyResponse {
+        let (data, response) = try await HTTPSClient.post(
+            url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.validateOpenAIKey)")!,
+            body: request,
+            headers: nil)
+        
+        do {
+            let validateOpenAIKeyResponse = try JSONDecoder().decode(ValidateOpenAIKeyResponse.self, from: data)
+            
+            return validateOpenAIKeyResponse
         } catch {
             // Catch as StatusResponse
             let statusResponse = try JSONDecoder().decode(StatusResponse.self, from: data)

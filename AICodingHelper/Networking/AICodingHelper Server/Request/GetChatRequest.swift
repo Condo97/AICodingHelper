@@ -10,10 +10,12 @@ import Foundation
 struct GetChatRequest: Encodable {
     
     var authToken: String
+    var openAIKey: String?
     var chatCompletionRequest: OAIChatCompletionRequest
     
     enum CodingKeys: String, CodingKey {
         case authToken
+        case openAIKey
         case chatCompletionRequest
     }
     

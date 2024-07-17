@@ -23,7 +23,7 @@ class ProgressTracker: ObservableObject {
         _completedTasks
     }
     
-    public static var maxProgress: Double = 1.0
+    public static let maxProgress: Double = 1.0
     
     private var startTime: Date?
     private var lastTaskCompletionTime: Date?

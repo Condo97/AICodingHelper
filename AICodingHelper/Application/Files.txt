@@ -1,0 +1,1422 @@
+FileSystemView.swift//
+//  FileSystemView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import Foundation
+import SwiftUI
+
+struct FileSystemView: View {
+    
+    @Binding var directory: String
+    @Binding var selectedFilepaths: [String]
+    var onAction: (_ action: FileActions, _ path: String) -> Void
+    
+    @StateObject private var fileTree: FileTree
+    @State private var fileMonitor: FileMonitor?
+    
+    
+    init(directory: Binding<String>, selectedFilepaths: Binding<[String]>, onAction: @escaping (_ action: FileActions, _ path: String) -> Void) {
+        self._directory = directory
+        self._selectedFilepaths = selectedFilepaths
+        self.onAction = onAction
+        _fileTree = StateObject(wrappedValue: FileTree(rootDirectory: directory.wrappedValue))
+    }
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    FileNodeView(
+                        node: fileTree.rootNode,
+                        level: 0,
+                        selectedFilepaths: $selectedFilepaths,
+                        onAction: onAction
+                    )
+                    Spacer()
+                }
+            }
+            .padding()
+        }
+        .onChange(of: directory) { newDirectory in
+            fileTree.updateRootDirectory(to: newDirectory)
+            startFileMonitor()
+        }
+        .onReceive(fileTree.$rootNode) { _ in
+            removeInvalidFilesFromSelectedFilepaths()
+        }
+        .onAppear {
+            startFileMonitor()
+        }
+        .onDisappear {
+            stopFileMonitor()
+        }
+    }
+    
+    private func removeInvalidFilesFromSelectedFilepaths() {
+        var allFilePaths = Set<String>()
+        collectFilePaths(node: fileTree.rootNode, filePaths: &allFilePaths)
+        
+        selectedFilepaths = selectedFilepaths.filter { allFilePaths.contains($0) }
+    }
+    
+    private func collectFilePaths(node: FileNode, filePaths: inout Set<String>) {
+        filePaths.insert(node.path)
+        for child in node.children {
+            collectFilePaths(node: child, filePaths: &filePaths)
+        }
+    }
+    
+    private func startFileMonitor() {
+        stopFileMonitor()
+        let expandedPath = NSString(string: directory).expandingTildeInPath
+        fileMonitor = FileMonitor(paths: [expandedPath]) {
+            fileTree.updateRootDirectory(to: directory)
+        }
+        fileMonitor?.start()
+    }
+    
+    private func stopFileMonitor() {
+        fileMonitor?.stop()
+        fileMonitor = nil
+    }
+    
+}
+EditFileCodeGenerator.swift//
+//  WideScopeChatGenerator.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 7/1/24.
+//
+
+import Foundation
+
+
+class EditFileCodeGenerator {
+    
+    static func refactorFiles(authToken: String, openAIKey: String?, wideScopeChatGenerationTask: CodeGenerationTask, progressTracker: ProgressTracker) async throws {
+        // Start progress tracker estimation with totalTasks as filepathCodeGenerationPrompts count
+        DispatchQueue.main.async {
+            progressTracker.startEstimation(totalTasks: wideScopeChatGenerationTask.filepathCodeGenerationPrompts.count)
+        }
+        
+        for filepathCodeGenerationPrompt in wideScopeChatGenerationTask.filepathCodeGenerationPrompts {
+            // Refactor file
+            do {
+                try await refactorFile(
+                    authToken: authToken,
+                    openAIKey: openAIKey,
+                    filepathCodeGenerationPrompt: filepathCodeGenerationPrompt,
+                    copyCurrentFileToTempFile: wideScopeChatGenerationTask.copyCurrentFilesToTempFiles)
+            } catch {
+                print("Error refactoring file in WideScopeChatGenerator, continuing with other files... \(error)")
+            }
+            
+            // Complete task for progressTracker
+            DispatchQueue.main.async {
+                progressTracker.completeTask()
+            }
+        }
+    }
+    
+    static func refactorFile(authToken: String, openAIKey: String?, filepathCodeGenerationPrompt: FilepathCodeGenerationPrompt, copyCurrentFileToTempFile: Bool) async throws {
+        // Refactor files
+        try await refactorFile(
+            authToken: authToken,
+            openAIKey: openAIKey,
+            model: filepathCodeGenerationPrompt.model,
+            additionalInput: filepathCodeGenerationPrompt.additionalInput,
+            filepath: filepathCodeGenerationPrompt.filepath,
+            systemMessage: filepathCodeGenerationPrompt.systemMessage,
+            context: filepathCodeGenerationPrompt.context,
+            copyCurrentFileToTempFile: copyCurrentFileToTempFile)
+    }
+    
+    /**
+     Refactor File
+     
+     Automatically uses filepaths as context unless alternateContextFilepaths are specified
+     */
+    static func refactorFile(authToken: String, openAIKey: String?, model: GPTModels, additionalInput: String, filepath: String, systemMessage: String, context: [String], copyCurrentFileToTempFile: Bool) async throws {
+        // Get file contents using currentItemPath
+        let fileContents = try String(contentsOfFile: filepath)
+        
+        // Create promptInput from additionalInput 
+ fileContents
+        let promptInput = additionalInput + "
+" + fileContents
+        
+        // Get chat with userInputs as context with promptInput at the bottom
+        let fileChatResponse = try await getChat(
+            authToken: authToken,
+            openAIKey: openAIKey,
+            model: model,
+            systemMessage: systemMessage,
+            userInputs: context + [promptInput])
+        
+        // If copyCurrentFileToTempFile copy file to new file with _temp# suffixed name
+        if copyCurrentFileToTempFile {
+            try FileCopier.copyFileToTempVersion(at: filepath)
+        }
+        
+        // Set file text to chat
+        try fileChatResponse?.write(
+            toFile: filepath,
+            atomically: true,
+            encoding: .utf8)
+    }
+        
+    
+    
+    private static func getChat(authToken: String, openAIKey: String?, model: GPTModels, systemMessage: String?, userInputs: [String]) async throws -> String? {
+        // Create inputMessages array
+        var inputMessages: [OAIChatCompletionRequestMessage] = []
+        
+        // Create and append system message
+        if let systemMessage = systemMessage {
+            inputMessages.append(
+                OAIChatCompletionRequestMessage(
+                    role: .system,
+                    content: [
+                        .text(OAIChatCompletionRequestMessageContentText(text: systemMessage))
+                    ])
+            )
+        }
+        
+        // Create and append messages from userInputs
+        for userInput in userInputs {
+            inputMessages.append(
+                OAIChatCompletionRequestMessage(
+                role: .user,
+                content: [
+                    .text(OAIChatCompletionRequestMessageContentText(text: userInput))
+                ])
+            )
+        }
+        
+        // Create GetChatRequest
+        let getChatRequest = GetChatRequest(
+            authToken: authToken,
+            openAIKey: openAIKey,
+            chatCompletionRequest: OAIChatCompletionRequest(
+                model: model.rawValue,
+                stream: true,
+                messages: inputMessages.reversed()))
+        
+        // Return getChat
+        return try await getChat(getChatRequest: getChatRequest)
+    }
+    
+    private static func getChat(getChatRequest: GetChatRequest) async throws -> String? {
+        // Encode getChatRequest to string, otherwise return
+        guard let requestString = String(data: try JSONEncoder().encode(getChatRequest), encoding: .utf8) else {
+            // TODO: Handle Errors
+            print("Could not unwrap encoded getChatRequest to String in AICodingHelperServerNetworkClient!")
+            return nil
+        }
+        
+        // Get stream
+        let stream = AICodingHelperWebSocketConnector.getStream()
+        
+        // Send GetChatRequest to stream
+        try await stream.send(.string(requestString))
+        
+        // Parse stream response
+        var responseContent: String = ""
+        do {
+            for try await message in stream {
+                // Parse message, and if it cannot be unwrapped continue
+                guard let messageData = {
+                    switch message {
+                    case .data(let data):
+                        return data
+                    case .string(let string):
+                        return string.data(using: .utf8)
+                    @unknown default:
+                        print("Message wasn't stirng or data when parsing message stream! :O")
+                        return nil
+                    }
+                }() else {
+                    print("Could not unwrap messageData in message stream! Skipping...")
+                    continue
+                }
+                
+                // Parse message to GetChatResponse
+                let getChatResponse: GetChatResponse
+                do {
+                    getChatResponse = try JSONDecoder().decode(GetChatResponse.self, from: messageData)
+                } catch {
+                    print("Error decoding messageData to GetChatResponse so skipping... \(error)")
+                    
+                    // Catch as StatusResponse
+                    let statusResponse = try JSONDecoder().decode(StatusResponse.self, from: messageData)
+                    
+                    if statusResponse.success == 5 {
+                        Task {
+                            do {
+                                try await AuthHelper.regenerate()
+                            } catch {
+                                print("Error regenerating authToken in HTTPSConnector... \(error)")
+                            }
+                        }
+                    } else if statusResponse.success == 60 {
+                        throw GenerationError.invalidOpenAIKey
+                    }
+                    continue
+                }
+                
+                // Add response content to responseContent
+                if let zeroIndexChoice = getChatResponse.body.oaiResponse.choices[safe: 0],
+                   let content = zeroIndexChoice.delta.content {
+                    responseContent += content
+                }
+            }
+        } catch {
+            // TODO: Handle Errors, though this may be normal
+            print("Error parsing stream response in AICodingHelperNetworkClient... \(error)")
+        }
+        
+        // Return responseContent
+        return responseContent
+    }
+    
+}
+ErrorCodes.swiftCodeGenerationPlanGenerator.swift//
+//  CodeGenerationPlanGenerator.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 7/6/24.
+//
+
+import Foundation
+
+
+class CodeGenerationPlanGenerator {
+    
+    // Creates PlanCodeGenerationFC
+    
+    private static let systemMessage = "Create a detailed plan to prompt GPT in a series of steps to complete the task in the prompt. You may edit, create, delete files. Please make sure to include as many files as necessary for each step in the plan as they are the only files available for GPT to reference. You must include an index, action, and filepath. If making edits include reference_filepaths if any and edit_instructions with instructions to make the edits. When creating a file make sure to edit it in a future step to give it content." // TODO: Maybe remove the last sentence here
+    private static let additionalInstructionMessage = ""
+    
+    static func generatePlan(authToken: String, openAIKey: String?, model: GPTModels, instructions: String, selectedFilepaths: [String]) async throws -> PlanCodeGenerationFC? {
+        // Well this should be creating a list of tasks with CodeGenerationTask or something, right? So it should be before accepting codeGenerationTask. Also this one should not be added to the user's token count and stuff
+        
+        // Create input from additionalInstructionsMessage + instructions + selectedFilepaths
+        let input = additionalInstructionMessage + "
+" + instructions + "
+
+" + selectedFilepaths.compactMap({FilePrettyPrinter.getFileContent(filepath: $0)}).joined(separator: "
+")
+        
+        return try await planCodeGeneration(
+            authToken: authToken,
+            openAIKey: openAIKey,
+            model: model,
+            input: input,
+            systemMessage: systemMessage)
+    }
+    
+    static func planCodeGeneration(authToken: String, openAIKey: String?, model: GPTModels, input: String, systemMessage: String) async throws -> PlanCodeGenerationFC? {
+        // Create PlanCodeGenerationRequest
+        let planCodeGenerationRequest = FunctionCallRequest(
+            authToken: authToken,
+            openAIKey: openAIKey,
+            model: model,
+            systemMessage: systemMessage,
+            input: input)
+        
+        // Get from AICodingHelperHTTPSConnector
+        let planCodeGenerationResponse = try await AICodingHelperHTTPSConnector.planCodeGeneration(request: planCodeGenerationRequest)
+        
+        // Ensure unwrap first tool call data
+        guard let firstToolCall = planCodeGenerationResponse.body.response.choices[safe: 0]?.message.toolCalls[safe: 0]?.function,
+              let firstToolCallData = firstToolCall.arguments.data(using: .utf8) else {
+            // TODO: Handle Errors, this should probably be throwing something idk I need to be throwing things more lol
+            return nil
+        }
+        
+        // Parse PlanCodeGenerationFC & return
+        return try JSONDecoder().decode(PlanCodeGenerationFC.self, from: firstToolCallData)
+    }
+    
+}
+
+BlankFileCreatorPopup.swift//
+//  BlankFileCreatorPopup.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 7/7/24.
+//
+
+import SwiftUI
+
+struct BlankFileCreatorPopup: ViewModifier {
+    
+    @Binding var isPresented: Bool
+    @State var path: String
+    
+    
+    @State private var newFileName: String = ""
+    
+    @State private var errorMessage: String = ""
+    @State private var alertShowingError: Bool = false
+    
+    func body(content: Content) -> some View {
+        content
+            .alert("Create Blank File", isPresented: $isPresented) {
+                TextField("File Name", text: $newFileName)
+                Button("Create") {
+                    createBlankFile(withName: newFileName, atPath: path)
+                }
+                Button("Cancel", role: .cancel) {}
+            }
+            .alert(isPresented: $alertShowingError) {
+                Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("Done")))
+            }
+    }
+    
+    private func createBlankFile(withName name: String, atPath path: String) {
+        var isDirectory: ObjCBool = false
+        if FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory) {
+            let directoryPath = isDirectory.boolValue ? path : (path as NSString).deletingLastPathComponent
+            let filePath = URL(fileURLWithPath: directoryPath).appendingPathComponent(name).path
+            
+            if FileManager.default.fileExists(atPath: filePath) {
+                errorMessage = "File already exists at path: \(filePath)"
+                alertShowingError = true
+            } else {
+                FileManager.default.createFile(atPath: filePath, contents: nil, attributes: nil)
+            }
+        } else {
+            errorMessage = "Could not find base directory when creating file: \(path)"
+            alertShowingError = true
+        }
+    }
+    
+}
+
+
+extension View {
+    
+    func blankFileCreatorPopup(isPresented: Binding<Bool>, path: String) -> some View {
+        self
+            .modifier(BlankFileCreatorPopup(isPresented: isPresented, path: path))
+    }
+    
+}
+
+
+#Preview {
+    
+    ZStack {
+        
+    }
+    .blankFileCreatorPopup(
+        isPresented: .constant(true),
+        path: "~/Downloads/test_dir"
+    )
+    
+}
+FolderCreatorPopup.swift//
+//  FolderCreatorPopup.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 7/7/24.
+//
+
+import SwiftUI
+
+struct FolderCreatorPopup: ViewModifier {
+    
+    @Binding var isPresented: Bool
+    @State var path: String
+    
+    
+    @State private var newFolderName: String = ""
+    
+    @State private var errorMessage: String = ""
+    @State private var alertShowingError: Bool = false
+    
+    
+    func body(content: Content) -> some View {
+        content
+            .alert("Create Folder", isPresented: $isPresented) {
+                TextField("Folder Name", text: $newFolderName)
+                Button("Create") {
+                    createFolder(withName: newFolderName, atPath: path)
+                }
+                Button("Cancel", role: .cancel) {}
+            }
+            .alert(isPresented: $alertShowingError) {
+                Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("Done")))
+            }
+    }
+    
+    
+    private func createFolder(withName name: String, atPath path: String) {
+        var isDirectory: ObjCBool = false
+        if FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory) {
+            let directoryPath = isDirectory.boolValue ? path : (path as NSString).deletingLastPathComponent
+            let folderPath = URL(fileURLWithPath: directoryPath).appendingPathComponent(name).path
+            
+            if FileManager.default.fileExists(atPath: folderPath) {
+                errorMessage = "Folder already exists at path: \(folderPath)"
+                alertShowingError = true
+            } else {
+                do {
+                    try FileManager.default.createDirectory(atPath: folderPath, withIntermediateDirectories: false, attributes: nil)
+                } catch {
+                    errorMessage = "Error creating folder: \(error)"
+                    alertShowingError = true
+                }
+            }
+        } else {
+            errorMessage = "Could not find base directory when creating folder: \(path)"
+            alertShowingError = true
+        }
+    }
+    
+}
+
+
+extension View {
+    
+    func folderCreatorPopup(isPresented: Binding<Bool>, path: String) -> some View {
+        self
+            .modifier(FolderCreatorPopup(isPresented: isPresented, path: path))
+    }
+    
+}
+
+
+
+#Preview {
+    
+    ZStack {
+        
+    }
+    .folderCreatorPopup(isPresented: .constant(true), path: "~/Downloads/test_dir")
+    
+}
+SearchBarView.swiftimport SwiftUI
+
+struct SearchBarView: View {
+    @Binding var text: String
+    
+    var body: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+            TextField("Search", text: $text)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            if !text.isEmpty {
+                Button(action: {
+                    text = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
+struct FileBrowserView: View {
+    @State private var searchText = ""
+    @State private var files = ["File1.txt", "File2.txt", "Document.pdf", "Image.png", "Notes.docx"]
+    
+    var filteredFiles: [String] {
+        if searchText.isEmpty {
+            return files
+        } else {
+            return files.filter { $0.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
+    
+    var body: some View {
+        VStack {
+            SearchBarView(text: $searchText)
+                .padding(.top, 8)
+            List(filteredFiles, id: \.self) { file in
+                NavigationLink(destination: FileNodeView(fileName: file)) {
+                    FileSystemView(fileName: file)
+                }
+            }
+            .listStyle(PlainListStyle())
+        }
+        .padding()
+    }
+}
+
+struct FileSystemView: View {
+    var fileName: String
+    
+    var body: some View {
+        Text(fileName)
+    }
+}
+
+struct FileNodeView: View {
+    var fileName: String
+    
+    var body: some View {
+        VStack {
+            Text("Detail view for \(fileName)")
+            Spacer()
+        }
+        .padding()
+        .navigationTitle(fileName)
+    }
+}
+
+#Preview {
+    NavigationView {
+        FileBrowserView()
+    }
+}CodeGenerationPlanner.swift//
+//  CodeGenerationPlanner.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 7/6/24.
+//
+
+import Foundation
+
+
+class CodeGenerationPlanner {
+    
+    // Creates CodeGenerationPlan
+    
+    static func makePlan(authToken: String, openAIKey: String?, model: GPTModels, editActionSystemMessage: String, instructions: String, selectedFilepaths: [String], copyCurrentFilesToTempFiles: Bool) async throws -> CodeGenerationPlan? {
+        // Ensure unwrap PlanCodeGenerationFC from CodeGenerationPlanGenerator
+        guard let planCodeGeneratorFC = try await CodeGenerationPlanGenerator.generatePlan(
+            authToken: authToken,
+            openAIKey: openAIKey,
+            model: model,
+            instructions: instructions,
+            selectedFilepaths: selectedFilepaths) else {
+            // TODO: Handle Errors
+            return nil
+        }
+        
+        // Return CodeGenerationPlan
+        return CodeGenerationPlan(
+            model: model,
+            editActionSystemMessage: editActionSystemMessage,
+            instructions: instructions,
+            copyCurrentFilesToTempFiles: copyCurrentFilesToTempFiles,
+            planFC: planCodeGeneratorFC)
+    }
+    
+}
+TabAddingFileSystemView.swift//
+//  TabAddingFileSystemView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/29/24.
+//
+
+import SwiftUI
+
+struct TabAddingFileSystemView: View {
+    
+    @Binding var directory: String
+    @Binding var selectedFilepaths: [String]
+    @Binding var searchText: String
+    @ObservedObject var tabsViewModel: TabsViewModel
+    
+    @Environment(\.undoManager) var undoManager
+    @EnvironmentObject var focusViewModel: FocusViewModel
+    
+    @State private var alertShowingRenameFile: Bool = false
+    @State private var renameFileOriginalPath: String = ""
+    @State private var renameFileNewName: String = ""
+    
+    @State private var alertShowingAddFolder: Bool = false
+    @State private var alertShowingErrorAddingFolderFolderExists: Bool = false
+    @State private var folderBasePath: String = ""
+    @State private var folderName: String = ""
+    
+    var body: some View {
+        FileSystemView(
+            directory: $directory,
+            selectedFilepaths: $selectedFilepaths,
+            onAction: { action, path in
+                switch action {
+                case .open:
+                    // Append to openTabs if not in there
+                    if !tabsViewModel.openTabs.contains(where: { $0.filepath == path }) {
+                        tabsViewModel.openTabs.append(CodeViewModel(filepath: path))
+                    }
+                    
+                    // Save undo and set openTab to CodeViewModel where filepath is equal to path
+                    if let pathTab = tabsViewModel.openTabs.first(where: { $0.filepath == path }) {
+                        // Save undo with tabsViewModel openTab before setting it to pathTab
+                        if let undoManager = undoManager {
+                            tabsViewModel.saveUndo(undoManager: undoManager)
+                        }
+                        
+                        // Set openTab to pathTab
+                        tabsViewModel.openTab = pathTab
+                        
+                        // Set focus to editor
+                        focusViewModel.focus = .editor
+                    }
+                case .rename:
+                    renameFileNewName = URL(fileURLWithPath: path).lastPathComponent
+                    renameFileOriginalPath = path
+                    alertShowingRenameFile = true
+                case .newFolder:
+                    folderName = ""
+                    folderBasePath = path
+                    alertShowingAddFolder = true
+                case .delete:
+                    do {
+                        try FileManager.default.removeItem(atPath: path)
+                    } catch {
+                        // TODO: Handle Errors
+                        print("Error deleting file in FileNodeView... \(error)")
+                    }
+                }
+            }
+        )
+        .alert("Rename \(renameFileNewName)", isPresented: $alertShowingRenameFile, actions: {
+            TextField("New name", text: $renameFileNewName)
+            Button("Cancel", role: .cancel, action: {})
+            Button("Rename", role: .none, action: {
+                let newPath = (renameFileOriginalPath as NSString).deletingLastPathComponent + "/" + renameFileNewName
+                do {
+                    // Move to newPath
+                    try FileManager.default.moveItem(atPath: renameFileOriginalPath, toPath: newPath)
+                    
+                    // Delete original path
+                    tabsViewModel.removeTabs(withFilepath: renameFileOriginalPath)
+                } catch {
+                    // TODO: Handle Errors
+                    print("Error renaming file in FileNodeView... \(error)")
+                }
+            })
+        })
+        .alert("Add Folder", isPresented: $alertShowingAddFolder, actions: {
+            TextField("Folder Name", text: $folderName)
+            Button("Cancel", role: .cancel, action: {})
+            Button("Create", role: .none, action: {
+                // If file exists for name show error alert and return
+                if FileManager.default.fileExists(atPath: (folderBasePath as NSString).appendingPathComponent(folderName)) {
+                    self.alertShowingErrorAddingFolderFolderExists = true
+                    return
+                }
+                
+                // Create folder
+                let newFolderPath = (folderBasePath as NSString).appendingPathComponent(folderName)
+                
+                do {
+                    try FileManager.default.createDirectory(atPath: newFolderPath, withIntermediateDirectories: true, attributes: nil)
+                } catch {
+                    // TODO: Handle Errors
+                    print("Error creating folder in FileNodeView... \(error)")
+                }
+            })
+        })
+        .alert("Folder Exists", isPresented: $alertShowingErrorAddingFolderFolderExists, actions: {
+            Button("Close") {
+                
+            }
+        }, message: {
+            Text("A folder with that name already exists.")
+        })
+    }
+    
+}
+
+#Preview {
+    
+    TabAddingFileSystemView(
+        directory: .constant(""),
+        selectedFilepaths: .constant([]),
+        searchText: .constant(""),
+        tabsViewModel: TabsViewModel()
+    )
+    
+}
+FileTree.swift//
+//  FileTree.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import Foundation
+import SwiftUI
+
+class FileTree: ObservableObject {
+    
+    @Published var rootNode: FileNode
+    
+    init(rootDirectory: String) {
+        let expandedPath = NSString(string: rootDirectory).expandingTildeInPath
+        rootNode = FileNode(path: expandedPath)
+        rootNode.isExpanded = true
+        rootNode.discoverChildren()
+    }
+    
+    func updateRootDirectory(to newDirectory: String) {
+        // Save the current expanded paths
+        let expandedPaths = rootNode.expandedPaths()
+        
+        // Update the root node
+        let expandedPath = NSString(string: newDirectory).expandingTildeInPath
+        rootNode = FileNode(path: expandedPath)
+        rootNode.isExpanded = true
+        rootNode.discoverChildren()
+        
+        // Reapply the expanded paths
+        rootNode.applyExpandedPaths(expandedPaths)
+    }
+    
+}
+AIFileCreatorView.swift//
+//  AIFileCreatorView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 7/7/24.
+//
+
+import SwiftUI
+
+struct AIFileCreatorView: View {
+    
+    @Binding var newFileName: String
+    @Binding var referenceFilepaths: [String]
+    @Binding var userPrompt: String
+    var onCancel: () -> Void
+    var onSubmit: () -> Void
+    
+    @State private var isFileImporterPresented = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Title
+            Text("Create AI File")
+                .font(.title)
+                .fontWeight(.bold)
+            
+            // File Name
+            VStack(alignment: .leading, spacing: 8) {
+                Text("File Name")
+                    .font(.headline)
+                TextField("Enter file name", text: $newFileName)
+            }
+            
+            // Reference Files
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Reference Files")
+                        .font(.headline)
+                    
+                    Button(action: {
+                        isFileImporterPresented = true
+                    }) {
+                        Image(systemName: "plus")
+                            .imageScale(.large)
+                    }
+                    
+                    Spacer()
+                }
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(referenceFilepaths, id: \.self) { path in
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(URL(fileURLWithPath: path).lastPathComponent)
+                                    
+                                    var isDirectory: ObjCBool = false
+                                    if FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory) {
+                                        if isDirectory.boolValue {
+                                            Text("Directory")
+                                                .font(.footnote)
+                                                .opacity(0.4)
+                                        } else {
+                                            Text("File")
+                                                .font(.footnote)
+                                                .opacity(0.4)
+                                        }
+                                    }
+                                }
+                                    
+                                Image(systemName: "xmark.circle")
+                                    .onTapGesture {
+                                        if let index = referenceFilepaths.firstIndex(of: path) {
+                                            referenceFilepaths.remove(at: index)
+                                        }
+                                    }
+                            }
+                            .padding(8)
+                            .background(Colors.foreground)
+                            .cornerRadius(8)
+                        }
+                    }
+                }
+            }
+            
+            // User Prompt
+            VStack(alignment: .leading, spacing: 8) {
+                Text("User Prompt")
+                    .font(.headline)
+                TextEditor(text: $userPrompt)
+                    .frame(height: 100)
+                    .scrollContentBackground(.hidden)
+                    .padding()
+                    .background(Colors.foreground)
+                    .clipShape(RoundedRectangle(cornerRadius: 8.0))
+            }
+            
+            // Cancel and Submit
+            HStack {
+                Spacer()
+                
+                Button(action: onCancel) {
+                    Text("Cancel")
+                        .padding([.top, .bottom], 8)
+                        .padding([.leading, .trailing])
+                        .cornerRadius(8)
+                }
+                .keyboardShortcut(.cancelAction)
+                
+                Button(action: onSubmit) {
+                    Text("Submit")
+                        .padding([.top, .bottom], 8)
+                        .padding([.leading, .trailing])
+                        .cornerRadius(8)
+                }
+                .keyboardShortcut(.defaultAction)
+            }
+            .padding(.vertical, 8)
+        }
+        .padding()
+        .frame(minWidth: 500)
+        .background(Colors.secondary)
+        .fileImporter(isPresented: $isFileImporterPresented, allowedContentTypes: [.plainText], allowsMultipleSelection: true) { result in
+            do {
+                let selectedFiles = try result.get()
+                let paths = selectedFiles.map { $0.path }
+                
+                for path in paths {
+                    if !referenceFilepaths.contains(path) {
+                        referenceFilepaths.append(path)
+                    }
+                }
+            } catch {
+                print("Error selecting files: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+}
+
+#Preview {
+    
+    ZStack {
+        AIFileCreatorView(
+            newFileName: .constant(""),
+            referenceFilepaths: .constant([]),
+            userPrompt: .constant(""),
+            onCancel: {},
+            onSubmit: {}
+        )
+        .padding()
+    }
+    .background(Color.white)
+    .frame(width: 550.0, height: 500.0)
+}
+FileActions.swiftFileNodeView.swiftimport Foundation
+import SwiftUI
+import UniformTypeIdentifiers
+
+struct FileNodeView: View {
+    
+    @ObservedObject var node: FileNode
+    let level: Int
+    @Binding var selectedFilepaths: [String]
+    var onAction: (_ action: FileActions, _ path: String) -> Void
+    
+    @EnvironmentObject private var focusViewModel: FocusViewModel
+    
+    @FocusState private var focused
+    
+    @State private var alertShowingRename = false
+    @State private var newName: String = ""
+    @State private var popupShowingCreateAIFile = false
+    @State private var popupShowingCreateBlankFile = false
+    @State private var popupShowingCreateFolder = false
+    @State private var newEntityName: String = ""
+    @State private var showAlertError: Bool = false
+    @State private var errorMessage: String = ""
+    @State private var hovering: Bool = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                if node.isDirectory {
+                    HStack(spacing: 0.0) {
+                        Image(systemName: node.isExpanded ? "arrowtriangle.down.fill" : "arrowtriangle.right")
+                            .imageScale(.small)
+                        Image(systemName: node.isExpanded ? "folder" : "folder")
+                    }
+                } else {
+                    Image(systemName: "doc.text")
+//                        .foregroundColor(.blue)
+                }
+                
+                Text(node.name)
+                
+                Spacer()
+            }
+            .padding(.leading, CGFloat(level) * 15)
+            .padding(.vertical, 3)
+            .background(
+                focusViewModel.focus == .browser
+                ? Colors.element.opacity(selectedFilepaths.contains(node.path) ? 0.3 : hovering ? 0.1 : 0)
+                : Color.gray.opacity(selectedFilepaths.contains(node.path) ? 0.3 : hovering ? 0.1 : 0)
+            )
+            .cornerRadius(5)
+            .focusable()
+            .focusEffectDisabledVersionCheck()
+            .focused($focused)
+            .onChange(of: focused) { newValue in
+                if newValue {
+                    focusViewModel.focus = .browser
+                }
+            }
+            .onTapGesture(count: 2) {
+                if node.isDirectory {
+                    node.toggleExpansion()
+                } else {
+                    onAction(.open, node.path)
+                }
+            }
+            .simultaneousGesture(
+                TapGesture(count: 1)
+                    .onEnded {
+                        if NSEvent.modifierFlags.contains(.shift) {
+                            selectedFilepaths.append(node.path)
+                        } else {
+                            selectedFilepaths = [node.path]
+                        }
+                    }
+            )
+            .onDrag { NSItemProvider(object: NSString(string: node.path)) }
+            .onDrop(of: [.text], isTargeted: nil) { providers in
+                if let provider = providers.first {
+                    provider.loadObject(ofClass: NSString.self, completionHandler: { providerReading, error in
+                        if let filepath = providerReading as? NSString {
+                            do {
+                                let directory = node.isDirectory ? node.path : (node.path as NSString).deletingLastPathComponent
+                                try FileManager.default.moveItem(atPath: filepath as String, toPath: URL(fileURLWithPath: directory).appendingPathComponent(filepath.lastPathComponent).path)
+                            } catch {
+                                errorMessage = "Error moving item in FileNodeView... \(error)"
+                                showAlertError = true
+                            }
+                        }
+                    })
+                    
+                }
+                
+                return true
+            }
+            .onHover { hovering in
+                self.hovering = hovering
+                
+                if hovering {
+                    NSCursor.arrow.push()
+                    NSCursor.pointingHand.set()
+                }
+            }
+//            .background(
+//                Rectangle()
+//                    .fill(Color.clear)
+//                    .onHover { hovering in
+//                        if hovering {
+//                            Color.lightGray
+//                        }
+//                }
+//            )
+            
+            if node.isExpanded {
+                ForEach(node.children) { childNode in
+                    FileNodeView(node: childNode, level: level + 1, selectedFilepaths: $selectedFilepaths, onAction: onAction)
+                }
+            }
+        }
+        .contextMenu {
+            Button("New AI File...", action: {
+                popupShowingCreateAIFile = true
+            })
+            
+            Divider()
+            
+            Button("New Blank File...", action: {
+                popupShowingCreateBlankFile = true
+            })
+            
+            Button("New Folder...", action: {
+                popupShowingCreateFolder = true
+            })
+            
+            Divider()
+            
+            Button("Reveal in Finder", action: {
+                NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: node.path)])
+            })
+            
+            Divider()
+            
+            Button("Rename", action: {
+                alertShowingRename = true
+            })
+            
+            Divider()
+            
+            Button(action: {
+                do {
+                    try FileManager.default.removeItem(atPath: node.path)
+                } catch {
+                    errorMessage = "Error deleting item in FileNodeView... \(error)"
+                    showAlertError = true
+                }
+            }) {
+                Text("Delete")
+            }
+        }
+        .aiFileCreatorPopup(
+            isPresented: $popupShowingCreateAIFile,
+            baseFilepath: node.isDirectory ? node.path : URL(fileURLWithPath: node.path).deletingLastPathComponent().path,
+            referenceFilepaths: selectedFilepaths)
+        .blankFileCreatorPopup(isPresented: $popupShowingCreateBlankFile, path: node.path)
+        .folderCreatorPopup(isPresented: $popupShowingCreateFolder, path: node.path)
+        .alert("Rename File", isPresented: $alertShowingRename) {
+            TextField("New Name", text: $newName)
+            Button("Rename") {
+                do {
+                    let newPath = URL(fileURLWithPath: (node.path as NSString).deletingLastPathComponent).appendingPathComponent(newName).path
+                    try FileManager.default.moveItem(atPath: node.path, toPath: newPath)
+                } catch {
+                    errorMessage = "Error renaming item in FileNodeView... \(error)"
+                    showAlertError = true
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+    
+}
+
+FileNode.swift//
+//  FileNode.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 6/26/24.
+//
+
+import Foundation
+
+class FileNode: ObservableObject, Identifiable {
+    
+    let id = UUID()
+    let name: String
+    let path: String
+    
+    @Published var isExpanded: Bool = false
+    @Published var children: [FileNode] = []
+    
+    var isDirectory: Bool {
+        var isDir: ObjCBool = false
+        FileManager.default.fileExists(atPath: path, isDirectory: &isDir)
+        return isDir.boolValue
+    }
+    
+    init(path: String) {
+        self.path = path
+        self.name = (path as NSString).lastPathComponent
+    }
+    
+    func toggleExpansion() {
+        if isDirectory {
+            isExpanded.toggle()
+            if isExpanded && children.isEmpty {
+                discoverChildren()
+            }
+        }
+    }
+    
+    func discoverChildren() {
+        guard isDirectory else { return }
+        do {
+            let contents = try FileManager.default.contentsOfDirectory(atPath: path)
+            children = contents.map { FileNode(path: (self.path as NSString).appendingPathComponent($0)) }
+                .sorted { $1.name > $0.name }
+                .sorted { $0.isDirectory && !$1.isDirectory }
+        } catch {
+            print("Error reading contents of directory: \(error)")
+        }
+    }
+    
+    func expandedPaths() -> Set<String> {
+        var paths = Set<String>()
+        if isExpanded {
+            paths.insert(path)
+            for child in children {
+                paths.formUnion(child.expandedPaths())
+            }
+        }
+        return paths
+    }
+    
+    func applyExpandedPaths(_ paths: Set<String>) {
+        if paths.contains(path) {
+            isExpanded = true
+            discoverChildren()
+            for child in children {
+                child.applyExpandedPaths(paths)
+            }
+        }
+    }
+    
+}
+FileBrowserView.swift//
+//  FileBrowserView.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 7/1/24.
+//
+
+import SwiftUI
+
+struct FileBrowserView: View {
+    
+    @Binding var baseDirectory: String
+    @Binding var selectedFilepaths: [String]
+    @ObservedObject var tabsViewModel: TabsViewModel
+    
+    
+    @State private var searchText: String = ""
+    
+    
+    var body: some View {
+        VStack(spacing: 0.0) {
+            // Search bar
+            HStack {
+                Image(systemName: "magnifyingglass")
+                TextField("Search", text: $searchText)
+                    .textFieldStyle(.plain)
+            }
+            .padding()
+            .background(Color.foreground)
+            
+            // File Browser
+            TabAddingFileSystemView(
+                directory: $baseDirectory,
+                selectedFilepaths: $selectedFilepaths,
+                searchText: $searchText,
+                tabsViewModel: tabsViewModel)
+        }
+    }
+    
+}
+
+#Preview {
+    
+    FileBrowserView(
+        baseDirectory: .constant("~/Downloads/test_dir"),
+        selectedFilepaths: .constant([]),
+        tabsViewModel: TabsViewModel())
+    .environmentObject(FocusViewModel())
+    
+}
+AIFileCreatorContainer.swift//
+//  AIFileCreatorContainer.swift
+//  AICodingHelper
+//
+//  Created by Alex Coundouriotis on 7/7/24.
+//
+
+import SwiftUI
+
+struct AIFileCreatorContainer: View {
+    
+    @Binding var isPresented: Bool
+    @State var baseFilepath: String
+    @State var referenceFilepaths: [String] // This is a state because if it is changed it should not propogate to the parent
+    @ObservedObject var progressTracker: ProgressTracker
+    
+    
+    private static let fileGeneratorSystemMessage = "You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language. You only respond to the one requested file. All files will be provided in turn, so therefore you will respond to each individually to preserve correct formatting to the IDE since it is looking to receive one file."
+    
+    
+    @EnvironmentObject private var activeSubscriptionUpdater: ActiveSubscriptionUpdater
+    @EnvironmentObject private var remainingUpdater: RemainingUpdater
+    
+    @State private var isLoading: Bool = false
+    
+    @State private var newFileName: String = ""
+    @State private var userPrompt: String = ""
+    
+    
+    var body: some View {
+        AIFileCreatorView(
+            newFileName: $newFileName,
+            referenceFilepaths: $referenceFilepaths,
+            userPrompt: $userPrompt,
+            onCancel: {
+                // Dismiss
+                withAnimation {
+                    isPresented = false
+                }
+            },
+            onSubmit: {
+                Task {
+                    // Generate File
+                    do {
+                        try await generateFile()
+                    } catch {
+                        // TODO: Handle Errors
+                        print("Error generating file in AIFileCreatorContainer... \(error)")
+                        return
+                    }
+                    
+                    // Dismiss
+                    withAnimation {
+                        isPresented = false
+                    }
+                }
+            })
+        .overlay { // TODO: This could be an alert
+            if isLoading {
+                ZStack {
+                    Colors.foreground
+                        .opacity(0.4)
+                    
+                    VStack {
+                        Text("Creating File...")
+                        
+                        ProgressView()
+                            .tint(Colors.foregroundText)
+                    }
+                }
+            }
+        }
+    }
+    
+    
+    func generateFile() async throws {
+        // Defer setting isLoading to false
+        defer {
+            DispatchQueue.main.async {
+                self.isLoading = false
+            }
+        }
+        
+        // Set isLoading to true
+        await MainActor.run {
+            self.isLoading = true
+        }
+        
+        // Ensure authToken
+        let authToken = try await AuthHelper.ensure()
+        
+        // Get openAIKey
+        let openAIKey = activeSubscriptionUpdater.openAIKey
+        
+        // Get newFileFilepath from newFileName and baseFilepath
+        let newFileFilepath = URL(fileURLWithPath: baseFilepath).appendingPathComponent(newFileName, conformingTo: .text).path
+        
+        // Create systemMessage
+        let systemMessage: String = AIFileCreatorContainer.fileGeneratorSystemMessage
+        
+        // Create instructions
+        let instructions: String = {
+            var instructions: [String] = []
+            
+            instructions.append("Create the file \(newFileName)") // TODO: Is this necessary?
+            
+            if !userPrompt.isEmpty {
+                instructions.append("Add the following functionality to \(newFileName).")
+                instructions.append(userPrompt)
+            }
+            
+            if !referenceFilepaths.isEmpty {
+                instructions.append("Use these files as reference")
+                instructions.append(referenceFilepaths.map({FilePrettyPrinter.getFileContent(filepath: $0)}).joined(separator: "
+"))
+            }
+            
+            return instructions.joined(separator: "
+")
+        }()
+        
+        // Create CodeGenerationPlan with create and edit action for new file
+        let codeGenerationPlan = CodeGenerationPlan(
+            model: .GPT4o,
+            editActionSystemMessage: systemMessage,
+            instructions: instructions,
+            copyCurrentFilesToTempFiles: false,
+            planFC: PlanCodeGenerationFC(
+                steps: [
+                    PlanCodeGenerationFC.Step(
+                        index: 0,
+                        action: .create,
+                        filepath: newFileFilepath,
+                        editInstructions: nil,
+                        referenceFilepaths: nil),
+                    PlanCodeGenerationFC.Step(
+                        index: 1,
+                        action: .edit,
+                        filepath: newFileFilepath,
+                        editInstructions: nil,
+                        referenceFilepaths: referenceFilepaths)
+                ]))
+        
+        // Execute CodeGenerationPlan
+        try await CodeGenerationPlanExecutor.generateAndRefactor(
+            authToken: authToken,
+            openAIKey: openAIKey,
+            plan: codeGenerationPlan,
+            progressTracker: progressTracker)
+        
+        // Update remaining
+        try await remainingUpdater.update(authToken: authToken)
+    }
+    
+}
+
+
+extension View {
+    
+    func aiFileCreatorPopup(isPresented: Binding<Bool>, baseFilepath: String, referenceFilepaths: [String]) -> some View {
+        self
+            .sheet(isPresented: isPresented) {
+                AIFileCreatorContainer(
+                    isPresented: isPresented,
+                    baseFilepath: baseFilepath,
+                    referenceFilepaths: referenceFilepaths,
+                    progressTracker: ProgressTracker())
+            }
+    }
+    
+}
+
+
+#Preview {
+    
+    AIFileCreatorContainer(
+        isPresented: .constant(true),
+        baseFilepath: "~/Downloads/test_dir",
+        referenceFilepaths: [],
+        progressTracker: ProgressTracker()
+    )
+    
+}
+
