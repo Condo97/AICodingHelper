@@ -53,12 +53,12 @@ class EditFileCodeGenerator {
      
      Automatically uses filepaths as context unless alternateContextFilepaths are specified
      */
-    static func refactorFile(authToken: String, openAIKey: String?, model: GPTModels, additionalInput: String, filepath: String, systemMessage: String, context: [String], copyCurrentFileToTempFile: Bool) async throws {
+    static func refactorFile(authToken: String, openAIKey: String?, model: GPTModels, additionalInput: String, filepath: String, systemMessage: String, context: [(message: String, role: CompletionRole)], copyCurrentFileToTempFile: Bool) async throws -> String? {
         // Get file contents using currentItemPath
         let fileContents = try String(contentsOfFile: filepath)
         
         // Create promptInput from additionalInput \n fileContents
-        let promptInput = additionalInput + "\n" + fileContents
+        let promptInput: (message: String, role: CompletionRole) = (additionalInput + "\n" + fileContents, .user)
         
         // Get chat with userInputs as context with promptInput at the bottom
         let fileChatResponse = try await getChat(
@@ -78,11 +78,14 @@ class EditFileCodeGenerator {
             toFile: filepath,
             atomically: true,
             encoding: .utf8)
+        
+        // Return fileChatResponse
+        return fileChatResponse
     }
         
     
     
-    private static func getChat(authToken: String, openAIKey: String?, model: GPTModels, systemMessage: String?, userInputs: [String]) async throws -> String? {
+    private static func getChat(authToken: String, openAIKey: String?, model: GPTModels, systemMessage: String?, userInputs: [(message: String, role: CompletionRole)]) async throws -> String? {
         // Create inputMessages array
         var inputMessages: [OAIChatCompletionRequestMessage] = []
         
@@ -101,10 +104,10 @@ class EditFileCodeGenerator {
         for userInput in userInputs {
             inputMessages.append(
                 OAIChatCompletionRequestMessage(
-                role: .user,
-                content: [
-                    .text(OAIChatCompletionRequestMessageContentText(text: userInput))
-                ])
+                    role: userInput.role,
+                    content: [
+                        .text(OAIChatCompletionRequestMessageContentText(text: userInput.message))
+                    ])
             )
         }
         

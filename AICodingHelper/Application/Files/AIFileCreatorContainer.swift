@@ -140,7 +140,7 @@ struct AIFileCreatorContainer: View {
                 ]))
         
         // Execute CodeGenerationPlan
-        try await CodeGenerationPlanExecutor.generateAndRefactor(
+        try await CodeGenerationPlanExecutor().generateAndRefactor(
             authToken: authToken,
             openAIKey: openAIKey,
             plan: codeGenerationPlan,

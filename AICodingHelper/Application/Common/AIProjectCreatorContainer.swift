@@ -195,7 +195,7 @@ struct AIProjectCreatorContainer: View {
         
         // Generate and refactor
         do {
-            try await CodeGenerationPlanExecutor.generateAndRefactor(
+            try await CodeGenerationPlanExecutor().generateAndRefactor(
                 authToken: authToken,
                 openAIKey: openAIKey,
                 plan: plan,
