@@ -22,7 +22,7 @@ struct FileNodeView: View {
     @State private var showAlertError: Bool = false
     @State private var errorMessage: String = ""
     @State private var hovering: Bool = false
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {

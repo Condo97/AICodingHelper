@@ -725,7 +725,7 @@ struct MainView: View {
             }
             
             // Get openAIKey
-            let openAIKey = activeSubscriptionUpdater.openAIKey
+            let openAIKey = activeSubscriptionUpdater.openAIKeyIsValid ? activeSubscriptionUpdater.openAIKey : nil
             
             // Generate and refactor
             do {
