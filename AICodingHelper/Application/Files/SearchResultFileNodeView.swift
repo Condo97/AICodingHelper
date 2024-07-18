@@ -25,7 +25,7 @@ struct SearchResultFileNodeView: View {
             VStack(alignment: .leading) {
                 Text(getFilename(filepath))
                 Text(filepath)
-                    .font(.subheadline)
+                    .font(.system(size: 9.0))
                     .opacity(0.6)
             }
             Spacer()

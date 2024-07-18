@@ -116,7 +116,7 @@ struct FileSystemView: View {
         
         if let enumerator = fileManager.enumerator(at: baseDirectoryURL, includingPropertiesForKeys: nil) {
             for case let url as URL in enumerator {
-                if !url.hasDirectoryPath && url.lastPathComponent.contains(query) {
+                if !url.hasDirectoryPath && url.lastPathComponent.lowercased().contains(query.lowercased()) {
                     results.append(url.path)
                 }
             }
