@@ -89,7 +89,7 @@ extension FilepathCodeGenerationPrompt {
                  */
                 
                 // Parse and assemble systemMessage and parse and add context String from alternativeContextFiles or if nil files
-                let systemMessage = "You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language. You only respond to the one requested file. All files will be provided in turn, so therefore you will respond to each individually to preserve correct formatting to the IDE since it is looking to receive one file."
+                let systemMessage = "You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language. You only respond to the one requested file. All files will be provided in turn, so therefore you will respond to each individually to preserve correct formatting to the IDE since it is looking to receive one file. You may include messages in comments if the langauge supports comments."
                 let contextFilepathsMessageString: (message: String, role: CompletionRole) = {
                     let userMessage1_1 = "You are an AI coding helper in an IDE so all responses must be in code that would be valid in an IDE."
                     let userMessage1_2 = "Here are other files in my project to reference"

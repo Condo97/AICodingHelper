@@ -28,6 +28,7 @@
 		BB57C2522C45CB35008ED9F6 /* ActiveSubscriptionUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2512C45CB35008ED9F6 /* ActiveSubscriptionUpdater.swift */; };
 		BB57C2542C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2532C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift */; };
 		BB57C2572C480F83008ED9F6 /* OpenAIKeyEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2562C480F83008ED9F6 /* OpenAIKeyEntryView.swift */; };
+		BB57C2612C48986F008ED9F6 /* SearchResultFileNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2602C48986F008ED9F6 /* SearchResultFileNodeView.swift */; };
 		BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4D2C36D29200263D3F /* TokenCalculator.swift */; };
 		BB617C502C38568400263D3F /* FilepathCodeGenerationPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */; };
 		BB617C542C3885D900263D3F /* FileActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C532C3885D900263D3F /* FileActions.swift */; };
@@ -186,6 +187,7 @@
 		BB57C2512C45CB35008ED9F6 /* ActiveSubscriptionUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSubscriptionUpdater.swift; sourceTree = "<group>"; };
 		BB57C2532C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidateOpenAIKeyResponse.swift; sourceTree = "<group>"; };
 		BB57C2562C480F83008ED9F6 /* OpenAIKeyEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIKeyEntryView.swift; sourceTree = "<group>"; };
+		BB57C2602C48986F008ED9F6 /* SearchResultFileNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultFileNodeView.swift; sourceTree = "<group>"; };
 		BB617C4D2C36D29200263D3F /* TokenCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenCalculator.swift; sourceTree = "<group>"; };
 		BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilepathCodeGenerationPrompt.swift; sourceTree = "<group>"; };
 		BB617C532C3885D900263D3F /* FileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActions.swift; sourceTree = "<group>"; };
@@ -515,6 +517,7 @@
 				BB7FF84C2C2CADE2000B60C3 /* FileNode.swift */,
 				BB7FF8502C2CAE13000B60C3 /* FileNodeView.swift */,
 				BB7FF84E2C2CAE00000B60C3 /* FileSystemView.swift */,
+				BB57C2602C48986F008ED9F6 /* SearchResultFileNodeView.swift */,
 				BB7FF84A2C2CADA4000B60C3 /* FileTree.swift */,
 				BB8561A82C304C7E001C11F8 /* TabAddingFileSystemView.swift */,
 				BBBD40A32C3B21E4008917CC /* BlankFileCreatorPopup.swift */,
@@ -875,6 +878,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BB57C2612C48986F008ED9F6 /* SearchResultFileNodeView.swift in Sources */,
 				BB617C672C39C41C00263D3F /* OAIChatCompletionResponseMessage.swift in Sources */,
 				BBBD40BD2C3D6324008917CC /* CodeEditorSettingsViewModel.swift in Sources */,
 				BBB7C7622C32571200BEDD07 /* WideScopeControlsView.swift in Sources */,

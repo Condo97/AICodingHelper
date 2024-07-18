@@ -26,7 +26,7 @@ class ChatGenerator {
             <Code>
          */
         
-        let systemMessage = "You are an AI coding helper service in an IDE so you must format all your responses in \(language == nil ? "" : "\(language!.rawValue)") code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language."
+        let systemMessage = "You are an AI coding helper service in an IDE so you must format all your responses in \(language == nil ? "" : "\(language!.rawValue)") code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language. You may include messages in comments if the langauge supports comments."
         let userMessage1 = {
             var userMessage1_1 = "You are an AI coding helper in an IDE so all responses must be in \(language == nil ? "" : "\(language!.rawValue)") code that would be valid in an IDE."
             var userMessage1_2 = "Here are other files from my project to reference"

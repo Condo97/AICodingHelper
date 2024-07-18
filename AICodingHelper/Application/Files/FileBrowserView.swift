@@ -26,7 +26,6 @@ struct FileBrowserView: View {
                     .textFieldStyle(.plain)
             }
             .padding()
-            .background(Color.foreground)
             
             // File Browser
             TabAddingFileSystemView(

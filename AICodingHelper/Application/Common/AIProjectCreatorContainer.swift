@@ -18,7 +18,7 @@ struct AIProjectCreatorContainer: View {
     @EnvironmentObject private var remainingUpdater: RemainingUpdater
     
     private static let generatePlanBaseInstructions: String = "Create a plan to create and code a project for the specified requirements."
-    private static let createProjectSystemMessage: String = "You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language. You only respond to the one requested file. All files will be provided in turn, so therefore you will respond to each individually to preserve correct formatting to the IDE since it is looking to receive one file."// "You are creating a project in code for the specified language formatted for an IDE."
+    private static let createProjectSystemMessage: String = "You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language. You only respond to the one requested file. All files will be provided in turn, so therefore you will respond to each individually to preserve correct formatting to the IDE since it is looking to receive one file. You may include messages in comments if the langauge supports comments."// "You are creating a project in code for the specified language formatted for an IDE."
     private static let additionalTokensForEstimationPerFile: Int = Constants.Additional.additionalTokensForEstimationPerFile
     
     @StateObject private var progressTracker: ProgressTracker = ProgressTracker()
