@@ -140,11 +140,9 @@ struct TabAddingFileSystemView: View {
 #Preview {
 
     TabAddingFileSystemView(
-        directory: .constant(""),
+        directory: .constant("../downloads/myproject"),
         selectedFilepaths: .constant([]),
         searchText: .constant(""),
         tabsViewModel: TabsViewModel()
-
     )
-
 }

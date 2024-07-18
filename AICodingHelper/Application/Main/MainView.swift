@@ -441,7 +441,7 @@ struct MainView: View {
                                             action: actionType,
                                             additionalInput: userInput,
                                             scope: .file,
-                                            context: [], // TODO: Use project as context and stuff
+                                            context: referenceFilepaths.map({FilePrettyPrinter.getFileContent(filepath: $0)}) + [], // TODO: Use project as context and stuff
                                             undoManager: undoManager,
                                             options: generateOptions)
                                         
@@ -531,7 +531,7 @@ struct MainView: View {
                                             action: actionType,
                                             additionalInput: userInput,
                                             scope: .highlight,
-                                            context: [],
+                                            context: referenceFilepaths.map({FilePrettyPrinter.getFileContent(filepath: $0)}) + [],
                                             undoManager: undoManager,
                                             options: generateOptions)
                                         
