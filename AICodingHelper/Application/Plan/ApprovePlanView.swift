@@ -58,6 +58,7 @@ struct ApprovePlanView: View {
         plan: .constant(
             CodeGenerationPlan(
                 model: .GPT4o,
+                rootFilepath: "~/Downloads/test_dir",
                 editActionSystemMessage: "Edit Action System Message",
                 instructions: "Instructions all of them!",
                 copyCurrentFilesToTempFiles: true,

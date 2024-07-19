@@ -10,7 +10,7 @@ import SwiftUI
 struct AIFileCreatorContainer: View {
     
     @Binding var isPresented: Bool
-    @State var baseFilepath: String
+    @State var rootFilepath: String
     @State var referenceFilepaths: [String] // This is a state because if it is changed it should not propogate to the parent
     @ObservedObject var progressTracker: ProgressTracker
     
@@ -92,8 +92,8 @@ struct AIFileCreatorContainer: View {
         // Get openAIKey
         let openAIKey = activeSubscriptionUpdater.openAIKey
         
-        // Get newFileFilepath from newFileName and baseFilepath
-        let newFileFilepath = URL(fileURLWithPath: baseFilepath).appendingPathComponent(newFileName, conformingTo: .text).path
+        // Get newFileFilepath from newFileName and rootFilepath
+        let newFileFilepath = URL(fileURLWithPath: rootFilepath).appendingPathComponent(newFileName, conformingTo: .text).path
         
         // Create systemMessage
         let systemMessage: String = AIFileCreatorContainer.fileGeneratorSystemMessage
@@ -111,7 +111,7 @@ struct AIFileCreatorContainer: View {
             
             if !referenceFilepaths.isEmpty {
                 instructions.append("Use these files as reference")
-                instructions.append(referenceFilepaths.map({FilePrettyPrinter.getFileContent(filepath: $0)}).joined(separator: "\n"))
+                instructions.append(referenceFilepaths.map({FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)}).joined(separator: "\n"))
             }
             
             return instructions.joined(separator: "\n")
@@ -120,6 +120,7 @@ struct AIFileCreatorContainer: View {
         // Create CodeGenerationPlan with create and edit action for new file
         let codeGenerationPlan = CodeGenerationPlan(
             model: .GPT4o,
+            rootFilepath: rootFilepath,
             editActionSystemMessage: systemMessage,
             instructions: instructions,
             copyCurrentFilesToTempFiles: false,
@@ -155,12 +156,12 @@ struct AIFileCreatorContainer: View {
 
 extension View {
     
-    func aiFileCreatorPopup(isPresented: Binding<Bool>, baseFilepath: String, referenceFilepaths: [String]) -> some View {
+    func aiFileCreatorPopup(isPresented: Binding<Bool>, rootFilepath: String, referenceFilepaths: [String]) -> some View {
         self
             .sheet(isPresented: isPresented) {
                 AIFileCreatorContainer(
                     isPresented: isPresented,
-                    baseFilepath: baseFilepath,
+                    rootFilepath: rootFilepath,
                     referenceFilepaths: referenceFilepaths,
                     progressTracker: ProgressTracker())
             }
@@ -173,7 +174,7 @@ extension View {
     
     AIFileCreatorContainer(
         isPresented: .constant(true),
-        baseFilepath: "~/Downloads/test_dir",
+        rootFilepath: "~/Downloads/test_dir",
         referenceFilepaths: [],
         progressTracker: ProgressTracker()
     )

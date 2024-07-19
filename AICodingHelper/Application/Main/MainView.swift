@@ -339,7 +339,8 @@ struct MainView: View {
                                             model: .GPT4o,
                                             editActionSystemMessage: Constants.Additional.editSystemMessage,
                                             instructions: instructions,
-                                            selectedFilepaths: referenceFilepaths,//[directory],
+                                            rootFilepath: directory,
+                                            selectedFilepaths: FileManager.default.contentsOfDirectory(atPath: directory),//instead of [directory] use all the files and folders in directory [directory],
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
                                             // TODO: Handle Errors
                                             print("Could not unwrap plan after making plan in MainView!")
@@ -394,6 +395,7 @@ struct MainView: View {
                                             model: .GPT4o,
                                             editActionSystemMessage: Constants.Additional.editSystemMessage,
                                             instructions: instructions,
+                                            rootFilepath: directory,
                                             selectedFilepaths: referenceFilepaths,//fileBrowserSelectedFilepaths,
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
                                             // TODO: Handle Errors
@@ -441,7 +443,7 @@ struct MainView: View {
                                             action: actionType,
                                             additionalInput: userInput,
                                             scope: .file,
-                                            context: referenceFilepaths.map({FilePrettyPrinter.getFileContent(filepath: $0)}) + [], // TODO: Use project as context and stuff
+                                            context: referenceFilepaths.map({FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: directory)}) + [], // TODO: Use project as context and stuff
                                             undoManager: undoManager,
                                             options: generateOptions)
                                         
@@ -485,6 +487,7 @@ struct MainView: View {
                                             model: .GPT4o,
                                             editActionSystemMessage: Constants.Additional.editSystemMessage,
                                             instructions: instructions,
+                                            rootFilepath: directory,
                                             selectedFilepaths: referenceFilepaths,//[firstFileBrowserSelectedFilepath],
                                             copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
                                             // TODO: Handle Errors
@@ -531,7 +534,7 @@ struct MainView: View {
                                             action: actionType,
                                             additionalInput: userInput,
                                             scope: .highlight,
-                                            context: referenceFilepaths.map({FilePrettyPrinter.getFileContent(filepath: $0)}) + [],
+                                            context: referenceFilepaths.map({FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: directory)}) + [],
                                             undoManager: undoManager,
                                             options: generateOptions)
                                         
@@ -573,6 +576,7 @@ struct MainView: View {
                     get: {
                         currentCodeGenerationPlan ?? CodeGenerationPlan(
                             model: .GPT4o,
+                            rootFilepath: "///--!!!!",
                             editActionSystemMessage: "",
                             instructions: "",
                             copyCurrentFilesToTempFiles: true,
@@ -635,7 +639,7 @@ struct MainView: View {
         })
         .aiFileCreatorPopup(
             isPresented: $popupShowingCreateAIFile,
-            baseFilepath: fileOrFolderCreatorBaseFilepath,
+            rootFilepath: fileOrFolderCreatorBaseFilepath,
             referenceFilepaths: fileBrowserSelectedFilepaths)
         .blankFileCreatorPopup(
             isPresented: $popupShowingCreateBlankFile,
@@ -743,65 +747,6 @@ struct MainView: View {
                 print("Error generating and refactoring çode in MainView... \(error)")
             }
         }
-        
-        
-//        guard let currentWideScopeChatGenerationTask = currentWideScopeChatGenerationTask,
-//              let currentWideScopeChatGenerationTaskTokenEstimation = currentWideScopeChatGenerationTaskTokenEstimation else {
-//            // TODO: Handle Errors
-//            print("Could not unwrap currentWideScopeChatGenerationTask or currentWideScopeChatGenerationTaskTokenEstimation in MainView!")
-//            return
-//        }
-//        
-//        guard currentWideScopeChatGenerationTaskTokenEstimation + MainView.additionalTokensForEstimationPerFile < remainingUpdater.remaining else {
-//            // Show not enough tokens alert
-//            DispatchQueue.main.async {
-//                self.alertShowingNotEnoughTokensToPerformTask = true
-//            }
-//            return
-//        }
-//        
-//        Task {
-//            // Defer setting isLoadingBrowser to false
-//            defer {
-//                DispatchQueue.main.async {
-//                    self.isLoadingBrowser = false
-//                }
-//            }
-//            
-//            // Set isLoadingBrowser to true
-//            await MainActor.run {
-//                isLoadingBrowser = true
-//            }
-//            
-//            // Ensure authToken
-//            let authToken: String
-//            do {
-//                authToken = try await AuthHelper.ensure()
-//            } catch {
-//                // TODO: Handle Errors
-//                print("Error ensuring authToken in MainView... \(error)")
-//                return
-//            }
-//            
-//            // Refactor files
-//            do {
-//                try await EditFileCodeGenerator.refactorFiles(
-//                    authToken: authToken,
-//                    wideScopeChatGenerationTask: currentWideScopeChatGenerationTask,
-//                    progressTracker: progressTracker)
-//            } catch {
-//                // TODO: Handle Errors
-//                print("Error refactoring files in MainView... \(error)")
-//            }
-//            
-//            // Update remaining
-//            do {
-//                try await remainingUpdater.update(authToken: authToken)
-//            } catch {
-//                // TODO: Handle Errors
-//                print("Error updating remaining in MainView... \(error)")
-//            }
-//        }
     }
     
 }

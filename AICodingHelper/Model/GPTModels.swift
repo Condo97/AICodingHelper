@@ -11,7 +11,7 @@ import Foundation
 enum GPTModels: String, Codable {
     
     case GPT3_5 = "gpt-3.5-turbo"
-    case GPT4o = "gpt-4o"
+    case GPT4o = "gpt-4o-mini"
     
 }
 

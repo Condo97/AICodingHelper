@@ -44,7 +44,7 @@ struct AICodingHelperApp: App {
                 popupShowingOpenProject: $isShowingHomeView)
             .grantedPermissionsDirectoryCreator(isPresented: $isShowingCreateBlankProject, projectFolderPath: $directory)
             .grantedPermissionsDirectoryImporter(isPresented: $isShowingOpenProjectImporter, filepath: $directory)
-            .aiProjectCreatorPopup(isPresented: $isShowingCreateAIProject, baseFilepath: $directory)
+            .aiProjectCreatorPopup(isPresented: $isShowingCreateAIProject, rootFilepath: $directory)
             .environmentObject(activeSubscriptionUpdater)
             .environmentObject(codeEditorSettingsViewModel)
             .environmentObject(focusViewModel)

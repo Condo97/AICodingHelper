@@ -37,19 +37,33 @@ struct PlanView: View {
                 
                 Text("Instructions")
                     .font(.headline)
-                TextField("Instructions", text: $plan.instructions)
+                Text("From your original prompt, included in **AI Edit** steps.")
+                    .font(.caption)
+                    .opacity(0.6)
+                TextEditor(text: $plan.instructions)
+                    .scrollContentBackground(.hidden)
+                    .padding(8)
+                    .background(Colors.secondary)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .frame(minHeight: 85.0)
                 
                 Spacer()
                 
-                HStack {
-                    Text("Steps")
-                        .font(.headline)
-                    Button("\(Image(systemName: "plus"))") {
-                        isShowingNewStepView = true
+                VStack(alignment: .leading, spacing: 0.0) {
+                    HStack {
+                        Text("Steps")
+                                .font(.headline)
+                        Button("\(Image(systemName: "plus"))") {
+                            isShowingNewStepView = true
+                        }
+                        Button("\(Image(systemName: "list.number"))") {
+                            isShowingReorderStepsView = true
+                        }
                     }
-                    Button("\(Image(systemName: "list.number"))") {
-                        isShowingReorderStepsView = true
-                    }
+                    
+                    Text("The plan to execute. Edit steps use AI to modify.")
+                        .font(.caption)
+                        .opacity(0.6)
                 }
                 ForEach($plan.planFC.steps, id: \.index) { $step in
                     PlanStepView(step: $step)
@@ -88,6 +102,7 @@ struct PlanView: View {
         plan: .constant(
             CodeGenerationPlan(
                 model: .GPT4o,
+                rootFilepath: "~/Downloads/test_dir",
                 editActionSystemMessage: "Edit Action System Message",
                 instructions: "Instructions all of them!",
                 copyCurrentFilesToTempFiles: true,

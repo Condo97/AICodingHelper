@@ -10,14 +10,14 @@ import SwiftUI
 struct AIProjectCreatorPopup: ViewModifier {
     
     @Binding var isPresented: Bool
-    @Binding var baseFilepath: String
+    @Binding var rootFilepath: String
     
     func body(content: Content) -> some View {
         content
             .sheet(isPresented: $isPresented) {
                 AIProjectCreatorContainer(
                     isPresented: $isPresented,
-                    baseFilepath: $baseFilepath)
+                    rootFilepath: $rootFilepath)
             }
     }
     
@@ -26,9 +26,9 @@ struct AIProjectCreatorPopup: ViewModifier {
 
 extension View {
     
-    func aiProjectCreatorPopup(isPresented: Binding<Bool>, baseFilepath: Binding<String>) -> some View {
+    func aiProjectCreatorPopup(isPresented: Binding<Bool>, rootFilepath: Binding<String>) -> some View {
         self
-            .modifier(AIProjectCreatorPopup(isPresented: isPresented, baseFilepath: baseFilepath))
+            .modifier(AIProjectCreatorPopup(isPresented: isPresented, rootFilepath: rootFilepath))
     }
     
 }

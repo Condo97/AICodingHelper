@@ -159,11 +159,7 @@ struct AIProjectCreatorView: View {
             }
         }
         .onAppear {
-            if baseProjectFilepath.isEmpty {
-                withAnimation {
-                    isShowingGrantedPermissionsDirectoryCreator = true
-                }
-            }
+            isShowingGrantedPermissionsDirectoryCreator = true
         }
     }
     

@@ -10,7 +10,7 @@ import SwiftUI
 struct AIProjectCreatorContainer: View {
     
     @Binding var isPresented: Bool
-    @Binding var baseFilepath: String
+    @Binding var rootFilepath: String
     
     // Basically the goal is to create a code generation plan to create a project, we will need to generate a plan and then generate the project so there may need to be a popup confirming how many tokens it will be, or maybe it can just be on that window like the submit button could be diabled and be changed with a different word like it could say "Next...", which will then disable the button and either an alert will pop up confirming the generation or the next button will become "Generate" and the token count will appear to the left but idk I like the first one better lol
     
@@ -27,17 +27,20 @@ struct AIProjectCreatorContainer: View {
     @State private var language: String = ""
     @State private var userPrompt: String = ""
     
-    @State private var plan: CodeGenerationPlan?
-    @State private var createProjectEstimatedTokens: Int?
+//    @State private var plan: CodeGenerationPlan?
+//    @State private var createProjectEstimatedTokens: Int?
+    @State private var currentCodeGenerationPlan: CodeGenerationPlan?
+    @State private var currentCodeGenerationPlanTokenEstimation: Int?
     
     @State private var isLoadingPlanProject: Bool = false
     @State private var isLoadingCreateProject: Bool = false
     
     @State private var alertShowingConfirmCodeGeneration: Bool = false
     
+    
     var body: some View {
         AIProjectCreatorView(
-            baseProjectFilepath: $baseFilepath,
+            baseProjectFilepath: $rootFilepath,
             referenceFilepaths: $referenceFilepaths,
             language: $language,
             userPrompt: $userPrompt,
@@ -74,22 +77,32 @@ struct AIProjectCreatorContainer: View {
                     }
                     
                     // Get openAIKey
-                    let openAIKey = activeSubscriptionUpdater.openAIKey
+                    let openAIKey = activeSubscriptionUpdater.openAIKeyIsValid ? activeSubscriptionUpdater.openAIKey : nil
                     
-                    // Get instructions from generatePlanBaseInstructions + "\nProject Base Filepath " + baseFilepath + "\nProject Language " + language + "\n" + userPrompt or blank if empty
-                    let instructions = AIProjectCreatorContainer.generatePlanBaseInstructions + "\nProject Base Filepath " + baseFilepath + "\nProject Language " + language + (userPrompt.isEmpty ? "" : "\n" + userPrompt)
+                    // Get instructions from generatePlanBaseInstructions + "\nProject Language " + language + "\n" + userPrompt or blank if empty
+                    let instructions = AIProjectCreatorContainer.generatePlanBaseInstructions + "\nProject Language " + language + (userPrompt.isEmpty ? "" : "\n" + userPrompt)
                     
                     // Generate plan
-                    guard let plan = try await CodeGenerationPlanner.makePlan(
-                        authToken: authToken,
-                        openAIKey: openAIKey,
-                        model: .GPT4o,
-                        editActionSystemMessage: AIProjectCreatorContainer.createProjectSystemMessage,
-                        instructions: instructions,
-                        selectedFilepaths: referenceFilepaths,
-                        copyCurrentFilesToTempFiles: false) else {
+                    let plan: CodeGenerationPlan
+                    do {
+                        guard let createdPlan = try await CodeGenerationPlanner.makePlan(
+                            authToken: authToken,
+                            openAIKey: openAIKey,
+                            model: .GPT4o,
+                            editActionSystemMessage: AIProjectCreatorContainer.createProjectSystemMessage,
+                            instructions: instructions,
+                            rootFilepath: rootFilepath,
+                            selectedFilepaths: referenceFilepaths,
+                            copyCurrentFilesToTempFiles: false) else {
+                            // TODO: Handle Errors
+                            print("Could not unwrap plan after generating in AIProjectCreatorContainer!")
+                            return
+                        }
+                        
+                        plan = createdPlan
+                    } catch {
                         // TODO: Handle Errors
-                        print("Could not unwrap plan after generating in AIProjectCreatorContainer!")
+                        print("Error making plan in AIProjectCreatorContainer... \(error)")
                         return
                     }
                     
@@ -100,13 +113,14 @@ struct AIProjectCreatorContainer: View {
                     
                     DispatchQueue.main.async {
                         // Set planFC and createProjectEstimatedTokens and show confirm code generation alert
-                        self.plan = plan
-                        self.createProjectEstimatedTokens = estimatedTokens
+                        self.currentCodeGenerationPlan = plan
+                        self.currentCodeGenerationPlanTokenEstimation = estimatedTokens
                         self.alertShowingConfirmCodeGeneration = true
                     }
                     
                 }
             })
+        .disabled(isLoadingCreateProject || isLoadingPlanProject)
         .overlay {
             if isLoadingCreateProject || isLoadingPlanProject {
                 ZStack {
@@ -128,41 +142,55 @@ struct AIProjectCreatorContainer: View {
                 }
             }
         }
-        .alert("Approve AI Task", isPresented: $alertShowingConfirmCodeGeneration, actions: {
-            Button("Cancel", role: .cancel) {
-                
+        .sheet(isPresented: $alertShowingConfirmCodeGeneration) {
+            var currentCodeGenerationPlanUnwrappedBinding: Binding<CodeGenerationPlan> {
+                Binding(
+                    get: {
+                        currentCodeGenerationPlan ?? CodeGenerationPlan(
+                            model: .GPT4o,
+                            rootFilepath: "///--!!!!",
+                            editActionSystemMessage: "",
+                            instructions: "",
+                            copyCurrentFilesToTempFiles: true,
+                            planFC: PlanCodeGenerationFC(steps: []))
+                    },
+                    set: { value in
+                        currentCodeGenerationPlan = value
+                    })
             }
-            
-            Button("Start") {
-                Task {
-                    // Create project
-                    await createProject()
+            ApprovePlanView(
+                plan: currentCodeGenerationPlanUnwrappedBinding,
+                tokenEstimation: $currentCodeGenerationPlanTokenEstimation,
+                onCancel: {
+                    // Set current code generation plan and its token estimation to nil
+                    currentCodeGenerationPlan = nil
+                    currentCodeGenerationPlanTokenEstimation = nil
                     
                     // Dismiss
-                    await MainActor.run {
-                        isPresented = false
+                    alertShowingConfirmCodeGeneration = false
+                },
+                onStart: {
+                    Task {
+                        // Create project
+                        await createProject()
                     }
-                }
-            }
-        }, message: {
-            Text("Task Details:\n")
-//            +
-//            Text("• \(currentWideScopeChatGenerationTask?.filepathCodeGenerationPrompts.count ?? -1) Files\n")
-            +
-            Text("• \(createProjectEstimatedTokens ?? -1) Est. Tokens")
-        })
+                    
+                    // Dismiss
+                    alertShowingConfirmCodeGeneration = false
+                })
+        }
     }
     
     
     func createProject() async {
-        guard let plan = plan,
-              let createProjectEstimatedTokens = createProjectEstimatedTokens else {
+        guard let currentCodeGenerationPlan = currentCodeGenerationPlan,
+              let currentCodeGenerationPlanTokenEstimation = currentCodeGenerationPlanTokenEstimation else {
             // TODO: Handle Errors
             print("Could not unwrap plan or createProjectEstimatedTokens in AIProjectCreatorContainer!")
             return
         }
         
-        guard createProjectEstimatedTokens + AIProjectCreatorContainer.additionalTokensForEstimationPerFile < remainingUpdater.remaining else {
+        guard currentCodeGenerationPlanTokenEstimation + AIProjectCreatorContainer.additionalTokensForEstimationPerFile < remainingUpdater.remaining else {
             // TODO: Handle Errors
             print("Current code generation plan token estimation plus additional tokens for estimation per file exceeds remaining tokens!")
             return
@@ -191,18 +219,23 @@ struct AIProjectCreatorContainer: View {
         }
         
         // Get openAIKey
-        let openAIKey = activeSubscriptionUpdater.openAIKey
+        let openAIKey = activeSubscriptionUpdater.openAIKeyIsValid ? activeSubscriptionUpdater.openAIKey : nil
         
         // Generate and refactor
         do {
             try await CodeGenerationPlanExecutor().generateAndRefactor(
                 authToken: authToken,
                 openAIKey: openAIKey,
-                plan: plan,
+                plan: currentCodeGenerationPlan,
                 progressTracker: progressTracker)
         } catch {
             // TODO: Handle Errors
             print("Error generating and refactoring çode in MainView... \(error)")
+        }
+        
+        // Dismiss
+        await MainActor.run {
+            isPresented = false
         }
     }
     
@@ -212,7 +245,7 @@ struct AIProjectCreatorContainer: View {
     
     AIProjectCreatorContainer(
         isPresented: .constant(true),
-        baseFilepath: .constant("~/Downloads/test_dir")
+        rootFilepath: .constant("~/Downloads/test_dir")
     )
     
 }

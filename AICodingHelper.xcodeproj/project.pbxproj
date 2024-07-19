@@ -29,6 +29,7 @@
 		BB57C2542C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2532C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift */; };
 		BB57C2572C480F83008ED9F6 /* OpenAIKeyEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2562C480F83008ED9F6 /* OpenAIKeyEntryView.swift */; };
 		BB57C2612C48986F008ED9F6 /* SearchResultFileNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2602C48986F008ED9F6 /* SearchResultFileNodeView.swift */; };
+		BB57C2C02C4ADC50008ED9F6 /* GenerateCodeFC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2BF2C4ADC50008ED9F6 /* GenerateCodeFC.swift */; };
 		BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4D2C36D29200263D3F /* TokenCalculator.swift */; };
 		BB617C502C38568400263D3F /* FilepathCodeGenerationPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */; };
 		BB617C542C3885D900263D3F /* FileActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C532C3885D900263D3F /* FileActions.swift */; };
@@ -188,6 +189,7 @@
 		BB57C2532C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidateOpenAIKeyResponse.swift; sourceTree = "<group>"; };
 		BB57C2562C480F83008ED9F6 /* OpenAIKeyEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIKeyEntryView.swift; sourceTree = "<group>"; };
 		BB57C2602C48986F008ED9F6 /* SearchResultFileNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultFileNodeView.swift; sourceTree = "<group>"; };
+		BB57C2BF2C4ADC50008ED9F6 /* GenerateCodeFC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCodeFC.swift; sourceTree = "<group>"; };
 		BB617C4D2C36D29200263D3F /* TokenCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenCalculator.swift; sourceTree = "<group>"; };
 		BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilepathCodeGenerationPrompt.swift; sourceTree = "<group>"; };
 		BB617C532C3885D900263D3F /* FileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActions.swift; sourceTree = "<group>"; };
@@ -403,6 +405,7 @@
 		BB617C6C2C39C64800263D3F /* FunctionCall */ = {
 			isa = PBXGroup;
 			children = (
+				BB57C2BF2C4ADC50008ED9F6 /* GenerateCodeFC.swift */,
 				BB617C6D2C39C65600263D3F /* PlanCodeGenerationFC.swift */,
 			);
 			path = FunctionCall;
@@ -884,6 +887,7 @@
 				BBB7C7622C32571200BEDD07 /* WideScopeControlsView.swift in Sources */,
 				BB85618C2C2F2D6D001C11F8 /* BlankRequest.swift in Sources */,
 				BB85618A2C2F2D49001C11F8 /* RegisterUserResponse.swift in Sources */,
+				BB57C2C02C4ADC50008ED9F6 /* GenerateCodeFC.swift in Sources */,
 				BB57C2572C480F83008ED9F6 /* OpenAIKeyEntryView.swift in Sources */,
 				BB617C742C39CE1B00263D3F /* CodeGenerationTask.swift in Sources */,
 				BB617C7C2C39DDDC00263D3F /* CodeGenerationPlan.swift in Sources */,

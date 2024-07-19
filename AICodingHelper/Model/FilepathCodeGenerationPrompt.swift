@@ -24,13 +24,13 @@ struct FilepathCodeGenerationPrompt {
 
 extension FilepathCodeGenerationPrompt {
     
-    static func from(model: GPTModels, action: ActionType, userInput: String?, filepaths: [String], alternateContextFilepaths: [String]?) -> [FilepathCodeGenerationPrompt] {
+    static func from(model: GPTModels, action: ActionType, userInput: String?, rootFilepath: String, filepaths: [String], alternateContextFilepaths: [String]?) -> [FilepathCodeGenerationPrompt] {
         // Create contextString from all alternateContextFilepaths or if nil all of the filepaths
         let contextString = {
             if let alternateContextFilepaths = alternateContextFilepaths {
-                return alternateContextFilepaths.map({FilePrettyPrinter.getFileContent(filepath: $0)}).joined(separator: "\n")
+                return alternateContextFilepaths.map({FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)}).joined(separator: "\n")
             } else {
-                return filepaths.map({FilePrettyPrinter.getFileContent(filepath: $0)}).joined(separator: "\n")
+                return filepaths.map({FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)}).joined(separator: "\n")
             }
         }()
         

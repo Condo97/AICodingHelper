@@ -126,9 +126,9 @@ class AICodingHelperHTTPSConnector {
         }
     }
     
-    static func planCodeGeneration(request: FunctionCallRequest) async throws -> OAICompletionResponse {
+    static func functionCallRequest(endpoint: String, request: FunctionCallRequest) async throws -> OAICompletionResponse {
         let (data, response) = try await HTTPSClient.post(
-            url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.planCodeGeneration)")!,
+            url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(endpoint)")!,
             body: request,
             headers: nil)
         

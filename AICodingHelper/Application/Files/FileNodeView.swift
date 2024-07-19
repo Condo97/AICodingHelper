@@ -159,7 +159,7 @@ struct FileNodeView: View {
         }
         .aiFileCreatorPopup(
             isPresented: $popupShowingCreateAIFile,
-            baseFilepath: node.isDirectory ? node.path : URL(fileURLWithPath: node.path).deletingLastPathComponent().path,
+            rootFilepath: node.isDirectory ? node.path : URL(fileURLWithPath: node.path).deletingLastPathComponent().path,
             referenceFilepaths: selectedFilepaths)
         .blankFileCreatorPopup(isPresented: $popupShowingCreateBlankFile, path: node.path)
         .folderCreatorPopup(isPresented: $popupShowingCreateFolder, path: node.path)

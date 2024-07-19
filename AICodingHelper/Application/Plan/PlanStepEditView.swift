@@ -145,6 +145,7 @@ struct PlanStepEditView: View {
             .padding()
         }
         .background(Colors.secondary)
+        .frame(minWidth: 350.0, idealWidth: 550.0, minHeight: 300.0, idealHeight: 500.0)
         .onChange(of: createBaseFilepath) { newValue in
             updateStepFilepathWithCreateFilepathValues()
         }

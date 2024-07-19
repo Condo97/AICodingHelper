@@ -13,7 +13,7 @@ struct PlanStepPreviewView: View {
     @State var showInstructions: Bool = true
     
     var body: some View {
-        HStack {
+        HStack(alignment: .top) {
             Text("\(step.index)")
                 .font(.largeTitle)
                 .padding([.vertical, .leading])

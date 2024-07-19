@@ -10,41 +10,43 @@ import Foundation
 
 class FilePrettyPrinter {
     
-    static func getFileContent(filepath: String) -> String {
+    static func getFileContent(relativeFilepath: String, rootFilepath: String) -> String {
         var result = ""
         let fileManager = FileManager.default
+        
+        let fullFilepath = rootFilepath + (relativeFilepath.hasPrefix("/") ? "" : "/") + relativeFilepath
 
         // Check if the given path is a directory
         var isDirectory: ObjCBool = false
-        if fileManager.fileExists(atPath: filepath, isDirectory: &isDirectory) {
+        if fileManager.fileExists(atPath: fullFilepath, isDirectory: &isDirectory) {
             if isDirectory.boolValue {
                 // Directory case: Recursively process each subfile
                 do {
-                    let subfiles = try fileManager.contentsOfDirectory(atPath: filepath)
+                    let subfiles = try fileManager.contentsOfDirectory(atPath: fullFilepath)
                     for subfile in subfiles {
-                        let subfilePath = (filepath as NSString).appendingPathComponent(subfile)
-                        result += getFileContent(filepath: subfilePath)
+                        let subfilePath = (relativeFilepath as NSString).appendingPathComponent(subfile)
+                        result += getFileContent(relativeFilepath: subfilePath, rootFilepath: rootFilepath)
                     }
                 } catch {
-                    result += "Path: \(filepath)\n"
+                    result += "Path: \(relativeFilepath)\n" // Relative filepath here in the print
                     result += "Error reading directory: \(error.localizedDescription)\n"
                     result += "---------------------------------\n"
                 }
             } else {
                 // File case: Read content from the file at filepath
                 do {
-                    let fileContent = try String(contentsOfFile: filepath)
-                    result += "Path: \(filepath)\n"
+                    let fileContent = try String(contentsOfFile: fullFilepath)
+                    result += "Path: \(relativeFilepath)\n" // Relative filepath here in the print
                     result += "Content:\n\(fileContent)\n"
                     result += "---------------------------------\n"
                 } catch {
-                    result += "Path: \(filepath)\n"
+                    result += "Path: \(relativeFilepath)\n" // Relative filepath here in the print
                     result += "Error reading file: \(error.localizedDescription)\n"
                     result += "---------------------------------\n"
                 }
             }
         } else {
-            result += "Path: \(filepath)\n"
+            result += "Path: \(relativeFilepath)\n" // Relative filepath here in the print
             result += "File does not exist.\n"
             result += "---------------------------------\n"
         }
