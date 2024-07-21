@@ -1,5 +1,5 @@
 //
-//  WideScopeControlsView.swift
+//  CodeGeneratorControlsView.swift
 //  AICodingHelper
 //
 //  Created by Alex Coundouriotis on 6/30/24.
@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 
-struct WideScopeControlsView: View {
+struct CodeGeneratorControlsView: View {
     
     @Binding var scope: Scope
     @ObservedObject var focusViewModel: FocusViewModel
@@ -66,7 +66,7 @@ struct WideScopeControlsView: View {
                                 
                                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]) {
                                     // Comment
-                                    WideScopeControlButton(
+                                    CodeGeneratorControlButton(
                                         label: Text("//")
                                             .font(.system(size: 100.0))
                                             .minimumScaleFactor(0.01),
@@ -77,7 +77,7 @@ struct WideScopeControlsView: View {
                                         action: { onSubmit(.comment, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
                                     
                                     // Bug Fix
-                                    WideScopeControlButton(
+                                    CodeGeneratorControlButton(
                                         label: Image(Constants.ImageName.Actions.bug)
                                             .resizable()
                                             .aspectRatio(contentMode: .fit),
@@ -88,7 +88,7 @@ struct WideScopeControlsView: View {
                                         action: { onSubmit(.bugFix, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
                                     
                                     // Split
-                                    WideScopeControlButton(
+                                    CodeGeneratorControlButton(
                                         label: Image(Constants.ImageName.Actions.split)
                                             .resizable()
                                             .aspectRatio(contentMode: .fit),
@@ -99,7 +99,7 @@ struct WideScopeControlsView: View {
                                         action: { onSubmit(.split, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
                                     
                                     // Simplify
-                                    WideScopeControlButton(
+                                    CodeGeneratorControlButton(
                                         label: Image(Constants.ImageName.Actions.simplify)
                                             .resizable()
                                             .aspectRatio(contentMode: .fit),
@@ -110,7 +110,7 @@ struct WideScopeControlsView: View {
                                         action: { onSubmit(.simplify, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
                                     
                                     // Test
-                                    WideScopeControlButton(
+                                    CodeGeneratorControlButton(
                                         label: Image(Constants.ImageName.Actions.createTests)
                                             .resizable()
                                             .aspectRatio(contentMode: .fit),
@@ -121,7 +121,7 @@ struct WideScopeControlsView: View {
                                         action: { onSubmit(.createTests, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
                                     
                                     //                        // Custom
-                                    WideScopeControlButton(
+                                    CodeGeneratorControlButton(
                                         label: Image(systemName: "ellipsis")
                                             .symbolRenderingMode(.palette)
                                             .resizable()
@@ -163,7 +163,7 @@ struct WideScopeControlsView: View {
                                                 }) {
                                                     VStack {
                                                         Text("Expand \(Image(systemName: "chevron.right"))")
-                                                            .matchedGeometryEffect(id: WideScopeControlsView.additionalPromptTitleMatchedGeometryEffectID, in: namespace)
+                                                            .matchedGeometryEffect(id: CodeGeneratorControlsView.additionalPromptTitleMatchedGeometryEffectID, in: namespace)
                                                     }
                                                 }
                                                 .padding(8)
@@ -211,7 +211,7 @@ struct WideScopeControlsView: View {
                                     .padding(8)
                                 
                                 // Create temporary files instead of rewriting TODO: Add option to NarrowScopeControlsView
-                                WideScopeControlSwitch(
+                                CodeGeneratorControlSwitch(
                                     isOn: generateOptionCopyCurrentFilesToTempFile,
                                     title: .constant(Text("Save to Temp File")),
                                     subtitle: generateOptionCopyCurrentFilesToTempFile.wrappedValue ? .constant(Text("Will not overwrite your files.")) : .constant(Text("***Will overwrite***").foregroundColor(Color(NSColor.systemRed)) + Text(" your files.")),
@@ -220,7 +220,7 @@ struct WideScopeControlsView: View {
                                 .offset(x: -8)
                                 
 //                                // Use entire project as context TODO: Maybe make this a three option switch where it can either be no added context, selected files as context, project as context.. TODO: Add option to NarrowScopeControlsView
-//                                WideScopeControlSwitch(
+//                                CodeGeneratorControlSwitch(
 //                                    isOn: generateOptionUseEntireProjectAsContext,
 //                                    title: .constant(Text("Project as Context")),
 //                                    subtitle: generateOptionUseEntireProjectAsContext.wrappedValue ? .constant(Text("More accuracy and cost.")) : .constant(Text("Let AI see your entire project. May increase cost.")),
@@ -256,7 +256,7 @@ struct WideScopeControlsView: View {
                                 Text("Additional Prompt")
                                     .font(.system(size: 17.0, weight: .medium))
                                     .padding(.top)
-                                //                                    .matchedGeometryEffect(id: WideScopeControlsView.additionalPromptTitleMatchedGeometryEffectID, in: namespace)
+                                //                                    .matchedGeometryEffect(id: CodeGeneratorControlsView.additionalPromptTitleMatchedGeometryEffectID, in: namespace)
                                 
                                 // Text
                                 TextEditor(text: $additionalPromptText)
@@ -264,7 +264,7 @@ struct WideScopeControlsView: View {
                                     .scrollContentBackground(.hidden)
                                     .background(Color.background.opacity(0.1))
                                     .clipShape(RoundedRectangle(cornerRadius: 8.0))
-                                //                                    .matchedGeometryEffect(id: WideScopeControlsView.additionalPromptTextMatchedGeometryEffectID, in: namespace)
+                                //                                    .matchedGeometryEffect(id: CodeGeneratorControlsView.additionalPromptTextMatchedGeometryEffectID, in: namespace)
                                 
                                 // Hide Button
                                 Button(action: {
@@ -334,7 +334,7 @@ struct WideScopeControlsView: View {
 
 #Preview {
     
-    WideScopeControlsView(
+    CodeGeneratorControlsView(
         scope: .constant(.directory),
         focusViewModel: FocusViewModel(),
         selectedFilepaths: .constant(["Test", "Test2"]),

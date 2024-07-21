@@ -30,13 +30,26 @@ class CodeGenerationPlanGenerator {
     }
     
     static func planCodeGeneration(authToken: String, openAIKey: String?, model: GPTModels, input: String, systemMessage: String) async throws -> PlanCodeGenerationFC? {
+        // Create messages from systemMessage and input
+        let messages: [OAIChatCompletionRequestMessage] = [
+            OAIChatCompletionRequestMessage(
+                role: .system,
+                content: [
+                    .text(OAIChatCompletionRequestMessageContentText(text: systemMessage))
+                ]),
+            OAIChatCompletionRequestMessage(
+                role: .user,
+                content: [
+                    .text(OAIChatCompletionRequestMessageContentText(text: input))
+                ])
+        ]
+        
         // Create PlanCodeGenerationRequest
         let planCodeGenerationRequest = FunctionCallRequest(
             authToken: authToken,
             openAIKey: openAIKey,
             model: model,
-            systemMessage: systemMessage,
-            input: input)
+            messages: messages)
         
         // Get from AICodingHelperHTTPSConnector
         let planCodeGenerationResponse = try await AICodingHelperHTTPSConnector.functionCallRequest(endpoint: Constants.Networking.HTTPS.Endpoints.planCodeGeneration, request: planCodeGenerationRequest)

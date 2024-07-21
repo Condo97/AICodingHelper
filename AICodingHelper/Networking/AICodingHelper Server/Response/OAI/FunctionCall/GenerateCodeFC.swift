@@ -10,7 +10,9 @@ import SwiftUI
 
 struct GenerateCodeFC: Codable {
     
-    struct File: Codable {
+    struct File: Codable, Identifiable {
+        
+        var id = UUID()
         
         var filepath: String
         var content: String

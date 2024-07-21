@@ -1,5 +1,5 @@
 //
-//  WideScopeControlButton.swift
+//  CodeGeneratorControlButton.swift
 //  AICodingHelper
 //
 //  Created by Alex Coundouriotis on 6/30/24.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct WideScopeControlButton<Content: View>: View {
+struct CodeGeneratorControlButton<Content: View>: View {
     
     var label: Content
     @Binding var title: Text
@@ -59,7 +59,7 @@ struct WideScopeControlButton<Content: View>: View {
 
 #Preview {
     
-    WideScopeControlButton(
+    CodeGeneratorControlButton(
         label: Text("//")
             .font(.system(size: 100.0))
             .minimumScaleFactor(0.01),

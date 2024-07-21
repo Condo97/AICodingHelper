@@ -1,5 +1,5 @@
 //
-//  WideScopeControlSwitch.swift
+//  CodeGeneratorControlSwitch.swift
 //  AICodingHelper
 //
 //  Created by Alex Coundouriotis on 7/1/24.
@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-struct WideScopeControlSwitch: View {
+struct CodeGeneratorControlSwitch: View {
     
     @Binding var isOn: Bool
     @Binding var title: Text
@@ -49,7 +49,7 @@ struct WideScopeControlSwitch: View {
 
 #Preview {
     
-    WideScopeControlSwitch(
+    CodeGeneratorControlSwitch(
         isOn: .constant(true),
         title: .constant(Text("Use Entire Project as Context")),
         subtitle: .constant(Text("More accurate results but may cost large amounts of tokens.")),

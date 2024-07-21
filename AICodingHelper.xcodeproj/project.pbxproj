@@ -30,6 +30,13 @@
 		BB57C2572C480F83008ED9F6 /* OpenAIKeyEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2562C480F83008ED9F6 /* OpenAIKeyEntryView.swift */; };
 		BB57C2612C48986F008ED9F6 /* SearchResultFileNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2602C48986F008ED9F6 /* SearchResultFileNodeView.swift */; };
 		BB57C2C02C4ADC50008ED9F6 /* GenerateCodeFC.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2BF2C4ADC50008ED9F6 /* GenerateCodeFC.swift */; };
+		BB57C2C22C4ADD68008ED9F6 /* CodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2C12C4ADD68008ED9F6 /* CodeGenerator.swift */; };
+		BB57C2C52C4BE4EB008ED9F6 /* DiscussionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2C42C4BE4EB008ED9F6 /* DiscussionView.swift */; };
+		BB57C2C72C4BE537008ED9F6 /* Discussion.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2C62C4BE537008ED9F6 /* Discussion.swift */; };
+		BB57C2C92C4BE5B2008ED9F6 /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2C82C4BE5B2008ED9F6 /* Chat.swift */; };
+		BB57C2CB2C4BE9ED008ED9F6 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2CA2C4BE9ED008ED9F6 /* ChatView.swift */; };
+		BB57C2CD2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2CC2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift */; };
+		BB57C2D12C4C72F2008ED9F6 /* CodeGeneratorControlsContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2D02C4C72F2008ED9F6 /* CodeGeneratorControlsContainer.swift */; };
 		BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4D2C36D29200263D3F /* TokenCalculator.swift */; };
 		BB617C502C38568400263D3F /* FilepathCodeGenerationPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */; };
 		BB617C542C3885D900263D3F /* FileActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C532C3885D900263D3F /* FileActions.swift */; };
@@ -106,18 +113,22 @@
 		BB8561B02C305FB9001C11F8 /* CodeTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561AF2C305FB9001C11F8 /* CodeTabView.swift */; };
 		BB8561B42C306D84001C11F8 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561B32C306D84001C11F8 /* MainViewModel.swift */; };
 		BB8E17BE2C3366D100E3F463 /* GenerateOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8E17BD2C3366D100E3F463 /* GenerateOptions.swift */; };
-		BB8E17C02C3369A900E3F463 /* WideScopeControlSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8E17BF2C3369A900E3F463 /* WideScopeControlSwitch.swift */; };
+		BB8E17C02C3369A900E3F463 /* CodeGeneratorControlSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8E17BF2C3369A900E3F463 /* CodeGeneratorControlSwitch.swift */; };
 		BB8E17C62C347F8800E3F463 /* UndoUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8E17C52C347F8800E3F463 /* UndoUpdater.swift */; };
 		BB8E17C82C349B2900E3F463 /* TabsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8E17C72C349B2900E3F463 /* TabsViewModel.swift */; };
 		BB8E17CA2C3599D800E3F463 /* FocusableContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8E17C92C3599D800E3F463 /* FocusableContent.swift */; };
+		BBAD0AEB2C4D62400005A418 /* GenerateCodeFCChatFileMiniView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AEA2C4D62400005A418 /* GenerateCodeFCChatFileMiniView.swift */; };
+		BBAD0AED2C4D63730005A418 /* ResizableTextEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AEC2C4D63730005A418 /* ResizableTextEditor.swift */; };
+		BBAD0AEF2C4D6EA30005A418 /* ChatViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AEE2C4D6EA30005A418 /* ChatViewContainer.swift */; };
+		BBAD0AF12C4D70420005A418 /* FileCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AF02C4D70420005A418 /* FileCreator.swift */; };
 		BBB7C74E2C30E94800BEDD07 /* CodeEditor in Frameworks */ = {isa = PBXBuildFile; productRef = BBB7C74D2C30E94800BEDD07 /* CodeEditor */; };
 		BBB7C7522C31B13500BEDD07 /* FileMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7512C31B13500BEDD07 /* FileMonitor.swift */; };
 		BBB7C7542C31F52D00BEDD07 /* ResponseFormatType.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7532C31F52D00BEDD07 /* ResponseFormatType.swift */; };
 		BBB7C7562C31F92B00BEDD07 /* OAIChatCompletionRequestResponseFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7552C31F92B00BEDD07 /* OAIChatCompletionRequestResponseFormat.swift */; };
 		BBB7C75A2C31FD2E00BEDD07 /* FileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7592C31FD2E00BEDD07 /* FileSystem.swift */; };
 		BBB7C75C2C31FEAE00BEDD07 /* FileSystemGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C75B2C31FEAE00BEDD07 /* FileSystemGenerator.swift */; };
-		BBB7C7622C32571200BEDD07 /* WideScopeControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7612C32571200BEDD07 /* WideScopeControlsView.swift */; };
-		BBB7C7642C325AE200BEDD07 /* WideScopeControlButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7632C325AE200BEDD07 /* WideScopeControlButton.swift */; };
+		BBB7C7622C32571200BEDD07 /* CodeGeneratorControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7612C32571200BEDD07 /* CodeGeneratorControlsView.swift */; };
+		BBB7C7642C325AE200BEDD07 /* CodeGeneratorControlButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7632C325AE200BEDD07 /* CodeGeneratorControlButton.swift */; };
 		BBB7C7662C32FE8D00BEDD07 /* EditFileCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7652C32FE8D00BEDD07 /* EditFileCodeGenerator.swift */; };
 		BBB7C7682C330ABE00BEDD07 /* FileCopier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7672C330ABE00BEDD07 /* FileCopier.swift */; };
 		BBB7C76A2C330C9400BEDD07 /* FilePrettyPrinter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7692C330C9400BEDD07 /* FilePrettyPrinter.swift */; };
@@ -190,6 +201,13 @@
 		BB57C2562C480F83008ED9F6 /* OpenAIKeyEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIKeyEntryView.swift; sourceTree = "<group>"; };
 		BB57C2602C48986F008ED9F6 /* SearchResultFileNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultFileNodeView.swift; sourceTree = "<group>"; };
 		BB57C2BF2C4ADC50008ED9F6 /* GenerateCodeFC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCodeFC.swift; sourceTree = "<group>"; };
+		BB57C2C12C4ADD68008ED9F6 /* CodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenerator.swift; sourceTree = "<group>"; };
+		BB57C2C42C4BE4EB008ED9F6 /* DiscussionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionView.swift; sourceTree = "<group>"; };
+		BB57C2C62C4BE537008ED9F6 /* Discussion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Discussion.swift; sourceTree = "<group>"; };
+		BB57C2C82C4BE5B2008ED9F6 /* Chat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chat.swift; sourceTree = "<group>"; };
+		BB57C2CA2C4BE9ED008ED9F6 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		BB57C2CC2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCodeFCChatMiniView.swift; sourceTree = "<group>"; };
+		BB57C2D02C4C72F2008ED9F6 /* CodeGeneratorControlsContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGeneratorControlsContainer.swift; sourceTree = "<group>"; };
 		BB617C4D2C36D29200263D3F /* TokenCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenCalculator.swift; sourceTree = "<group>"; };
 		BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilepathCodeGenerationPrompt.swift; sourceTree = "<group>"; };
 		BB617C532C3885D900263D3F /* FileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActions.swift; sourceTree = "<group>"; };
@@ -271,17 +289,21 @@
 		BB8561AF2C305FB9001C11F8 /* CodeTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeTabView.swift; sourceTree = "<group>"; };
 		BB8561B32C306D84001C11F8 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		BB8E17BD2C3366D100E3F463 /* GenerateOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateOptions.swift; sourceTree = "<group>"; };
-		BB8E17BF2C3369A900E3F463 /* WideScopeControlSwitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideScopeControlSwitch.swift; sourceTree = "<group>"; };
+		BB8E17BF2C3369A900E3F463 /* CodeGeneratorControlSwitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGeneratorControlSwitch.swift; sourceTree = "<group>"; };
 		BB8E17C52C347F8800E3F463 /* UndoUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoUpdater.swift; sourceTree = "<group>"; };
 		BB8E17C72C349B2900E3F463 /* TabsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabsViewModel.swift; sourceTree = "<group>"; };
 		BB8E17C92C3599D800E3F463 /* FocusableContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusableContent.swift; sourceTree = "<group>"; };
+		BBAD0AEA2C4D62400005A418 /* GenerateCodeFCChatFileMiniView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCodeFCChatFileMiniView.swift; sourceTree = "<group>"; };
+		BBAD0AEC2C4D63730005A418 /* ResizableTextEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResizableTextEditor.swift; sourceTree = "<group>"; };
+		BBAD0AEE2C4D6EA30005A418 /* ChatViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewContainer.swift; sourceTree = "<group>"; };
+		BBAD0AF02C4D70420005A418 /* FileCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCreator.swift; sourceTree = "<group>"; };
 		BBB7C7512C31B13500BEDD07 /* FileMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMonitor.swift; sourceTree = "<group>"; };
 		BBB7C7532C31F52D00BEDD07 /* ResponseFormatType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseFormatType.swift; sourceTree = "<group>"; };
 		BBB7C7552C31F92B00BEDD07 /* OAIChatCompletionRequestResponseFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionRequestResponseFormat.swift; sourceTree = "<group>"; };
 		BBB7C7592C31FD2E00BEDD07 /* FileSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystem.swift; sourceTree = "<group>"; };
 		BBB7C75B2C31FEAE00BEDD07 /* FileSystemGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemGenerator.swift; sourceTree = "<group>"; };
-		BBB7C7612C32571200BEDD07 /* WideScopeControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideScopeControlsView.swift; sourceTree = "<group>"; };
-		BBB7C7632C325AE200BEDD07 /* WideScopeControlButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideScopeControlButton.swift; sourceTree = "<group>"; };
+		BBB7C7612C32571200BEDD07 /* CodeGeneratorControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGeneratorControlsView.swift; sourceTree = "<group>"; };
+		BBB7C7632C325AE200BEDD07 /* CodeGeneratorControlButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGeneratorControlButton.swift; sourceTree = "<group>"; };
 		BBB7C7652C32FE8D00BEDD07 /* EditFileCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditFileCodeGenerator.swift; sourceTree = "<group>"; };
 		BBB7C7672C330ABE00BEDD07 /* FileCopier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCopier.swift; sourceTree = "<group>"; };
 		BBB7C7692C330C9400BEDD07 /* FilePrettyPrinter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePrettyPrinter.swift; sourceTree = "<group>"; };
@@ -368,6 +390,20 @@
 				BB57C2562C480F83008ED9F6 /* OpenAIKeyEntryView.swift */,
 			);
 			path = OpenAIKeyEntry;
+			sourceTree = "<group>";
+		};
+		BB57C2C32C4BE4CF008ED9F6 /* Discussion */ = {
+			isa = PBXGroup;
+			children = (
+				BB57C2C82C4BE5B2008ED9F6 /* Chat.swift */,
+				BB57C2CA2C4BE9ED008ED9F6 /* ChatView.swift */,
+				BBAD0AEE2C4D6EA30005A418 /* ChatViewContainer.swift */,
+				BB57C2C62C4BE537008ED9F6 /* Discussion.swift */,
+				BB57C2C42C4BE4EB008ED9F6 /* DiscussionView.swift */,
+				BB57C2CC2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift */,
+				BBAD0AEA2C4D62400005A418 /* GenerateCodeFCChatFileMiniView.swift */,
+			);
+			path = Discussion;
 			sourceTree = "<group>";
 		};
 		BB617C552C389D0100263D3F /* Home */ = {
@@ -480,7 +516,9 @@
 			isa = PBXGroup;
 			children = (
 				BB8561A12C2F9313001C11F8 /* CodeView */,
+				BBB7C75E2C3256E400BEDD07 /* CodeGenerator */,
 				BBBD40A92C3B5DAF008917CC /* Common */,
+				BB57C2C32C4BE4CF008ED9F6 /* Discussion */,
 				BB7FF8452C2CABEF000B60C3 /* Files */,
 				BB617C552C389D0100263D3F /* Home */,
 				BB7FF83F2C2CAAFA000B60C3 /* Main */,
@@ -490,7 +528,6 @@
 				BBBD40BE2C3D638D008917CC /* Settings */,
 				BB8561AA2C305250001C11F8 /* Tabs */,
 				BBBD40C72C3D6949008917CC /* Ultra */,
-				BBB7C75E2C3256E400BEDD07 /* WideScopeControls */,
 			);
 			path = Application;
 			sourceTree = "<group>";
@@ -525,6 +562,7 @@
 				BB8561A82C304C7E001C11F8 /* TabAddingFileSystemView.swift */,
 				BBBD40A32C3B21E4008917CC /* BlankFileCreatorPopup.swift */,
 				BBBD40A52C3B2383008917CC /* FolderCreatorPopup.swift */,
+				BB57C2C12C4ADD68008ED9F6 /* CodeGenerator.swift */,
 			);
 			path = Files;
 			sourceTree = "<group>";
@@ -650,25 +688,26 @@
 		BB8561832C2F2BCA001C11F8 /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				BB57C2512C45CB35008ED9F6 /* ActiveSubscriptionUpdater.swift */,
 				BB8561812C2F2BC7001C11F8 /* AuthHelper.swift */,
 				BB1405E52C362B450036CFE8 /* BindingUserDefaultsHelper.swift */,
+				BBBD40B42C3CA588008917CC /* BookmarkHelper.swift */,
+				BB617C752C39D35800263D3F /* CodeGenerationPlanExecutor.swift */,
 				BB85618D2C2F32CC001C11F8 /* Collection+Safe.swift */,
+				BB53E3392C4180BF003FC84E /* ConstantsUpdater.swift */,
 				BBB7C7672C330ABE00BEDD07 /* FileCopier.swift */,
 				BB1405E12C360D180036CFE8 /* FileCounter.swift */,
+				BBAD0AF02C4D70420005A418 /* FileCreator.swift */,
 				BBB7C7512C31B13500BEDD07 /* FileMonitor.swift */,
 				BBB7C7692C330C9400BEDD07 /* FilePrettyPrinter.swift */,
+				BB617C6F2C39C6DE00263D3F /* FunctionCallParser.swift */,
+				BBBD40C52C3D6678008917CC /* IAPManager.swift */,
+				BBBD40C32C3D655C008917CC /* ProductUpdater.swift */,
+				BBBD40B62C3CA61D008917CC /* RecentProjectHelper.swift */,
 				BB1405E72C362C4D0036CFE8 /* RemainingUpdater.swift */,
+				BB617C4D2C36D29200263D3F /* TokenCalculator.swift */,
 				BB1405E32C362A1E0036CFE8 /* UserDefaultsHelper.swift */,
 				BB1405DD2C35ACF00036CFE8 /* View+FocusEffectDisabledVersionCheck.swift */,
-				BB617C4D2C36D29200263D3F /* TokenCalculator.swift */,
-				BB617C6F2C39C6DE00263D3F /* FunctionCallParser.swift */,
-				BB617C752C39D35800263D3F /* CodeGenerationPlanExecutor.swift */,
-				BBBD40B42C3CA588008917CC /* BookmarkHelper.swift */,
-				BBBD40B62C3CA61D008917CC /* RecentProjectHelper.swift */,
-				BBBD40C32C3D655C008917CC /* ProductUpdater.swift */,
-				BBBD40C52C3D6678008917CC /* IAPManager.swift */,
-				BB53E3392C4180BF003FC84E /* ConstantsUpdater.swift */,
-				BB57C2512C45CB35008ED9F6 /* ActiveSubscriptionUpdater.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -706,14 +745,15 @@
 			path = "GPT JSONs";
 			sourceTree = "<group>";
 		};
-		BBB7C75E2C3256E400BEDD07 /* WideScopeControls */ = {
+		BBB7C75E2C3256E400BEDD07 /* CodeGenerator */ = {
 			isa = PBXGroup;
 			children = (
-				BBB7C7612C32571200BEDD07 /* WideScopeControlsView.swift */,
-				BBB7C7632C325AE200BEDD07 /* WideScopeControlButton.swift */,
-				BB8E17BF2C3369A900E3F463 /* WideScopeControlSwitch.swift */,
+				BBB7C7612C32571200BEDD07 /* CodeGeneratorControlsView.swift */,
+				BB57C2D02C4C72F2008ED9F6 /* CodeGeneratorControlsContainer.swift */,
+				BBB7C7632C325AE200BEDD07 /* CodeGeneratorControlButton.swift */,
+				BB8E17BF2C3369A900E3F463 /* CodeGeneratorControlSwitch.swift */,
 			);
-			path = WideScopeControls;
+			path = CodeGenerator;
 			sourceTree = "<group>";
 		};
 		BBBD40A92C3B5DAF008917CC /* Common */ = {
@@ -725,6 +765,7 @@
 				BBBD40AA2C3B5E9D008917CC /* GrantedPermissionsDirectoryImporter.swift */,
 				BBBD40AC2C3C24A5008917CC /* GrantedPermissionsDirectoryCreator.swift */,
 				BBBD40B82C3CBD79008917CC /* DismissOnAppearView.swift */,
+				BBAD0AEC2C4D63730005A418 /* ResizableTextEditor.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -884,7 +925,7 @@
 				BB57C2612C48986F008ED9F6 /* SearchResultFileNodeView.swift in Sources */,
 				BB617C672C39C41C00263D3F /* OAIChatCompletionResponseMessage.swift in Sources */,
 				BBBD40BD2C3D6324008917CC /* CodeEditorSettingsViewModel.swift in Sources */,
-				BBB7C7622C32571200BEDD07 /* WideScopeControlsView.swift in Sources */,
+				BBB7C7622C32571200BEDD07 /* CodeGeneratorControlsView.swift in Sources */,
 				BB85618C2C2F2D6D001C11F8 /* BlankRequest.swift in Sources */,
 				BB85618A2C2F2D49001C11F8 /* RegisterUserResponse.swift in Sources */,
 				BB57C2C02C4ADC50008ED9F6 /* GenerateCodeFC.swift in Sources */,
@@ -893,6 +934,9 @@
 				BB617C7C2C39DDDC00263D3F /* CodeGenerationPlan.swift in Sources */,
 				BB8561782C2F2161001C11F8 /* ChatGenerator.swift in Sources */,
 				BB1405E62C362B450036CFE8 /* BindingUserDefaultsHelper.swift in Sources */,
+				BBAD0AED2C4D63730005A418 /* ResizableTextEditor.swift in Sources */,
+				BB57C2C22C4ADD68008ED9F6 /* CodeGenerator.swift in Sources */,
+				BB57C2C92C4BE5B2008ED9F6 /* Chat.swift in Sources */,
 				BB1405E22C360D180036CFE8 /* FileCounter.swift in Sources */,
 				BB57C2522C45CB35008ED9F6 /* ActiveSubscriptionUpdater.swift in Sources */,
 				BB8561762C2F20C1001C11F8 /* GetChatResponse.swift in Sources */,
@@ -912,6 +956,7 @@
 				BBBD40C42C3D655C008917CC /* ProductUpdater.swift in Sources */,
 				BB8561182C2CC246001C11F8 /* CodeEditorLanguageSelector.swift in Sources */,
 				BB1405EC2C362CBD0036CFE8 /* GetRemainingTokensResponse.swift in Sources */,
+				BB57C2CB2C4BE9ED008ED9F6 /* ChatView.swift in Sources */,
 				BB617C502C38568400263D3F /* FilepathCodeGenerationPrompt.swift in Sources */,
 				BBBD40AD2C3C24A5008917CC /* GrantedPermissionsDirectoryCreator.swift in Sources */,
 				BBB7C75C2C31FEAE00BEDD07 /* FileSystemGenerator.swift in Sources */,
@@ -924,6 +969,7 @@
 				BBB7C7562C31F92B00BEDD07 /* OAIChatCompletionRequestResponseFormat.swift in Sources */,
 				BB617C5B2C39ABE200263D3F /* OAICompletionResponse.swift in Sources */,
 				BB1405E82C362C4D0036CFE8 /* RemainingUpdater.swift in Sources */,
+				BBAD0AF12C4D70420005A418 /* FileCreator.swift in Sources */,
 				BB8E17C62C347F8800E3F463 /* UndoUpdater.swift in Sources */,
 				BB617C5F2C39C32200263D3F /* OAIChatCompletionResponse.swift in Sources */,
 				BBB7C76A2C330C9400BEDD07 /* FilePrettyPrinter.swift in Sources */,
@@ -935,7 +981,7 @@
 				BB617C722C39CDCE00263D3F /* CodeGenerationPlanGenerator.swift in Sources */,
 				BB8561112C2CB78D001C11F8 /* CodeEditorContainer.swift in Sources */,
 				BBBD40A62C3B2383008917CC /* FolderCreatorPopup.swift in Sources */,
-				BBB7C7642C325AE200BEDD07 /* WideScopeControlButton.swift in Sources */,
+				BBB7C7642C325AE200BEDD07 /* CodeGeneratorControlButton.swift in Sources */,
 				BBBD40B32C3C44B9008917CC /* AIProjectCreatorPopup.swift in Sources */,
 				BB7FF81B2C2CAA9C000B60C3 /* AICodingHelper.xcdatamodeld in Sources */,
 				BB7FF8412C2CAB19000B60C3 /* MainView.swift in Sources */,
@@ -950,12 +996,14 @@
 				BBEA61FD2C419D6F0078B4C4 /* CreatePlanStepView.swift in Sources */,
 				BB8E17BE2C3366D100E3F463 /* GenerateOptions.swift in Sources */,
 				BBBD40A42C3B21E4008917CC /* BlankFileCreatorPopup.swift in Sources */,
+				BB57C2C52C4BE4EB008ED9F6 /* DiscussionView.swift in Sources */,
 				BB8561632C2F16ED001C11F8 /* OAIChatCompletionRequestMessageContentType.swift in Sources */,
 				BB1405DE2C35ACF00036CFE8 /* View+FocusEffectDisabledVersionCheck.swift in Sources */,
 				BBB7C7662C32FE8D00BEDD07 /* EditFileCodeGenerator.swift in Sources */,
 				BB1405DC2C35A2DC0036CFE8 /* FocusViewModel.swift in Sources */,
 				BB7FF80F2C2CAA9B000B60C3 /* AICodingHelperApp.swift in Sources */,
 				BB1405F32C36CE330036CFE8 /* GenerationError.swift in Sources */,
+				BBAD0AEF2C4D6EA30005A418 /* ChatViewContainer.swift in Sources */,
 				BB8E17CA2C3599D800E3F463 /* FocusableContent.swift in Sources */,
 				BBBD40A82C3B4F96008917CC /* AICodingHelperAppCommands.swift in Sources */,
 				BB57C2542C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift in Sources */,
@@ -984,17 +1032,20 @@
 				BBBD40AB2C3B5E9D008917CC /* GrantedPermissionsDirectoryImporter.swift in Sources */,
 				BB8561132C2CBB18001C11F8 /* CodeEditorLanguageResolver.swift in Sources */,
 				BBEA61FF2C419E180078B4C4 /* PlanStepEditView.swift in Sources */,
-				BB8E17C02C3369A900E3F463 /* WideScopeControlSwitch.swift in Sources */,
+				BB8E17C02C3369A900E3F463 /* CodeGeneratorControlSwitch.swift in Sources */,
 				BB85614D2C2F097F001C11F8 /* CompletionRole.swift in Sources */,
 				BB8561802C2F2B98001C11F8 /* StatusResponse.swift in Sources */,
 				BB617C612C39C38000263D3F /* OAIChatCompletionResponseUsage.swift in Sources */,
 				BB53E33F2C418E33003FC84E /* PlanView.swift in Sources */,
 				BB8561AE2C305276001C11F8 /* TabView.swift in Sources */,
+				BB57C2D12C4C72F2008ED9F6 /* CodeGeneratorControlsContainer.swift in Sources */,
 				BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */,
 				BB8E17C82C349B2900E3F463 /* TabsViewModel.swift in Sources */,
+				BBAD0AEB2C4D62400005A418 /* GenerateCodeFCChatFileMiniView.swift in Sources */,
 				BB1405E02C360CC40036CFE8 /* ProgressTracker.swift in Sources */,
 				BBEA62032C41A1470078B4C4 /* PlanStepPreviewView.swift in Sources */,
 				BBEA62052C41A5680078B4C4 /* ApprovePlanView.swift in Sources */,
+				BB57C2CD2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift in Sources */,
 				BBBD40B12C3C28E5008917CC /* AIProjectCreatorView.swift in Sources */,
 				BB8561252C2CD30A001C11F8 /* NarrowScopeControlButton.swift in Sources */,
 				BB57C2502C45CA74008ED9F6 /* Subscriptions.swift in Sources */,
@@ -1003,6 +1054,7 @@
 				BB8561932C2F358B001C11F8 /* GPTModels.swift in Sources */,
 				BB8561222C2CD11E001C11F8 /* Constants.swift in Sources */,
 				BB53E33A2C4180BF003FC84E /* ConstantsUpdater.swift in Sources */,
+				BB57C2C72C4BE537008ED9F6 /* Discussion.swift in Sources */,
 				BB8561992C2F846C001C11F8 /* CodeView.swift in Sources */,
 				BB8561822C2F2BC7001C11F8 /* AuthHelper.swift in Sources */,
 				BBBD40B52C3CA588008917CC /* BookmarkHelper.swift in Sources */,

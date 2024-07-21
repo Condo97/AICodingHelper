@@ -172,7 +172,6 @@ class CodeViewModel: ObservableObject, Identifiable {
                 responseFormat: .text,
                 context: mutableContext,
                 input: input,
-                scope: scope,
                 stream: { getChatResponse in
                     if firstChat {
                         // Set isLoading to false and isStreaming to true

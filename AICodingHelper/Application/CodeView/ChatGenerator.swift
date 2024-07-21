@@ -11,7 +11,7 @@ import Foundation
 
 class ChatGenerator {
     
-    static func streamChat(authToken: String, openAIKey: String?, model: GPTModels, action: ActionType, additionalInput: String?, language: CodeEditor.Language?, responseFormat: ResponseFormatType = .text, context: [String], input: String, scope: Scope, stream: (GetChatResponse) async -> Void) async throws {
+    static func streamChat(authToken: String, openAIKey: String?, model: GPTModels, action: ActionType, additionalInput: String?, language: CodeEditor.Language?, responseFormat: ResponseFormatType = .text, context: [String], input: String, stream: (GetChatResponse) async -> Void) async throws {
         /* Should look something like
          System
             You are an AI coding helper service in an IDE so you must format all your responses in <language> code that would be valid in an IDE.
@@ -45,11 +45,10 @@ class ChatGenerator {
             responseFormat: responseFormat,
             systemMessage: systemMessage,
             userInputs: [userMessage1, userMessage2],
-            scope: scope,
             stream: stream)
     }
     
-    static func streamChat(authToken: String, openAIKey: String?, model: GPTModels, responseFormat: ResponseFormatType, systemMessage: String?, userInputs: [String], scope: Scope, stream: (GetChatResponse) async -> Void) async throws {
+    static func streamChat(authToken: String, openAIKey: String?, model: GPTModels, responseFormat: ResponseFormatType, systemMessage: String?, userInputs: [String], stream: (GetChatResponse) async -> Void) async throws {
         // Create messages and add messages
         var messages: [OAIChatCompletionRequestMessage] = []
         
@@ -78,10 +77,10 @@ class ChatGenerator {
                 messages: messages.reversed()))
         
         // Stream chat
-        try await streamChat(getChatRequest: getChatRequest, scope: scope, stream: stream)
+        try await streamChat(getChatRequest: getChatRequest, stream: stream)
     }
     
-    static func streamChat(getChatRequest: GetChatRequest, scope: Scope, stream: (GetChatResponse) async -> Void) async throws {
+    static func streamChat(getChatRequest: GetChatRequest, stream: (GetChatResponse) async -> Void) async throws {
         // Encode getChatRequest to string, otherwise return
         guard let requestString = String(data: try JSONEncoder().encode(getChatRequest), encoding: .utf8) else {
             // TODO: Handle Errors

@@ -13,15 +13,17 @@ struct FunctionCallRequest: Codable {
     let authToken: String
     let openAIKey: String?
     let model: GPTModels
-    let systemMessage: String?
-    let input: String
+    let messages: [OAIChatCompletionRequestMessage]
+//    let systemMessage: String?
+//    let input: String
     
     enum CodingKeys: String, CodingKey {
         case authToken
         case openAIKey
         case model
-        case systemMessage
-        case input
+        case messages
+//        case systemMessage
+//        case input
     }
     
 }

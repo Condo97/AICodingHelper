@@ -9,10 +9,6 @@ import CodeEditor
 import Foundation
 import SwiftUI
 
-//class TempMainViewModel: ObservableObject {
-//    @Published var openTabs: [CodeViewModel] = []
-//    @Published var selecte
-//}
 
 struct MainView: View {
     
@@ -35,14 +31,10 @@ struct MainView: View {
     @FocusState private var editorFocused: Bool
     
     
-//    @StateObject private var fileSystemGenerator: FileSystemGenerator = FileSystemGenerator()
     @StateObject private var progressTracker: ProgressTracker = ProgressTracker()
     @StateObject private var tabsViewModel: TabsViewModel = TabsViewModel()
     
     @State private var fileBrowserSelectedFilepaths: [String] = []
-    
-    @State private var currentCodeGenerationPlan: CodeGenerationPlan?
-    @State private var currentCodeGenerationPlanTokenEstimation: Int?
     
     private static let additionalTokensForEstimationPerFile: Int = Constants.Additional.additionalTokensForEstimationPerFile
     
@@ -53,14 +45,12 @@ struct MainView: View {
     
     @State private var alertShowingNewBlankFile: Bool = false
     @State private var alertShowingNewFolder: Bool = false
-    @State private var alertShowingInvalidOpenAIKey: Bool = false
     
     @State private var isShowingUltraView: Bool = false
     
     @State private var codeViewHasSelection: Bool = false
     
-    @State private var isLoadingBrowser: Bool = false
-    @State private var isLoadingGenerationPlan: Bool = false
+    @State private var isLoadingCodeGeneration: Bool = false
     
     @State private var newEntityName: String = ""
     
@@ -228,53 +218,53 @@ struct MainView: View {
                     }
                 }
                 .overlay {
-                    if isLoadingGenerationPlan {
+                    if isLoadingCodeGeneration {
                         ZStack {
                             Colors.foreground
                                 .opacity(0.6)
                             
                             VStack {
-                                Text("Planning Generation...")
+                                Text("Generating...")
                                 
                                 ProgressView()
                             }
                         }
                     }
                 }
-                .overlay {
-                    if isLoadingBrowser {
-                        ZStack {
-                            Colors.foreground
-                                .opacity(0.6)
-                            
-                            VStack {
-                                Text("**Performing \(currentScope.wrappedValue.name.capitalized) AI Task**")
-                                    .padding()
-                                
-                                var finalizing: Bool {
-                                    progressTracker.completedTasks == progressTracker.totalTasks || progressTracker.estimatedTimeRemaining == 0
-                                }
-                                
-                                if let estimatedTimeRemaining = progressTracker.estimatedTimeRemaining {
-                                    if finalizing {
-                                        Text("Finalizing...")
-                                    } else {
-                                        Text("Estimated time remaining: \(String(format: "%.1f", estimatedTimeRemaining))s")
-                                    }
-                                } else {
-                                    Text("Calculating time remaining...")
-                                    if let progress = progressTracker.progress {
-                                        Text("Progress \(progress)")
-                                    }
-                                }
-                                ProgressView(value: finalizing ? nil : progressTracker.progress, total: ProgressTracker.maxProgress)
-                                    .frame(width: 480.0)
-                                    .tint(Colors.element)
-                                    .padding([.leading, .trailing])
-                            }
-                        }
-                    }
-                }
+//                .overlay {
+//                    if isLoadingBrowser {
+//                        ZStack {
+//                            Colors.foreground
+//                                .opacity(0.6)
+//                            
+//                            VStack {
+//                                Text("**Performing \(currentScope.wrappedValue.name.capitalized) AI Task**")
+//                                    .padding()
+//                                
+//                                var finalizing: Bool {
+//                                    progressTracker.completedTasks == progressTracker.totalTasks || progressTracker.estimatedTimeRemaining == 0
+//                                }
+//                                
+//                                if let estimatedTimeRemaining = progressTracker.estimatedTimeRemaining {
+//                                    if finalizing {
+//                                        Text("Finalizing...")
+//                                    } else {
+//                                        Text("Estimated time remaining: \(String(format: "%.1f", estimatedTimeRemaining))s")
+//                                    }
+//                                } else {
+//                                    Text("Calculating time remaining...")
+//                                    if let progress = progressTracker.progress {
+//                                        Text("Progress \(progress)")
+//                                    }
+//                                }
+//                                ProgressView(value: finalizing ? nil : progressTracker.progress, total: ProgressTracker.maxProgress)
+//                                    .frame(width: 480.0)
+//                                    .tint(Colors.element)
+//                                    .padding([.leading, .trailing])
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
         .overlay {
@@ -283,285 +273,19 @@ struct MainView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    WideScopeControlsView(
+                    CodeGeneratorControlsContainer(
                         scope: currentScope,
+                        rootFilepath: $directory,
+                        progressTracker: progressTracker,
                         focusViewModel: focusViewModel,
-                        selectedFilepaths: $fileBrowserSelectedFilepaths,
-                        onSubmit: { actionType, userInput, referenceFilepaths, generateOptions in
-                            // Reset values
-                            self.currentCodeGenerationPlan = nil
-                            self.currentCodeGenerationPlanTokenEstimation = nil
-                            
-                            Task {
-                                // Ensure authToken
-                                let authToken: String
-                                do {
-                                    authToken = try await AuthHelper.ensure()
-                                } catch {
-                                    // TODO: Handle Errors
-                                    print("Error ensuring authToken in MainView... \(error)")
-                                    return
-                                }
-                                
-                                // Get openAIKey
-                                let openAIKey: String? = activeSubscriptionUpdater.openAIKeyIsValid ? activeSubscriptionUpdater.openAIKey : nil
-                                
-                                // Create alternateContextFilepaths and add directory if generateOptions useEntireProject is included
-                                var alternateContextFilepaths: [String] = []
-                                if generateOptions.contains(.useEntireProjectAsContext) {
-                                    alternateContextFilepaths.append(directory)
-                                }
-                                
-                                // Do generation by scope
-                                switch currentScope.wrappedValue {
-                                case .project:
-                                    // Generate with wide scope generator using single object array with directory as filepaths
-                                    do {
-                                        // Defer setting isLoadingGenerationPlan to false
-                                        defer {
-                                            DispatchQueue.main.async {
-                                                self.isLoadingGenerationPlan = false
-                                            }
-                                        }
-                                        
-                                        // Set isLoadingGenerationPlan to true
-                                        DispatchQueue.main.async {
-                                            self.isLoadingGenerationPlan = true
-                                        }
-                                        
-                                        // Create instructions from action aiPrompt and userInput
-                                        let instructions = actionType.aiPrompt + (userInput.isEmpty ? "" : "\n" + userInput)
-                                        
-                                        // Create Plan and set to currentCodeGenerationPlan
-                                        guard let plan = try await CodeGenerationPlanner.makePlan(
-                                            authToken: authToken,
-                                            openAIKey: openAIKey,
-                                            model: .GPT4o,
-                                            editActionSystemMessage: Constants.Additional.editSystemMessage,
-                                            instructions: instructions,
-                                            rootFilepath: directory,
-                                            selectedFilepaths: FileManager.default.contentsOfDirectory(atPath: directory),//instead of [directory] use all the files and folders in directory [directory],
-                                            copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
-                                            // TODO: Handle Errors
-                                            print("Could not unwrap plan after making plan in MainView!")
-                                            return
-                                        }
-                                        DispatchQueue.main.async {
-                                            self.currentCodeGenerationPlan = plan
-                                        }
-                                        
-                                        // Estimate tokens for plan and set to currentCodeGenerationPlanTokenEstimation
-                                        let tokenEstimation = await TokenCalculator.getEstimatedTokens(
-                                            authToken: authToken,
-                                            codeGenerationPlan: plan)
-                                        DispatchQueue.main.async {
-                                            self.currentCodeGenerationPlanTokenEstimation = tokenEstimation
-                                        }
-                                        
-                                        // Set alertShowingWideScopeChatGenerationEstimatedTokensApproval alert to true
-                                        DispatchQueue.main.async {
-                                            self.alertShowingWideScopeChatGenerationEstimatedTokensApproval = true
-                                        }
-                                    } catch GenerationError.invalidOpenAIKey {
-                                        // If received invalidOpenAIKey set openAIKeyIsValid to false and show alert
-                                        activeSubscriptionUpdater.openAIKeyIsValid = false
-                                        alertShowingInvalidOpenAIKey = true
-                                    } catch {
-                                        // TODO: Handle Errors
-                                        print("Error building refactor files task in MainView... \(error)")
-                                    }
-                                case .multifile:
-                                    // Generate with wide scope generator
-                                    do {
-                                        // Defer setting isLoadingGenerationPlan to false
-                                        defer {
-                                            DispatchQueue.main.async {
-                                                self.isLoadingGenerationPlan = false
-                                            }
-                                        }
-                                        
-                                        // Set isLoadingGenerationPlan to true
-                                        DispatchQueue.main.async {
-                                            self.isLoadingGenerationPlan = true
-                                        }
-                                        
-                                        // Create instructions from action aiPrompt and userInput
-                                        let instructions = actionType.aiPrompt + (userInput.isEmpty ? "" : "\n" + userInput)
-                                        
-                                        // Create Plan and set to currentCodeGenerationPlan
-                                        guard let plan = try await CodeGenerationPlanner.makePlan(
-                                            authToken: authToken,
-                                            openAIKey: openAIKey,
-                                            model: .GPT4o,
-                                            editActionSystemMessage: Constants.Additional.editSystemMessage,
-                                            instructions: instructions,
-                                            rootFilepath: directory,
-                                            selectedFilepaths: referenceFilepaths,//fileBrowserSelectedFilepaths,
-                                            copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
-                                            // TODO: Handle Errors
-                                            print("Could not unwrap plan after making plan in MainView!")
-                                            return
-                                        }
-                                        DispatchQueue.main.async {
-                                            self.currentCodeGenerationPlan = plan
-                                        }
-                                        
-                                        // Estimate tokens for plan and set to currentCodeGenerationPlanTokenEstimation
-                                        let tokenEstimation = await TokenCalculator.getEstimatedTokens(
-                                            authToken: authToken,
-                                            codeGenerationPlan: plan)
-                                        DispatchQueue.main.async {
-                                            self.currentCodeGenerationPlanTokenEstimation = tokenEstimation
-                                        }
-                                        
-                                        // Set alertShowingWideScopeChatGenerationEstimatedTokensApproval alert to true
-                                        DispatchQueue.main.async {
-                                            self.alertShowingWideScopeChatGenerationEstimatedTokensApproval = true
-                                        }
-                                    } catch GenerationError.invalidOpenAIKey {
-                                        // If received invalidOpenAIKey set openAIKeyIsValid to false and show alert
-                                        activeSubscriptionUpdater.openAIKeyIsValid = false
-                                        alertShowingInvalidOpenAIKey = true
-                                    } catch {
-                                        // TODO: Handle Errors
-                                        print("Error refactoring files in MainView... \(error)")
-                                    }
-                                case .file: // This only contains generation logic for the opened view in CodeView and falls through to directory if the intent is not to use the open view but to use a file in the browser as the directory case handles files and directories the same but exclusively from the browser
-                                    // If focus is on editor and openTab can be unwrapped use openTab to generate, otherwise fallthrough to directory to generate for the selected filepath from the browser
-                                    if focusViewModel.focus == .editor,
-                                       let openTab = tabsViewModel.openTab {
-                                        // Start progressTracker with one total task
-                                        DispatchQueue.main.async {
-                                            progressTracker.startEstimation(totalTasks: 1)
-                                        }
-                                        
-                                        // Generate with openTab narrow scope generator
-                                        await openTab.generate(
-                                            authToken: authToken,
-                                            openAIKey: openAIKey,
-                                            remainingTokens: remainingUpdater.remaining,
-                                            action: actionType,
-                                            additionalInput: userInput,
-                                            scope: .file,
-                                            context: referenceFilepaths.map({FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: directory)}) + [], // TODO: Use project as context and stuff
-                                            undoManager: undoManager,
-                                            options: generateOptions)
-                                        
-                                        // Complete task in progressTracker
-                                        DispatchQueue.main.async {
-                                            progressTracker.completeTask()
-                                        }
-                                    } else {
-                                        // If file is not open fallthrough to directory logic
-                                        fallthrough
-                                    }
-                                case .directory: // Due to the nature of the generation logic, this is able to be used for both single files and directories in the browser. Its generation exclusively updates files in the wide scope rather than narrow directly in the editor
-                                    // Create and ensure unwrap firstFileBrowserSelectedFilepath
-                                    guard let firstFileBrowserSelectedFilepath = fileBrowserSelectedFilepaths[safe: 0] else {
-                                        // TODO: Handle Errors
-                                        print("Could not unwrap selected file in MainView!")
-                                        return
-                                    }
-                                    
-                                    // Generate with wide scope generator
-                                    do {
-                                        // Defer setting isLoadingGenerationPlan to false
-                                        defer {
-                                            DispatchQueue.main.async {
-                                                self.isLoadingGenerationPlan = false
-                                            }
-                                        }
-                                        
-                                        // Set isLoadingGenerationPlan to true
-                                        DispatchQueue.main.async {
-                                            self.isLoadingGenerationPlan = true
-                                        }
-                                        
-                                        // Create instructions from action aiPrompt and userInput
-                                        let instructions = actionType.aiPrompt + (userInput.isEmpty ? "" : "\n" + userInput)
-                                        
-                                        // Create Plan and set to currentCodeGenerationPlan
-                                        guard let plan = try await CodeGenerationPlanner.makePlan(
-                                            authToken: authToken,
-                                            openAIKey: openAIKey,
-                                            model: .GPT4o,
-                                            editActionSystemMessage: Constants.Additional.editSystemMessage,
-                                            instructions: instructions,
-                                            rootFilepath: directory,
-                                            selectedFilepaths: referenceFilepaths,//[firstFileBrowserSelectedFilepath],
-                                            copyCurrentFilesToTempFiles: generateOptions.contains(.copyCurrentFilesToTempFiles)) else {
-                                            // TODO: Handle Errors
-                                            print("Could not unwrap plan after making plan in MainView!")
-                                            return
-                                        }
-                                        DispatchQueue.main.async {
-                                            self.currentCodeGenerationPlan = plan
-                                        }
-                                        
-                                        // If openAIKey is nil or empty estimate tokens for plan and set to currentCodeGenerationPlanTokenEstimation, otherwise set token estimation to nil
-                                        if openAIKey == nil || openAIKey!.isEmpty {
-                                            let tokenEstimation = await TokenCalculator.getEstimatedTokens(
-                                                authToken: authToken,
-                                                codeGenerationPlan: plan)
-                                            DispatchQueue.main.async {
-                                                self.currentCodeGenerationPlanTokenEstimation = tokenEstimation
-                                            }
-                                        }
-                                        
-                                        // Set alertShowingWideScopeChatGenerationEstimatedTokensApproval alert to true
-                                        DispatchQueue.main.async {
-                                            self.alertShowingWideScopeChatGenerationEstimatedTokensApproval = true
-                                        }
-                                    } catch GenerationError.invalidOpenAIKey {
-                                        // If received invalidOpenAIKey set openAIKeyIsValid to false and show alert
-                                        activeSubscriptionUpdater.openAIKeyIsValid = false
-                                        alertShowingInvalidOpenAIKey = true
-                                    } catch {
-                                        // TODO: Handle Errors
-                                        print("Error refactoring files in MainView... \(error)")
-                                    }
-                                case .highlight:
-                                    if let openTab = tabsViewModel.openTab {
-                                        // Start progressTracker with one total task
-                                        DispatchQueue.main.async {
-                                            progressTracker.startEstimation(totalTasks: 1)
-                                        }
-                                        
-                                        await openTab.generate(
-                                            authToken: authToken,
-                                            openAIKey: openAIKey,
-                                            remainingTokens: remainingUpdater.remaining,
-                                            action: actionType,
-                                            additionalInput: userInput,
-                                            scope: .highlight,
-                                            context: referenceFilepaths.map({FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: directory)}) + [],
-                                            undoManager: undoManager,
-                                            options: generateOptions)
-                                        
-                                        // Complete task in progressTracker
-                                        DispatchQueue.main.async {
-                                            progressTracker.completeTask()
-                                        }
-                                    } else {
-                                        // TODO: Handle Errors
-                                        return
-                                    }
-                                }
-                                
-                                // Update remaining
-                                do {
-                                    try await remainingUpdater.update(authToken: authToken)
-                                } catch {
-                                    // TODO: Handle Errors
-                                    print("Error updating remaining in MainView... \(error)")
-                                }
-                            }
-                        })
+                        tabsViewModel: tabsViewModel,
+                        fileBrowserSelectedFilepaths: $fileBrowserSelectedFilepaths,
+                        isLoading: $isLoadingCodeGeneration)
                     .shadow(color: Colors.foregroundText.opacity(0.05), radius: 8.0)
                     .padding()
                     .padding(.bottom)
                     .padding(.bottom)
-                    .disabled(isLoadingBrowser || isLoadingGenerationPlan)
+                    .disabled(isLoadingCodeGeneration)
                 }
             }
         }
@@ -570,41 +294,41 @@ struct MainView: View {
 //                Text("")
 //            }
 //        }
-        .sheet(isPresented: $alertShowingWideScopeChatGenerationEstimatedTokensApproval) {
-            var currentCodeGenerationPlanUnwrappedBinding: Binding<CodeGenerationPlan> {
-                Binding(
-                    get: {
-                        currentCodeGenerationPlan ?? CodeGenerationPlan(
-                            model: .GPT4o,
-                            rootFilepath: "///--!!!!",
-                            editActionSystemMessage: "",
-                            instructions: "",
-                            copyCurrentFilesToTempFiles: true,
-                            planFC: PlanCodeGenerationFC(steps: []))
-                    },
-                    set: { value in
-                        currentCodeGenerationPlan = value
-                    })
-            }
-            ApprovePlanView(
-                plan: currentCodeGenerationPlanUnwrappedBinding,
-                tokenEstimation: $currentCodeGenerationPlanTokenEstimation,
-                onCancel: {
-                    // Set current code generation plan and its token estimation to nil
-                    currentCodeGenerationPlan = nil
-                    currentCodeGenerationPlanTokenEstimation = nil
-                    
-                    // Dismiss
-                    alertShowingWideScopeChatGenerationEstimatedTokensApproval = false
-                },
-                onStart: {
-                    // Refactor files
-                    refactorFiles()
-                    
-                    // Dismiss
-                    alertShowingWideScopeChatGenerationEstimatedTokensApproval = false
-                })
-        }
+//        .sheet(isPresented: $alertShowingWideScopeChatGenerationEstimatedTokensApproval) {
+//            var currentCodeGenerationPlanUnwrappedBinding: Binding<CodeGenerationPlan> {
+//                Binding(
+//                    get: {
+//                        currentCodeGenerationPlan ?? CodeGenerationPlan(
+//                            model: .GPT4o,
+//                            rootFilepath: "///--!!!!",
+//                            editActionSystemMessage: "",
+//                            instructions: "",
+//                            copyCurrentFilesToTempFiles: true,
+//                            planFC: PlanCodeGenerationFC(steps: []))
+//                    },
+//                    set: { value in
+//                        currentCodeGenerationPlan = value
+//                    })
+//            }
+//            ApprovePlanView(
+//                plan: currentCodeGenerationPlanUnwrappedBinding,
+//                tokenEstimation: $currentCodeGenerationPlanTokenEstimation,
+//                onCancel: {
+//                    // Set current code generation plan and its token estimation to nil
+//                    currentCodeGenerationPlan = nil
+//                    currentCodeGenerationPlanTokenEstimation = nil
+//                    
+//                    // Dismiss
+//                    alertShowingWideScopeChatGenerationEstimatedTokensApproval = false
+//                },
+//                onStart: {
+//                    // Refactor files
+//                    refactorFiles()
+//                    
+//                    // Dismiss
+//                    alertShowingWideScopeChatGenerationEstimatedTokensApproval = false
+//                })
+//        }
         .sheet(isPresented: $isShowingUltraView) {
             UltraView(isPresented: $isShowingUltraView)
         }
@@ -629,13 +353,6 @@ struct MainView: View {
             }
         }, message: {
             Text("Purchase more tokens to perform this AI task.")
-        })
-        .alert("Invalid OpenAI Key", isPresented: $alertShowingInvalidOpenAIKey, actions: {
-            Button("Close") {
-                
-            }
-        }, message: {
-            Text("Your Open AI API Key is invalid and your plan will be used until it is updated. If you believe this is an error please report it!")
         })
         .aiFileCreatorPopup(
             isPresented: $popupShowingCreateAIFile,
@@ -688,65 +405,6 @@ struct MainView: View {
 //                }
 //            }
 //        }
-    }
-    
-    
-    func refactorFiles() {
-        guard let currentCodeGenerationPlan = currentCodeGenerationPlan,
-              let currentCodeGenerationPlanTokenEstimation = currentCodeGenerationPlanTokenEstimation else {
-            // TODO: Handle Errors
-            print("Could not unwrap currentCodeGenerationPlan in MainView!")
-            return
-        }
-        
-        guard currentCodeGenerationPlanTokenEstimation + MainView.additionalTokensForEstimationPerFile < remainingUpdater.remaining else {
-            // TODO: Handle Errors
-            print("Current code generation plan token estimation plus additional tokens for estimation per file exceeds remaining tokens!")
-            return
-        }
-        
-        Task {
-            // Defer setting isLoadingBrowser to false
-            defer {
-                DispatchQueue.main.async {
-                    self.isLoadingBrowser = false
-                }
-            }
-            
-            // Set isLoadingBrowser to true
-            await MainActor.run {
-                isLoadingBrowser = true
-            }
-            
-            // Ensure authToken
-            let authToken: String
-            do {
-                authToken = try await AuthHelper.ensure()
-            } catch {
-                // TODO: Handle Errors
-                print("Error ensuring authToken in MainView... \(error)")
-                return
-            }
-            
-            // Get openAIKey
-            let openAIKey = activeSubscriptionUpdater.openAIKeyIsValid ? activeSubscriptionUpdater.openAIKey : nil
-            
-            // Generate and refactor
-            do {
-                try await CodeGenerationPlanExecutor().generateAndRefactor(
-                    authToken: authToken,
-                    openAIKey: openAIKey,
-                    plan: currentCodeGenerationPlan,
-                    progressTracker: progressTracker)
-            } catch GenerationError.invalidOpenAIKey {
-                // If received invalidOpenAIKey set openAIKeyIsValid to false and show alert
-                activeSubscriptionUpdater.openAIKeyIsValid = false
-                alertShowingInvalidOpenAIKey = true
-            } catch {
-                // TODO: Handle Errors
-                print("Error generating and refactoring çode in MainView... \(error)")
-            }
-        }
     }
     
 }

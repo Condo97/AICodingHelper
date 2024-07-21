@@ -54,6 +54,7 @@ struct Constants {
             struct Endpoints {
 
                 static let calculateTokens = "/calculateTokens"
+                static let generateCode = "/generateCode"
                 static let getImportantConstants = "/getImportantConstants"
                 static let getIsActive = "/getIsActive"
                 static let getRemainingTokens = "/getRemainingTokens"
