@@ -17,7 +17,7 @@ class CodeGenerationPlanner {
         let relativeSelectedFilepaths: [String] = selectedFilepaths.map({$0.replacingOccurrences(of: rootFilepath, with: "")})
         
         // Ensure unwrap PlanCodeGenerationFC from CodeGenerationPlanGenerator
-        guard let planCodeGeneratorFC = try await CodeGenerationPlanGenerator.generatePlan(
+        guard let planCodeGeneratorFC = try await CodeGenerationPlanGenerator().generatePlan(
             authToken: authToken,
             openAIKey: openAIKey,
             model: model,

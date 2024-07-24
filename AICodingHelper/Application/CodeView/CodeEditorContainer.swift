@@ -42,6 +42,8 @@ struct CodeEditorContainer: View {
                 print("Changed Language \(newValue)")
             }
             
+            Spacer()
+            
             // Language Selector
             HStack {
                 Spacer()

@@ -12,6 +12,8 @@ struct DiscussionView: View {
     @Binding var rootFilepath: String
     @ObservedObject var discussion: Discussion
     @Binding var isLoading: Bool
+    @State var generateOnAppear: Bool
+    var onResetDiscussion: () -> Void
     
     @EnvironmentObject private var activeSubscriptionUpdater: ActiveSubscriptionUpdater
     
@@ -20,11 +22,31 @@ struct DiscussionView: View {
     @State private var newInput: String = ""
     @State private var newFilepaths: [String] = []
     
+    @State private var chatGenerator: ChatGenerator?
+    @State private var generateCodeFCAICodingHelperHTTPSConnector: AICodingHelperHTTPSConnector?
+    
     @State private var streamingChat: String = ""
+    
+    @State private var isCancelling: Bool = false
     
     @State private var isShowingDirectoryImporter: Bool = false
     
+    @State private var commandReturnEventMonitorCreated: Bool = false
+    
     @State private var directoryImporterNewFilepath: String = ""
+    
+    
+    private var canCancelGeneration: Binding<Bool> {
+        Binding(
+            get: {
+                // Can cancel generation if neither chatGenerator and generateCodeFCAICodingHelperHTTPSConnector are nil
+                chatGenerator != nil || generateCodeFCAICodingHelperHTTPSConnector != nil
+            },
+            set: { value in
+                // No actions
+            })
+    }
+    
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -33,7 +55,40 @@ struct DiscussionView: View {
                 .bold()
             
             ScrollView {
-                VStack(alignment: .leading) {
+                VStack(alignment: .trailing) {
+                    if isLoading {
+                        LoadingChatView(
+                            canCancel: canCancelGeneration,
+                            stopLoading: {
+                                Task {
+                                    // Defer setting isCancelling to false
+                                    defer {
+                                        DispatchQueue.main.async {
+                                            self.isCancelling = false
+                                        }
+                                    }
+                                    
+                                    // Set isCancelling to true
+                                    await MainActor.run {
+                                        isCancelling = true
+                                    }
+                                    
+                                    // Cancel generateCodeFCAICodingHelperHTTPSConnector this one first since it is not async even though I guess it doesn't matter
+                                    generateCodeFCAICodingHelperHTTPSConnector?.cancel()
+                                    
+                                    // Cancel chatGenerator
+                                    do {
+                                        try await chatGenerator?.cancel()
+                                    } catch {
+                                        // TODO: Handle Errors
+                                        print("Error cancelling chatGenerator in DiscussionView... \(error)")
+                                        return
+                                    }
+                                }
+                            })
+                            .padding(.leading, 4)
+                            .rotationEffect(.degrees(180))
+                    }
                     if !streamingChat.isEmpty {
                         ChatView(
                             chat: Chat(
@@ -61,88 +116,135 @@ struct DiscussionView: View {
             
             Spacer()
             
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading) {
-                    Text("Message")
-                        .font(.subheadline)
-                        .bold()
-                    ZStack(alignment: .topLeading) {
-                        TextEditor(text: $newInput)
-                            .focused($focused)
-                            .frame(height: 80.0)
-                        
-                        Text("Enter Message...")
-                            .opacity(focused ? 0.0 : 0.4)
-                            .onTapGesture {
-                                focused = true
-                            }
-                    }
+            VStack {
+                ZStack(alignment: .topLeading) {
+                    TextEditor(text: $newInput)
+                        .scrollContentBackground(.hidden)
+                        .focused($focused)
+                        .frame(height: 80.0)
                     
-                    Text("Files")
-                        .font(.subheadline)
-                        .bold()
-                    
-                    ForEach(newFilepaths, id: \.self) { filepath in
-                        Text(filepath)
-                            .font(.system(size: 9.0))
-                            .opacity(0.6)
-                    }
-                    
-                    Button("Add File") {
-                        isShowingDirectoryImporter = true
-                    }
+                    Text("Enter Message...")
+                        .opacity(focused ? 0.0 : 0.4)
+                        .onTapGesture {
+                            focused = true
+                        }
                 }
                 
-                VStack(alignment: .leading) {
-                    Button("Build Code") {
-                        // Create chat with newInput and append to discussion chats
-                        discussion.chats.append(
-                            Chat(
-                                role: .user,
-                                message: newInput,
-                                referenceFilepaths: newFilepaths.isEmpty ? nil : newFilepaths)
-                        )
-                        
-                        // Reset newInput and newFilepaths
-                        newInput = ""
-                        newFilepaths = []
-                        
-                        // Generate geneate code FC chat
-                        Task {
-                            await generateGenerateCodeFCChat()
+                HStack(alignment: .bottom) {
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Text("Files")
+                                .font(.subheadline)
+                                .bold()
+                            
+                            Button("\(Image(systemName: "plus"))") {
+                                isShowingDirectoryImporter = true
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
+                        .padding(.top, 2)
+                        
+                        VStack(alignment: .leading) {
+                            ForEach(newFilepaths, id: \.self) { filepath in
+                                Text(filepath)
+                                    .lineLimit(1)
+                                    .truncationMode(.head)
+                                    .font(.system(size: 9.0))
+                                    .opacity(0.6)
+                            }
+                            
+                            Text("Drag Files Here")
+                                .font(.subheadline)
+                                .opacity(isLoading ? 0.2 : 0.6)
+                        }
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 8.0)
+                            .stroke(Color.background.opacity(isLoading ? 0.2 : 0.6), style: StrokeStyle(dash: [5, 3])))
+                        .onDrop(of: [.text], isTargeted: nil, perform: { providers in
+                            if let provider = providers.first {
+                                provider.loadObject(ofClass: NSString.self, completionHandler: { providerReading, error in
+                                    if let filepath = providerReading as? String {
+                                        if !newFilepaths.contains(where: {$0 == filepath}) {
+                                            newFilepaths.append(filepath)
+                                        }
+                                    }
+                                })
+                            }
+                            
+                            return true
+                        })
                     }
                     
-                    Button("Chat \(Image(systemName: "return"))") {
-                        // Create chat with newInput and append to discussion chats
-                        discussion.chats.append(
-                            Chat(
-                                role: .user,
-                                message: newInput,
-                                referenceFilepaths: newFilepaths.isEmpty ? nil : newFilepaths)
-                        )
-                        
-                        // Reset newInput and newFilepaths
-                        newInput = ""
-                        newFilepaths = []
-                        
-                        // Generate string chat
-                        Task {
-                            await generateStringChat()
+                    Spacer()
+                    
+                    VStack(alignment: .leading) {
+                        Button("Build Code") {
+                            doBuildCodeGeneration()
                         }
+                        .help("Build Code - command+shift+return")
+                        
+                        Button(action: {
+                            doChatGeneration()
+                        }) {
+                            HStack {
+                                Text("Chat")
+                                HStack(spacing: 0.0) {
+                                    Image(systemName: "command")
+                                        .imageScale(.small)
+                                    Image(systemName: "return")
+                                        .imageScale(.small)
+                                }
+                            }
+                        }
+                        .help("Chat - command+return")
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(newInput.isEmpty && newFilepaths.isEmpty)
                     }
-                    .keyboardShortcut(.defaultAction)
                 }
+                .disabled(isLoading)
             }
             .padding()
             .background(RoundedRectangle(cornerRadius: 4.0)
                 .stroke(focused ? Colors.element : Colors.background, lineWidth: focused ? 2.0 : 1.0))
+        }
+        .overlay(alignment: .topTrailing) {
+            Button(action: {
+                onResetDiscussion()
+            }) {
+                Image(Constants.ImageName.Icons.broom)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 28.0, height: 28.0)
+                    .padding(8)
+                    .background(Color.foreground)
+                    .clipShape(Circle())
+                    .shadow(color: Colors.foregroundText.opacity(0.05), radius: 8.0)
+            }
+            .buttonStyle(PlainButtonStyle())
         }
         .grantedPermissionsDirectoryImporter(
             isPresented: $isShowingDirectoryImporter,
             filepath: $directoryImporterNewFilepath,
             canChooseDirectories: true,
             canChooseFiles: true)
+        .onAppear {
+            if !commandReturnEventMonitorCreated {
+                NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+                    if event.modifierFlags.contains(.command) && event.keyCode == 36 { // Return key code is
+                        doChatGeneration()
+                    }
+                    
+                    return event
+                }
+                
+                commandReturnEventMonitorCreated = true
+            }
+        }
+        .onAppear {
+            if generateOnAppear {
+                doBuildCodeGeneration()
+            }
+        }
         .onChange(of: directoryImporterNewFilepath) { newValue in
             // Append newValue to newFilepaths if it is not empty and newFilepaths does not contain it
             if !newValue.isEmpty,
@@ -155,6 +257,64 @@ struct DiscussionView: View {
         }
     }
     
+    
+    func doBuildCodeGeneration() {
+        // Ensure is not loading, otherwise return
+        guard !isLoading else {
+            // TODO: Handle Errors
+            return
+        }
+        
+        // Create chat with newInput and newFilepaths and append to discussion chats if not empty
+        if !newInput.isEmpty || !newFilepaths.isEmpty {
+            discussion.chats.append(
+                Chat(
+                    role: .user,
+                    message: newInput,
+                    referenceFilepaths: newFilepaths.isEmpty ? nil : newFilepaths)
+            )
+        }
+        
+        // Reset newInput and newFilepaths
+        newInput = ""
+        newFilepaths = []
+        
+        // Generate geneate code FC chat
+        Task {
+            await generateGenerateCodeFCChat()
+        }
+    }
+    
+    func doChatGeneration() {
+        // Ensure is not loading otherwise return
+        guard !isLoading else {
+            // TODO: Handle Errors
+            return
+        }
+        
+        // Ensure either newInput or newFilepaths are not empty, otherwise return
+        guard !newInput.isEmpty || !newFilepaths.isEmpty else {
+            // TODO: Handle Errors
+            return
+        }
+        
+        // Create chat with newInput and newFilepaths and append to discussion
+        discussion.chats.append(
+            Chat(
+                role: .user,
+                message: newInput,
+                referenceFilepaths: newFilepaths.isEmpty ? nil : newFilepaths)
+        )
+        
+        // Reset newInput and newFilepaths
+        newInput = ""
+        newFilepaths = []
+        
+        // Generate string chat
+        Task {
+            await generateStringChat()
+        }
+    }
     
     func generateStringChat() async {
         // Ensure not isLoading
@@ -189,20 +349,33 @@ struct DiscussionView: View {
         let messages: [OAIChatCompletionRequestMessage]
         do {
             messages = try discussion.chats.compactMap({
+                // Transform reference filepaths into a string for the message
+                let referenceFilepathsString: String = discussion.chats.compactMap({
+                    $0.referenceFilepaths?.compactMap({
+                        FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)
+                    }).joined(separator: "\n\n")
+                }).joined(separator: "\n\n")
+                
+                // If message is GenerateCodeFC transform and return
                 if let message = $0.message as? GenerateCodeFC,
                    let messageString = String(data: try JSONEncoder().encode(message), encoding: .utf8) {
+                    let finalMessage = messageString + "\n\n" + referenceFilepathsString
+                    
                     return OAIChatCompletionRequestMessage(
                         role: $0.role,
                         content: [
-                            .text(OAIChatCompletionRequestMessageContentText(text: messageString))
+                            .text(OAIChatCompletionRequestMessageContentText(text: finalMessage))
                         ])
                 }
                 
+                // If message is String transform and return
                 if let message = $0.message as? String {
+                    let finalMessage = message + "\n\n" + referenceFilepathsString
+                    
                     return OAIChatCompletionRequestMessage(
                         role: $0.role,
                         content: [
-                            .text(OAIChatCompletionRequestMessageContentText(text: message))
+                            .text(OAIChatCompletionRequestMessageContentText(text: finalMessage))
                         ])
                 }
                 
@@ -227,9 +400,13 @@ struct DiscussionView: View {
             streamingChat = ""
         }
         
-        // Stream chat
+        // Stream chat and set chatGenerator
         do {
-            try await ChatGenerator.streamChat(
+            let chatGenerator = ChatGenerator()
+            await MainActor.run {
+                self.chatGenerator = chatGenerator
+            }
+            try await chatGenerator.streamChat(
                 getChatRequest: getChatRequest,
                 stream: { getChatResponse in
                     if let responseMessageDelta = getChatResponse.body.oaiResponse.choices[safe: 0]?.delta.content {
@@ -281,17 +458,46 @@ struct DiscussionView: View {
         }
         
         // Transform discussion chats to messages
-        let messages: [OAIChatCompletionRequestMessage] = discussion.chats.compactMap({
-            guard let message = $0.message as? String else {
+        let messages: [OAIChatCompletionRequestMessage]
+        do {
+            messages = try discussion.chats.compactMap({
+                // Transform reference filepaths into a string for the message
+                let referenceFilepathsString: String = discussion.chats.compactMap({
+                    $0.referenceFilepaths?.compactMap({
+                        FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)
+                    }).joined(separator: "\n\n")
+                }).joined(separator: "\n\n")
+                
+                // If message is GenerateCodeFC transform and return
+                if let message = $0.message as? GenerateCodeFC,
+                   let messageString = String(data: try JSONEncoder().encode(message), encoding: .utf8) {
+                    let finalMessage = messageString + "\n\n" + referenceFilepathsString
+                    
+                    return OAIChatCompletionRequestMessage(
+                        role: $0.role,
+                        content: [
+                            .text(OAIChatCompletionRequestMessageContentText(text: finalMessage))
+                        ])
+                }
+                
+                // If message is String transform and return
+                if let message = $0.message as? String {
+                    let finalMessage = message + "\n\n" + referenceFilepathsString
+                    
+                    return OAIChatCompletionRequestMessage(
+                        role: $0.role,
+                        content: [
+                            .text(OAIChatCompletionRequestMessageContentText(text: finalMessage))
+                        ])
+                }
+                
                 return nil
-            }
-            
-            return OAIChatCompletionRequestMessage(
-                role: $0.role,
-                content: [
-                    .text(OAIChatCompletionRequestMessageContentText(text: message))
-                ])
-        })
+            })
+        } catch {
+            // TODO: Handle Errors
+            print("Error transforming discussion chats to messages in DiscussionView... \(error)")
+            return
+        }
         
         // Get openAIKey
         let openAIKey = activeSubscriptionUpdater.openAIKeyIsValid ? activeSubscriptionUpdater.openAIKey : nil
@@ -303,10 +509,14 @@ struct DiscussionView: View {
             model: .GPT4o,
             messages: messages)
         
-        // Get oaiCompletionResponse
+        // Get oaiCompletionResponse and set generateCodeFCAICodingHelperHTTPSConnector
         let oaiCompletionResponse: OAICompletionResponse
         do {
-            oaiCompletionResponse = try await AICodingHelperHTTPSConnector.functionCallRequest(
+            let generateCodeFCAICodingHelperHTTPSConnector = AICodingHelperHTTPSConnector()
+            await MainActor.run {
+                self.generateCodeFCAICodingHelperHTTPSConnector = generateCodeFCAICodingHelperHTTPSConnector
+            }
+            oaiCompletionResponse = try await generateCodeFCAICodingHelperHTTPSConnector.functionCallRequest(
                 endpoint: Constants.Networking.HTTPS.Endpoints.generateCode,
                 request: functionCallRequest)
         } catch {
@@ -355,7 +565,7 @@ struct DiscussionView: View {
                 Chat(
                     role: .assistant,
                     message: GenerateCodeFC(
-                        files: [GenerateCodeFC.File(
+                        output_files: [GenerateCodeFC.File(
                             filepath: "Test/Filepath",
                         	content: "Test File Content")])
                 ),
@@ -365,7 +575,7 @@ struct DiscussionView: View {
                 Chat(
                     role: .assistant,
                     message: GenerateCodeFC(
-                        files: [
+                        output_files: [
                             GenerateCodeFC.File(
                                 filepath: "~/Downloads/test_dir/file.txt",
                                 content: "This is the content of the file"),
@@ -375,11 +585,16 @@ struct DiscussionView: View {
                         ]))
             ]
         ),
-        isLoading: .constant(false)
+        isLoading: .constant(false),
+        generateOnAppear: true,
+        onResetDiscussion: {
+            
+        }
     )
     .padding()
     .background(Color.foreground)
     .frame(width: 550.0, height: 500.0)
     .environmentObject(ActiveSubscriptionUpdater())
+    .environmentObject(CodeEditorSettingsViewModel())
     
 }

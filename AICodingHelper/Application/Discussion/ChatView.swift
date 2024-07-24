@@ -47,6 +47,7 @@ struct ChatView: View {
                 }
                 HStack {
                     GenerateCodeFCChatMiniView(generateCodeFC: messageBinding)
+                        .focused($focused)
                 }
             } else {
                 var messageBinding: Binding<String> {
@@ -81,7 +82,7 @@ struct ChatView: View {
     ChatView(
         chat: Chat(
             role: .user,
-            message: GenerateCodeFC(files: [GenerateCodeFC.File(
+            message: GenerateCodeFC(output_files: [GenerateCodeFC.File(
                 filepath: "~/Downloads/test_dir",
                 content: "This is the new content for the file.")])),
 //            message: "This is the user string message"),
@@ -89,5 +90,6 @@ struct ChatView: View {
             
         }
     )
+    .environmentObject(CodeEditorSettingsViewModel())
     
 }

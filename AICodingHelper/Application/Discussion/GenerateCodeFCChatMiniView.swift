@@ -20,7 +20,7 @@ struct GenerateCodeFCChatMiniView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8.0) {
-            ForEach($generateCodeFC.files) { $file in
+            ForEach($generateCodeFC.output_files) { $file in
                 GenerateCodeFCChatFileMiniView(file: $file)
             }
         }
@@ -36,7 +36,7 @@ struct GenerateCodeFCChatMiniView: View {
     
     GenerateCodeFCChatMiniView(
         generateCodeFC: .constant(GenerateCodeFC(
-            files: [
+            output_files: [
                 GenerateCodeFC.File(
                     filepath: "~/Downloads/test_dir/file.txt",
                     content: "This is the content of the file"),

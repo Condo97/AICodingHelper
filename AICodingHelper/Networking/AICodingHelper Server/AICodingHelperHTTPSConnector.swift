@@ -8,10 +8,10 @@
 import Foundation
 
 
-class AICodingHelperHTTPSConnector {
+class AICodingHelperHTTPSConnector: HTTPSClient {
     
-    static func calculateTokens(request: CalculateTokensRequest) async throws -> CalculateTokensResponse {
-        let (data, response) = try await HTTPSClient.post(
+    func calculateTokens(request: CalculateTokensRequest) async throws -> CalculateTokensResponse {
+        let (data, response) = try await post(
             url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.calculateTokens)")!,
             body: request,
             headers: nil)
@@ -39,8 +39,8 @@ class AICodingHelperHTTPSConnector {
         }
     }
     
-    static func getImportantConstants() async throws -> GetImportantConstantsResponse {
-        let (data, response) = try await HTTPSClient.post(
+    func getImportantConstants() async throws -> GetImportantConstantsResponse {
+        let (data, response) = try await post(
             url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.getImportantConstants)")!,
             body: BlankRequest(),
             headers: nil)
@@ -68,8 +68,8 @@ class AICodingHelperHTTPSConnector {
         }
     }
     
-    static func getIsActive(request: AuthRequest) async throws -> IsActiveResponse {
-        let (data, response) = try await HTTPSClient.post(
+    func getIsActive(request: AuthRequest) async throws -> IsActiveResponse {
+        let (data, response) = try await post(
             url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.getIsActive)")!,
             body: request,
             headers: nil)
@@ -97,8 +97,8 @@ class AICodingHelperHTTPSConnector {
         }
     }
     
-    static func getRemaining(request: AuthRequest) async throws -> GetRemainingTokensResponse {
-        let (data, response) = try await HTTPSClient.post(
+    func getRemaining(request: AuthRequest) async throws -> GetRemainingTokensResponse {
+        let (data, response) = try await post(
             url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.getRemainingTokens)")!,
             body: request,
             headers: nil)
@@ -126,8 +126,8 @@ class AICodingHelperHTTPSConnector {
         }
     }
     
-    static func functionCallRequest(endpoint: String, request: FunctionCallRequest) async throws -> OAICompletionResponse {
-        let (data, response) = try await HTTPSClient.post(
+    func functionCallRequest(endpoint: String, request: FunctionCallRequest) async throws -> OAICompletionResponse {
+        let (data, response) = try await post(
             url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(endpoint)")!,
             body: request,
             headers: nil)
@@ -157,14 +157,14 @@ class AICodingHelperHTTPSConnector {
         }
     }
     
-    static func registerTransaction(authToken: String, transactionID: UInt64) async throws -> IsActiveResponse {
+    func registerTransaction(authToken: String, transactionID: UInt64) async throws -> IsActiveResponse {
         let request = RegisterTransactionRequest(authToken: authToken, transactionId: transactionID)
         
         return try await registerTransaction(request: request)
     }
     
-    static func registerTransaction(request: RegisterTransactionRequest) async throws -> IsActiveResponse {
-        let (data, response) = try await HTTPSClient.post(
+    func registerTransaction(request: RegisterTransactionRequest) async throws -> IsActiveResponse {
+        let (data, response) = try await post(
             url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.registerTransaction)")!,
             body: request,
             headers: nil)
@@ -174,8 +174,8 @@ class AICodingHelperHTTPSConnector {
         return isActiveResponse
     }
     
-    static func registerUser() async throws -> RegisterUserResponse {
-        let (data, response) = try await HTTPSClient.post(
+    func registerUser() async throws -> RegisterUserResponse {
+        let (data, response) = try await post(
             url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.registerUser)")!,
             body: BlankRequest(),
             headers: nil)
@@ -203,8 +203,8 @@ class AICodingHelperHTTPSConnector {
         }
     }
     
-    static func validateOpenAIKey(request: AuthRequest) async throws -> ValidateOpenAIKeyResponse {
-        let (data, response) = try await HTTPSClient.post(
+    func validateOpenAIKey(request: AuthRequest) async throws -> ValidateOpenAIKeyResponse {
+        let (data, response) = try await post(
             url: URL(string: "\(Constants.Networking.HTTPS.aiCodingHelperServer)\(Constants.Networking.HTTPS.Endpoints.validateOpenAIKey)")!,
             body: request,
             headers: nil)

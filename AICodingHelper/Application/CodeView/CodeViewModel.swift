@@ -162,7 +162,7 @@ class CodeViewModel: ObservableObject, Identifiable {
         // Do generation
         do {
             var firstChat = true
-            try await ChatGenerator.streamChat(
+            try await ChatGenerator().streamChat(
                 authToken: authToken,
                 openAIKey: openAIKey,
                 model: .GPT4o,

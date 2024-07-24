@@ -3,7 +3,7 @@ import Foundation
 class ConstantsHelper {
     
     static func updateImportantConstants() async throws {
-        let response = try await AICodingHelperHTTPSConnector.getImportantConstants()
+        let response = try await AICodingHelperHTTPSConnector().getImportantConstants()
         
         guard response.success == 1 else {
             // Handle the error case, possibly by setting default values

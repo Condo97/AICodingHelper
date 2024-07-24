@@ -69,7 +69,7 @@ class ActiveSubscriptionUpdater: ObservableObject {
     
     func registerTransaction(authToken: String, transactionID: UInt64) async throws {
         // Get isActiveResponse from server with authToken and transactionID
-        let isActiveResponse = try await AICodingHelperHTTPSConnector.registerTransaction(
+        let isActiveResponse = try await AICodingHelperHTTPSConnector().registerTransaction(
             authToken: authToken,
             transactionID: transactionID)
         
@@ -84,7 +84,7 @@ class ActiveSubscriptionUpdater: ObservableObject {
         let authRequest = AuthRequest(authToken: authToken)
 
         // Get isActiveResponse from server
-        let isActiveResponse = try await AICodingHelperHTTPSConnector.getIsActive(request: authRequest)
+        let isActiveResponse = try await AICodingHelperHTTPSConnector().getIsActive(request: authRequest)
         
         // Update with isPremium value
         update(

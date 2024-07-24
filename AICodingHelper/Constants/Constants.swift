@@ -44,6 +44,12 @@ struct Constants {
             static let createTests = "Create Tests"
 
         }
+        
+        struct Icons {
+            
+            static let broom = "Broom"
+            
+        }
 
     }
 

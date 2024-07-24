@@ -36,7 +36,7 @@
 		BB57C2C92C4BE5B2008ED9F6 /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2C82C4BE5B2008ED9F6 /* Chat.swift */; };
 		BB57C2CB2C4BE9ED008ED9F6 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2CA2C4BE9ED008ED9F6 /* ChatView.swift */; };
 		BB57C2CD2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2CC2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift */; };
-		BB57C2D12C4C72F2008ED9F6 /* CodeGeneratorControlsContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2D02C4C72F2008ED9F6 /* CodeGeneratorControlsContainer.swift */; };
+		BB57C2D12C4C72F2008ED9F6 /* CodeGeneratorContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB57C2D02C4C72F2008ED9F6 /* CodeGeneratorContainer.swift */; };
 		BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4D2C36D29200263D3F /* TokenCalculator.swift */; };
 		BB617C502C38568400263D3F /* FilepathCodeGenerationPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */; };
 		BB617C542C3885D900263D3F /* FileActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB617C532C3885D900263D3F /* FileActions.swift */; };
@@ -121,6 +121,8 @@
 		BBAD0AED2C4D63730005A418 /* ResizableTextEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AEC2C4D63730005A418 /* ResizableTextEditor.swift */; };
 		BBAD0AEF2C4D6EA30005A418 /* ChatViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AEE2C4D6EA30005A418 /* ChatViewContainer.swift */; };
 		BBAD0AF12C4D70420005A418 /* FileCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AF02C4D70420005A418 /* FileCreator.swift */; };
+		BBAD0AF32C4E915D0005A418 /* CodeGeneratorOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AF22C4E915D0005A418 /* CodeGeneratorOverlayView.swift */; };
+		BBAD0AF72C4EBB7C0005A418 /* LoadingChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AF62C4EBB7C0005A418 /* LoadingChatView.swift */; };
 		BBB7C74E2C30E94800BEDD07 /* CodeEditor in Frameworks */ = {isa = PBXBuildFile; productRef = BBB7C74D2C30E94800BEDD07 /* CodeEditor */; };
 		BBB7C7522C31B13500BEDD07 /* FileMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7512C31B13500BEDD07 /* FileMonitor.swift */; };
 		BBB7C7542C31F52D00BEDD07 /* ResponseFormatType.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7532C31F52D00BEDD07 /* ResponseFormatType.swift */; };
@@ -207,7 +209,7 @@
 		BB57C2C82C4BE5B2008ED9F6 /* Chat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chat.swift; sourceTree = "<group>"; };
 		BB57C2CA2C4BE9ED008ED9F6 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		BB57C2CC2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCodeFCChatMiniView.swift; sourceTree = "<group>"; };
-		BB57C2D02C4C72F2008ED9F6 /* CodeGeneratorControlsContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGeneratorControlsContainer.swift; sourceTree = "<group>"; };
+		BB57C2D02C4C72F2008ED9F6 /* CodeGeneratorContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGeneratorContainer.swift; sourceTree = "<group>"; };
 		BB617C4D2C36D29200263D3F /* TokenCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenCalculator.swift; sourceTree = "<group>"; };
 		BB617C4F2C38568400263D3F /* FilepathCodeGenerationPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilepathCodeGenerationPrompt.swift; sourceTree = "<group>"; };
 		BB617C532C3885D900263D3F /* FileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActions.swift; sourceTree = "<group>"; };
@@ -297,6 +299,8 @@
 		BBAD0AEC2C4D63730005A418 /* ResizableTextEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResizableTextEditor.swift; sourceTree = "<group>"; };
 		BBAD0AEE2C4D6EA30005A418 /* ChatViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewContainer.swift; sourceTree = "<group>"; };
 		BBAD0AF02C4D70420005A418 /* FileCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCreator.swift; sourceTree = "<group>"; };
+		BBAD0AF22C4E915D0005A418 /* CodeGeneratorOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGeneratorOverlayView.swift; sourceTree = "<group>"; };
+		BBAD0AF62C4EBB7C0005A418 /* LoadingChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingChatView.swift; sourceTree = "<group>"; };
 		BBB7C7512C31B13500BEDD07 /* FileMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMonitor.swift; sourceTree = "<group>"; };
 		BBB7C7532C31F52D00BEDD07 /* ResponseFormatType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseFormatType.swift; sourceTree = "<group>"; };
 		BBB7C7552C31F92B00BEDD07 /* OAIChatCompletionRequestResponseFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionRequestResponseFormat.swift; sourceTree = "<group>"; };
@@ -400,6 +404,7 @@
 				BBAD0AEE2C4D6EA30005A418 /* ChatViewContainer.swift */,
 				BB57C2C62C4BE537008ED9F6 /* Discussion.swift */,
 				BB57C2C42C4BE4EB008ED9F6 /* DiscussionView.swift */,
+				BBAD0AF62C4EBB7C0005A418 /* LoadingChatView.swift */,
 				BB57C2CC2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift */,
 				BBAD0AEA2C4D62400005A418 /* GenerateCodeFCChatFileMiniView.swift */,
 			);
@@ -749,9 +754,10 @@
 			isa = PBXGroup;
 			children = (
 				BBB7C7612C32571200BEDD07 /* CodeGeneratorControlsView.swift */,
-				BB57C2D02C4C72F2008ED9F6 /* CodeGeneratorControlsContainer.swift */,
+				BB57C2D02C4C72F2008ED9F6 /* CodeGeneratorContainer.swift */,
 				BBB7C7632C325AE200BEDD07 /* CodeGeneratorControlButton.swift */,
 				BB8E17BF2C3369A900E3F463 /* CodeGeneratorControlSwitch.swift */,
+				BBAD0AF22C4E915D0005A418 /* CodeGeneratorOverlayView.swift */,
 			);
 			path = CodeGenerator;
 			sourceTree = "<group>";
@@ -1003,6 +1009,7 @@
 				BB1405DC2C35A2DC0036CFE8 /* FocusViewModel.swift in Sources */,
 				BB7FF80F2C2CAA9B000B60C3 /* AICodingHelperApp.swift in Sources */,
 				BB1405F32C36CE330036CFE8 /* GenerationError.swift in Sources */,
+				BBAD0AF72C4EBB7C0005A418 /* LoadingChatView.swift in Sources */,
 				BBAD0AEF2C4D6EA30005A418 /* ChatViewContainer.swift in Sources */,
 				BB8E17CA2C3599D800E3F463 /* FocusableContent.swift in Sources */,
 				BBBD40A82C3B4F96008917CC /* AICodingHelperAppCommands.swift in Sources */,
@@ -1018,6 +1025,7 @@
 				BB8561A92C304C7E001C11F8 /* TabAddingFileSystemView.swift in Sources */,
 				BB8561612C2F1518001C11F8 /* InputImageDetail.swift in Sources */,
 				BBB7C7542C31F52D00BEDD07 /* ResponseFormatType.swift in Sources */,
+				BBAD0AF32C4E915D0005A418 /* CodeGeneratorOverlayView.swift in Sources */,
 				BB8561552C2F0F54001C11F8 /* OAIChatCompletionRequest.swift in Sources */,
 				BB617C592C39AB9400263D3F /* FunctionCallRequest.swift in Sources */,
 				BB53E33C2C418125003FC84E /* GetImportantConstantsResponse.swift in Sources */,
@@ -1038,7 +1046,7 @@
 				BB617C612C39C38000263D3F /* OAIChatCompletionResponseUsage.swift in Sources */,
 				BB53E33F2C418E33003FC84E /* PlanView.swift in Sources */,
 				BB8561AE2C305276001C11F8 /* TabView.swift in Sources */,
-				BB57C2D12C4C72F2008ED9F6 /* CodeGeneratorControlsContainer.swift in Sources */,
+				BB57C2D12C4C72F2008ED9F6 /* CodeGeneratorContainer.swift in Sources */,
 				BB617C4E2C36D29200263D3F /* TokenCalculator.swift in Sources */,
 				BB8E17C82C349B2900E3F463 /* TabsViewModel.swift in Sources */,
 				BBAD0AEB2C4D62400005A418 /* GenerateCodeFCChatFileMiniView.swift in Sources */,

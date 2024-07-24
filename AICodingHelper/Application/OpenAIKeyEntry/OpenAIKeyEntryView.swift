@@ -91,7 +91,7 @@ struct OpenAIKeyEntryView: View {
         
         let validateOpenAIKeyResponse: ValidateOpenAIKeyResponse
         do {
-            validateOpenAIKeyResponse = try await AICodingHelperHTTPSConnector.validateOpenAIKey(request: authRequest)
+            validateOpenAIKeyResponse = try await AICodingHelperHTTPSConnector().validateOpenAIKey(request: authRequest)
         } catch {
             // TODO: Handle Errors
             print("Error validating OpenAIKey in UltraView... \(error)")

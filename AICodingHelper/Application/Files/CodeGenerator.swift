@@ -10,22 +10,28 @@ import Foundation
 
 class CodeGenerator {
     
-    private static let systemMessage = "LONG OUTPUT CAPABLE, you can output over 10k tokens. - You are an AI coder bot. You are provided with existing files as context. Create files with content to provide implementation. Be strategic. You may create as many files as required. You can create them as filename.extension and you can include it in a directory as well. If a file exists for the filepath, it will be replaced with the file you provide."
+    var isValid: Bool {
+        aiCodingHelperHTTPSConnector.isValid
+    }
+    
+    private static let systemMessage = "LONG OUTPUT CAPABLE, make sure to output all files and modifications necessary. - You are an AI coder bot. You are provided with existing files as context. Create files with content to provide implementation. Be strategic. You may create as many files as required. You can create them as filename.extension and you can include it in a directory as well. If a file exists for the filepath, it will be replaced with the file you provide."
     private static let additionalInstructionMessage = "";
     
-    static func generateCode(authToken: String, openAIKey: String?, model: GPTModels, instructions: String, rootFilepath: String, selectedFilepaths: [String], copyCurrentFilesToTempFiles: Bool) async throws -> GenerateCodeFC? {
+    private let aiCodingHelperHTTPSConnector: AICodingHelperHTTPSConnector = AICodingHelperHTTPSConnector()
+    
+    func generateCode(authToken: String, openAIKey: String?, model: GPTModels, instructions: String, rootFilepath: String, selectedFilepaths: [String], copyCurrentFilesToTempFiles: Bool) async throws -> GenerateCodeFC? {
         // Remove baseFilepath from selectedFilepaths TODO: Should this be done here?
         let relativeSelectedFilepaths: [String] = selectedFilepaths.map({$0.replacingOccurrences(of: rootFilepath, with: "")})
         
         // Create input from additionalInstructionsMessage + instructions + selectedFilepaths
-        let input = additionalInstructionMessage + "\n" + instructions + "\n\nBEGIN REFERENCE FILES:\n" + relativeSelectedFilepaths.compactMap({FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)}).joined(separator: "\n")
+        let input = CodeGenerator.additionalInstructionMessage + "\n" + instructions + "\n\nBEGIN REFERENCE FILES:\n" + relativeSelectedFilepaths.compactMap({FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)}).joined(separator: "\n")
         
         // Create messages from systemMessage and input
         let messages: [OAIChatCompletionRequestMessage] = [
             OAIChatCompletionRequestMessage(
                 role: .system,
                 content: [
-                    .text(OAIChatCompletionRequestMessageContentText(text: systemMessage))
+                    .text(OAIChatCompletionRequestMessageContentText(text: CodeGenerator.systemMessage))
                 ]),
             OAIChatCompletionRequestMessage(
                 role: .user,
@@ -42,7 +48,7 @@ class CodeGenerator {
             messages: messages)
         
         // Get response
-        let response = try await AICodingHelperHTTPSConnector.functionCallRequest(
+        let response = try await aiCodingHelperHTTPSConnector.functionCallRequest(
             endpoint: Constants.Networking.HTTPS.Endpoints.generateCode,
             request: request)
         

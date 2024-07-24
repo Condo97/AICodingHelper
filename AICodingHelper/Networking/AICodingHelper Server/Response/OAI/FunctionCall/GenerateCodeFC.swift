@@ -24,10 +24,10 @@ struct GenerateCodeFC: Codable {
         
     }
     
-    var files: [File]
+    var output_files: [File]
     
     enum CodingKeys: String, CodingKey {
-        case files
+        case output_files
     }
     
 }

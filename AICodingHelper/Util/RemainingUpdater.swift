@@ -34,7 +34,7 @@ class RemainingUpdater: ObservableObject {
         let authRequest = AuthRequest(authToken: authToken)
         
         // Do request
-        let remainingResponse = try await AICodingHelperHTTPSConnector.getRemaining(request: authRequest)//BarbackNetworkService.getRemainingDrinks(request: authRequest)
+        let remainingResponse = try await AICodingHelperHTTPSConnector().getRemaining(request: authRequest)//BarbackNetworkService.getRemainingDrinks(request: authRequest)
         
         // Set persistentRemaining to response remainingDrinks
         set(tokensRemaining: remainingResponse.body.remainingTokens)

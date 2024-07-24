@@ -23,7 +23,7 @@ struct ChatViewContainer: View {
                 Button(action: {
                     // Apply changes
                     if let message = chat.message as? GenerateCodeFC {
-                        for file in message.files {
+                        for file in message.output_files {
                             let relativeFilepath = file.filepath.replacingOccurrences(of: rootFilepath, with: "")
                             let fullFilepath = URL(fileURLWithPath: rootFilepath).appendingPathComponent(relativeFilepath, conformingTo: .text).path
                             
@@ -41,10 +41,15 @@ struct ChatViewContainer: View {
                             .stroke(Color.background)
                             .opacity(isHoveringApplyButton ? 1.0 : 0.0)
                         
-                        Image(systemName: isApplied ? "checkmark.circle.fill" : "checkmark.circle")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 28.0)
+                        VStack {
+                            Image(systemName: isApplied ? "checkmark" : "chevron.left.2")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 20.0)
+                            Text(isApplied ? "Applied" : "Apply")
+                                .font(.subheadline)
+                        }
+                        .foregroundStyle(isApplied ? Color(.systemGreen) : Color.foregroundText)
                     }
                     .frame(width: 50.0)
                     .frame(maxHeight: .infinity)
@@ -71,7 +76,7 @@ struct ChatViewContainer: View {
         chat: Chat(
             role: .user,
             message: GenerateCodeFC(
-                files: [
+                output_files: [
                     GenerateCodeFC.File(
                         filepath: "~/Downloads/test_dir",
                         content: "This is the content for the file.")
@@ -79,4 +84,5 @@ struct ChatViewContainer: View {
         onDelete: {
             
         })
+    .environmentObject(CodeEditorSettingsViewModel())
 }

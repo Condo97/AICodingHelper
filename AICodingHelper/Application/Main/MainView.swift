@@ -38,7 +38,7 @@ struct MainView: View {
     
     private static let additionalTokensForEstimationPerFile: Int = Constants.Additional.additionalTokensForEstimationPerFile
     
-    @State private var navigationSplitViewColumnVisibility: NavigationSplitViewVisibility = .doubleColumn
+    @State private var navigationSplitViewColumnVisibility: NavigationSplitViewVisibility = .all
     
     @State private var alertShowingWideScopeChatGenerationEstimatedTokensApproval: Bool = false
     @State private var alertShowingNotEnoughTokensToPerformTask: Bool = false
@@ -49,6 +49,8 @@ struct MainView: View {
     @State private var isShowingUltraView: Bool = false
     
     @State private var codeViewHasSelection: Bool = false
+    
+    @State private var currentDiscussion: Discussion?
     
     @State private var isLoadingCodeGeneration: Bool = false
     
@@ -133,45 +135,63 @@ struct MainView: View {
                     }
                     .navigationSplitViewColumnWidth(ideal: 250.0)
                 }) {
-                    // Tab View
-                    VStack(spacing: 0.0) {
-                        if !tabsViewModel.openTabs.isEmpty {
-                            TabsView(tabsViewModel: tabsViewModel)
-                        }
-                        
-                        if let openTab = tabsViewModel.openTab {
-                            // Code View
-                            var openTabBinding: Binding<CodeViewModel> {
-                                Binding(
-                                    get: {
-                                        tabsViewModel.openTab ?? CodeViewModel(filepath: nil) // It is critical it is this and not openTab!
-                                    },
-                                    set: { value in
-                                        
-                                    })
+                    HSplitView {
+                        // Tab View
+                        VStack(spacing: 0.0) {
+                            if !tabsViewModel.openTabs.isEmpty {
+                                TabsView(tabsViewModel: tabsViewModel)
                             }
                             
-                            CodeView(
-                                codeViewModel: openTabBinding,
-                                hasSelection: $codeViewHasSelection)
-                                .focused($editorFocused)
-                        } else {
-                            // No Tabs View
-//                            VStack {
-//                                CodeEditor(source: "")
-//                            }
-                            VStack {
-                                if directory.isEmpty {
-                                    Text("No Project Selected")
-                                } else {
-                                    Text("Double-Click a File to Open")
+                            if let openTab = tabsViewModel.openTab {
+                                // Code View
+                                var openTabBinding: Binding<CodeViewModel> {
+                                    Binding(
+                                        get: {
+                                            tabsViewModel.openTab ?? CodeViewModel(filepath: nil) // It is critical it is this and not openTab!
+                                        },
+                                        set: { value in
+                                            
+                                        })
                                 }
                                 
-                                Button("Open Project \(Image(systemName: "folder"))") {
-                                    popupShowingOpenProject = true
+                                CodeView(
+                                    codeViewModel: openTabBinding,
+                                    hasSelection: $codeViewHasSelection)
+                                .focused($editorFocused)
+                            } else {
+                                // No Tabs View
+                                //                            VStack {
+                                //                                CodeEditor(source: "")
+                                //                            }
+                                HStack {
+                                    Spacer()
+                                    VStack {
+                                        if directory.isEmpty {
+                                            Text("No Project Selected")
+                                        } else {
+                                            Text("Double-Click a File to Open")
+                                        }
+                                        
+                                        Button("Open Project \(Image(systemName: "folder"))") {
+                                            popupShowingOpenProject = true
+                                        }
+                                    }
+                                    Spacer()
                                 }
                             }
                         }
+                        .frame(maxHeight: .infinity)
+                        
+                        CodeGeneratorContainer(
+                            scope: currentScope,
+                            rootFilepath: $directory,
+                            progressTracker: progressTracker,
+                            focusViewModel: focusViewModel,
+                            tabsViewModel: tabsViewModel,
+                            fileBrowserSelectedFilepaths: $fileBrowserSelectedFilepaths,
+                            isLoading: $isLoadingCodeGeneration)
+                        .background(Color.foreground)
+                        //                    .navigationSplitViewColumnWidth(currentScope.wrappedValue == .directory ? .infinity : 550.0)
                     }
                 }
                 .toolbar {
@@ -217,20 +237,6 @@ struct MainView: View {
                         }
                     }
                 }
-                .overlay {
-                    if isLoadingCodeGeneration {
-                        ZStack {
-                            Colors.foreground
-                                .opacity(0.6)
-                            
-                            VStack {
-                                Text("Generating...")
-                                
-                                ProgressView()
-                            }
-                        }
-                    }
-                }
 //                .overlay {
 //                    if isLoadingBrowser {
 //                        ZStack {
@@ -267,28 +273,32 @@ struct MainView: View {
 //                }
             }
         }
-        .overlay {
-            // Wide Scope Controls
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    CodeGeneratorControlsContainer(
-                        scope: currentScope,
-                        rootFilepath: $directory,
-                        progressTracker: progressTracker,
-                        focusViewModel: focusViewModel,
-                        tabsViewModel: tabsViewModel,
-                        fileBrowserSelectedFilepaths: $fileBrowserSelectedFilepaths,
-                        isLoading: $isLoadingCodeGeneration)
-                    .shadow(color: Colors.foregroundText.opacity(0.05), radius: 8.0)
-                    .padding()
-                    .padding(.bottom)
-                    .padding(.bottom)
-                    .disabled(isLoadingCodeGeneration)
-                }
-            }
-        }
+//        .overlay {
+//            // Wide Scope Controls
+//            VStack {
+//                Spacer()
+//                HStack {
+//                    Spacer()
+//                    CodeGeneratorOverlayView {
+//                        CodeGeneratorControlsContainer(
+//                            scope: currentScope,
+//                            rootFilepath: $directory,
+//                            progressTracker: progressTracker,
+//                            focusViewModel: focusViewModel,
+//                            tabsViewModel: tabsViewModel,
+//                            fileBrowserSelectedFilepaths: $fileBrowserSelectedFilepaths,
+//                            isLoading: $isLoadingCodeGeneration)
+//                        .background(Colors.foreground)
+//                        .clipShape(RoundedRectangle(cornerRadius: 14.0))
+//                    }
+//                    .shadow(color: Colors.foregroundText.opacity(0.05), radius: 8.0)
+//                    .padding()
+//                    .padding(.bottom)
+//                    .padding(.bottom)
+//                    .disabled(isLoadingCodeGeneration)
+//                }
+//            }
+//        }
 //        .popover(isPresented: $alertShowingWideScopeChatGenerationEstimatedTokensApproval) {
 //            VStack {
 //                Text("")

@@ -89,7 +89,7 @@ class TokenCalculator {
             model: .GPT4o,
             input: inputs.joined(separator: "\n"))
         
-        let calculateTokensResponse = try await AICodingHelperHTTPSConnector.calculateTokens(request: calculateTokensRequest)
+        let calculateTokensResponse = try await AICodingHelperHTTPSConnector().calculateTokens(request: calculateTokensRequest)
         
         return calculateTokensResponse.body.tokens
     }

@@ -7,11 +7,23 @@
 
 import CodeEditor
 import Foundation
+import SwiftUI
 
 
-class ChatGenerator {
+class ChatGenerator: ObservableObject {
     
-    static func streamChat(authToken: String, openAIKey: String?, model: GPTModels, action: ActionType, additionalInput: String?, language: CodeEditor.Language?, responseFormat: ResponseFormatType = .text, context: [String], input: String, stream: (GetChatResponse) async -> Void) async throws {
+    private let chatStream: SocketStream
+    
+    init() {
+        // Get stream
+        chatStream = AICodingHelperWebSocketConnector.getStream()
+    }
+    
+    func cancel() async throws {
+        try await chatStream.cancel()
+    }
+    
+    func streamChat(authToken: String, openAIKey: String?, model: GPTModels, action: ActionType, additionalInput: String?, language: CodeEditor.Language?, responseFormat: ResponseFormatType = .text, context: [String], input: String, stream: (GetChatResponse) async -> Void) async throws {
         /* Should look something like
          System
             You are an AI coding helper service in an IDE so you must format all your responses in <language> code that would be valid in an IDE.
@@ -48,7 +60,7 @@ class ChatGenerator {
             stream: stream)
     }
     
-    static func streamChat(authToken: String, openAIKey: String?, model: GPTModels, responseFormat: ResponseFormatType, systemMessage: String?, userInputs: [String], stream: (GetChatResponse) async -> Void) async throws {
+    func streamChat(authToken: String, openAIKey: String?, model: GPTModels, responseFormat: ResponseFormatType, systemMessage: String?, userInputs: [String], stream: (GetChatResponse) async -> Void) async throws {
         // Create messages and add messages
         var messages: [OAIChatCompletionRequestMessage] = []
         
@@ -80,16 +92,13 @@ class ChatGenerator {
         try await streamChat(getChatRequest: getChatRequest, stream: stream)
     }
     
-    static func streamChat(getChatRequest: GetChatRequest, stream: (GetChatResponse) async -> Void) async throws {
+    func streamChat(getChatRequest: GetChatRequest, stream: (GetChatResponse) async -> Void) async throws {
         // Encode getChatRequest to string, otherwise return
         guard let requestString = String(data: try JSONEncoder().encode(getChatRequest), encoding: .utf8) else {
             // TODO: Handle Errors
             print("Could not unwrap encoded getChatRequest to String in AICodingHelperServerNetworkClient!")
             return
         }
-        
-        // Get stream
-        let chatStream = AICodingHelperWebSocketConnector.getStream()
         
         // Send GetChatRequest to stream
         try await chatStream.send(.string(requestString))

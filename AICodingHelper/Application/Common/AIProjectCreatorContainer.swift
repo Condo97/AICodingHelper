@@ -230,7 +230,7 @@ struct AIProjectCreatorContainer: View {
                 progressTracker: progressTracker)
         } catch {
             // TODO: Handle Errors
-            print("Error generating and refactoring çode in MainView... \(error)")
+            print("Error generating and refactoring code in AIProjectCreatorContainer... \(error)")
         }
         
         // Dismiss
