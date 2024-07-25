@@ -62,7 +62,7 @@ struct TabAddingFileSystemView: View {
                         alertShowingAddFolder = true
                     case .delete:
                         do {
-                            try FileManager.default.removeItem(atPath: path)
+                            try FileManager.default.trashItem(at: URL(fileURLWithPath: path), resultingItemURL: nil)
                         } catch {
                             // TODO: Handle Errors
                             print("Error deleting file in FileNodeView... \(error)")

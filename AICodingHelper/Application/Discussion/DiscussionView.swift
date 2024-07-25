@@ -55,7 +55,7 @@ struct DiscussionView: View {
                 .bold()
             
             ScrollView {
-                VStack(alignment: .trailing) {
+                LazyVStack(alignment: .trailing) {
                     if isLoading {
                         LoadingChatView(
                             canCancel: canCancelGeneration,
@@ -350,16 +350,14 @@ struct DiscussionView: View {
         do {
             messages = try discussion.chats.compactMap({
                 // Transform reference filepaths into a string for the message
-                let referenceFilepathsString: String = discussion.chats.compactMap({
-                    $0.referenceFilepaths?.compactMap({
-                        FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)
-                    }).joined(separator: "\n\n")
+                let referenceFilepathsString: String? = $0.referenceFilepaths?.compactMap({
+                    FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)
                 }).joined(separator: "\n\n")
                 
                 // If message is GenerateCodeFC transform and return
                 if let message = $0.message as? GenerateCodeFC,
                    let messageString = String(data: try JSONEncoder().encode(message), encoding: .utf8) {
-                    let finalMessage = messageString + "\n\n" + referenceFilepathsString
+                    let finalMessage = messageString + (referenceFilepathsString == nil ? "" : ("\n\n" + referenceFilepathsString!))
                     
                     return OAIChatCompletionRequestMessage(
                         role: $0.role,
@@ -370,7 +368,7 @@ struct DiscussionView: View {
                 
                 // If message is String transform and return
                 if let message = $0.message as? String {
-                    let finalMessage = message + "\n\n" + referenceFilepathsString
+                    let finalMessage = message + (referenceFilepathsString == nil ? "" : ("\n\n" + referenceFilepathsString!))
                     
                     return OAIChatCompletionRequestMessage(
                         role: $0.role,
@@ -462,16 +460,14 @@ struct DiscussionView: View {
         do {
             messages = try discussion.chats.compactMap({
                 // Transform reference filepaths into a string for the message
-                let referenceFilepathsString: String = discussion.chats.compactMap({
-                    $0.referenceFilepaths?.compactMap({
-                        FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)
-                    }).joined(separator: "\n\n")
+                let referenceFilepathsString: String? = $0.referenceFilepaths?.compactMap({
+                    FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)
                 }).joined(separator: "\n\n")
                 
                 // If message is GenerateCodeFC transform and return
                 if let message = $0.message as? GenerateCodeFC,
                    let messageString = String(data: try JSONEncoder().encode(message), encoding: .utf8) {
-                    let finalMessage = messageString + "\n\n" + referenceFilepathsString
+                    let finalMessage = messageString + (referenceFilepathsString == nil ? "" : ("\n\n" + referenceFilepathsString!))
                     
                     return OAIChatCompletionRequestMessage(
                         role: $0.role,
@@ -482,7 +478,7 @@ struct DiscussionView: View {
                 
                 // If message is String transform and return
                 if let message = $0.message as? String {
-                    let finalMessage = message + "\n\n" + referenceFilepathsString
+                    let finalMessage = message + (referenceFilepathsString == nil ? "" : ("\n\n" + referenceFilepathsString!))
                     
                     return OAIChatCompletionRequestMessage(
                         role: $0.role,

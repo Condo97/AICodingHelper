@@ -274,6 +274,9 @@ struct CodeGeneratorContainer: View {
 //            isLoading = true
 //        }
         
+        // Remove baseFilepath from referenceFilepaths TODO: Should this be done here?
+        let relativeReferenceFilepaths: [String] = referenceFilepaths.map({$0.replacingOccurrences(of: rootFilepath, with: "")})
+        
         // If discussion is nil set to new discussion
         if currentDiscussion == nil {
             currentDiscussion = Discussion(chats: [])
@@ -284,7 +287,7 @@ struct CodeGeneratorContainer: View {
             Chat(
                 role: .user,
                 message: instructions,
-                referenceFilepaths: referenceFilepaths))
+                referenceFilepaths: relativeReferenceFilepaths))
     }
 //        
 //        // Ensure authToken

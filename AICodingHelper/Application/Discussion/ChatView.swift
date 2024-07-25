@@ -63,6 +63,16 @@ struct ChatView: View {
                     .scrollContentBackground(.hidden)
                     .focused($focused)
             }
+            
+            if let referenceFilepaths = chat.referenceFilepaths {
+                VStack(alignment: .leading) {
+                    ForEach(referenceFilepaths, id: \.self) { referenceFilepath in
+                        Text(referenceFilepath)
+                            .font(.subheadline)
+                            .bold()
+                    }
+                }
+            }
         }
         .padding(4)
         .background(RoundedRectangle(cornerRadius: 8.0)

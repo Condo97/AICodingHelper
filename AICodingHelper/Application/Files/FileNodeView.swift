@@ -148,7 +148,7 @@ struct FileNodeView: View {
             
             Button(action: {
                 do {
-                    try FileManager.default.removeItem(atPath: node.path)
+                    try FileManager.default.trashItem(at: URL(fileURLWithPath: node.path), resultingItemURL: nil)
                 } catch {
                     errorMessage = "Error deleting item in FileNodeView... \(error)"
                     showAlertError = true

@@ -27,7 +27,7 @@ struct CodeEditorContainer: View {
     
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0.0) {
             // Code Editor
             CodeEditor(
                 source: $fileText,
@@ -42,13 +42,14 @@ struct CodeEditorContainer: View {
                 print("Changed Language \(newValue)")
             }
             
-            Spacer()
+//            Spacer()
             
             // Language Selector
             HStack {
                 Spacer()
                 CodeEditorLanguageSelector(selectedLanguage: $fileLanguage)
             }
+            .padding(8)
         }
     }
     
