@@ -15,13 +15,18 @@ struct AIFileCreatorContainer: View {
     @ObservedObject var progressTracker: ProgressTracker
     
     
+    private static let generateFileBaseInstructions = "Generate the file "
     private static let fileGeneratorSystemMessage = "You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language. You only respond to the one requested file. All files will be provided in turn, so therefore you will respond to each individually to preserve correct formatting to the IDE since it is looking to receive one file. You may include messages in comments if the langauge supports comments."
     
     
     @EnvironmentObject private var activeSubscriptionUpdater: ActiveSubscriptionUpdater
     @EnvironmentObject private var remainingUpdater: RemainingUpdater
     
-    @State private var isLoading: Bool = false
+    @State private var currentDiscussion: Discussion?
+    
+    @State private var isLoadingDiscussion: Bool = false
+    
+    @State private var isShowingDiscussionView: Bool = false
     
     @State private var newFileName: String = ""
     @State private var userPrompt: String = ""
@@ -40,23 +45,56 @@ struct AIFileCreatorContainer: View {
             },
             onSubmit: {
                 Task {
-                    // Generate File
+                    // Defer setting isLoadingDiscussion to false
+                    defer {
+                        DispatchQueue.main.async {
+                            self.isLoadingDiscussion = false
+                        }
+                    }
+                    
+                    // Set isLoadingPlanProject to true
+                    await MainActor.run {
+                        isLoadingDiscussion = true
+                    }
+                    
+                    // Ensure authToken
+                    let authToken: String
                     do {
-                        try await generateFile()
+                        authToken = try await AuthHelper.ensure()
                     } catch {
                         // TODO: Handle Errors
-                        print("Error generating file in AIFileCreatorContainer... \(error)")
+                        print("Error ensuring authToken in AIProjectCreatorContainer... \(error)")
                         return
                     }
                     
-                    // Dismiss
-                    withAnimation {
-                        isPresented = false
-                    }
+                    // Get openAIKey
+                    let openAIKey = activeSubscriptionUpdater.openAIKeyIsValid ? activeSubscriptionUpdater.openAIKey : nil
+                    
+                    // Get instructions from generateFileBaseInstructions + " " + newFileName + "\nProject Language " + userPrompt or blank if empty
+                    let instructions = AIFileCreatorContainer.generateFileBaseInstructions + " " + newFileName + (userPrompt.isEmpty ? "" : "\n" + userPrompt)
+                    
+                    // Create userChat from instructions
+                    let userChat = Chat(
+                        role: .user,
+                        message: instructions)
+                    
+                    // Create Discussion with userChat and set to currentDiscussion
+                    currentDiscussion = Discussion(chats: [userChat])
+                    
+                    // Set isShowingDiscussionView to true
+                    isShowingDiscussionView = true
                 }
             })
+        .discussionPopup(
+            discussion: $currentDiscussion,
+            rootFilepath: $rootFilepath,
+            isLoading: $isLoadingDiscussion,
+            generateOnAppear: true,
+            onResetDiscussion: {
+                
+            })
         .overlay { // TODO: This could be an alert
-            if isLoading {
+            if isLoadingDiscussion {
                 ZStack {
                     Colors.foreground
                         .opacity(0.4)
@@ -70,85 +108,6 @@ struct AIFileCreatorContainer: View {
                 }
             }
         }
-    }
-    
-    
-    func generateFile() async throws {
-        // Defer setting isLoading to false
-        defer {
-            DispatchQueue.main.async {
-                self.isLoading = false
-            }
-        }
-        
-        // Set isLoading to true
-        await MainActor.run {
-            self.isLoading = true
-        }
-        
-        // Ensure authToken
-        let authToken = try await AuthHelper.ensure()
-        
-        // Get openAIKey
-        let openAIKey = activeSubscriptionUpdater.openAIKey
-        
-        // Get newFileFilepath from newFileName and rootFilepath
-        let newFileFilepath = URL(fileURLWithPath: rootFilepath).appendingPathComponent(newFileName, conformingTo: .text).path
-        
-        // Create systemMessage
-        let systemMessage: String = AIFileCreatorContainer.fileGeneratorSystemMessage
-        
-        // Create instructions
-        let instructions: String = {
-            var instructions: [String] = []
-            
-            instructions.append("Create the file \(newFileName)") // TODO: Is this necessary?
-            
-            if !userPrompt.isEmpty {
-                instructions.append("Add the following functionality to \(newFileName).")
-                instructions.append(userPrompt)
-            }
-            
-            if !referenceFilepaths.isEmpty {
-                instructions.append("Use these files as reference")
-                instructions.append(referenceFilepaths.map({FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)}).joined(separator: "\n"))
-            }
-            
-            return instructions.joined(separator: "\n")
-        }()
-        
-        // Create CodeGenerationPlan with create and edit action for new file
-        let codeGenerationPlan = CodeGenerationPlan(
-            model: .GPT4o,
-            rootFilepath: rootFilepath,
-            editActionSystemMessage: systemMessage,
-            instructions: instructions,
-            copyCurrentFilesToTempFiles: false,
-            planFC: PlanCodeGenerationFC(
-                steps: [
-                    PlanCodeGenerationFC.Step(
-                        index: 0,
-                        action: .create,
-                        filepath: newFileFilepath,
-                        editInstructions: nil,
-                        referenceFilepaths: nil),
-                    PlanCodeGenerationFC.Step(
-                        index: 1,
-                        action: .edit,
-                        filepath: newFileFilepath,
-                        editInstructions: nil,
-                        referenceFilepaths: referenceFilepaths)
-                ]))
-        
-        // Execute CodeGenerationPlan
-        try await CodeGenerationPlanExecutor().generateAndRefactor(
-            authToken: authToken,
-            openAIKey: openAIKey,
-            plan: codeGenerationPlan,
-            progressTracker: progressTracker)
-        
-        // Update remaining
-        try await remainingUpdater.update(authToken: authToken)
     }
     
 }

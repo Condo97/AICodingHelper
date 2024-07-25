@@ -123,6 +123,8 @@
 		BBAD0AF12C4D70420005A418 /* FileCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AF02C4D70420005A418 /* FileCreator.swift */; };
 		BBAD0AF32C4E915D0005A418 /* CodeGeneratorOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AF22C4E915D0005A418 /* CodeGeneratorOverlayView.swift */; };
 		BBAD0AF72C4EBB7C0005A418 /* LoadingChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AF62C4EBB7C0005A418 /* LoadingChatView.swift */; };
+		BBAD0AF92C52BABA0005A418 /* GenerateCodeFCApplier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AF82C52BABA0005A418 /* GenerateCodeFCApplier.swift */; };
+		BBAD0AFB2C52C4B10005A418 /* DiscussionPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AFA2C52C4B10005A418 /* DiscussionPopup.swift */; };
 		BBB7C74E2C30E94800BEDD07 /* CodeEditor in Frameworks */ = {isa = PBXBuildFile; productRef = BBB7C74D2C30E94800BEDD07 /* CodeEditor */; };
 		BBB7C7522C31B13500BEDD07 /* FileMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7512C31B13500BEDD07 /* FileMonitor.swift */; };
 		BBB7C7542C31F52D00BEDD07 /* ResponseFormatType.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7532C31F52D00BEDD07 /* ResponseFormatType.swift */; };
@@ -301,6 +303,8 @@
 		BBAD0AF02C4D70420005A418 /* FileCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCreator.swift; sourceTree = "<group>"; };
 		BBAD0AF22C4E915D0005A418 /* CodeGeneratorOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGeneratorOverlayView.swift; sourceTree = "<group>"; };
 		BBAD0AF62C4EBB7C0005A418 /* LoadingChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingChatView.swift; sourceTree = "<group>"; };
+		BBAD0AF82C52BABA0005A418 /* GenerateCodeFCApplier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCodeFCApplier.swift; sourceTree = "<group>"; };
+		BBAD0AFA2C52C4B10005A418 /* DiscussionPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionPopup.swift; sourceTree = "<group>"; };
 		BBB7C7512C31B13500BEDD07 /* FileMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMonitor.swift; sourceTree = "<group>"; };
 		BBB7C7532C31F52D00BEDD07 /* ResponseFormatType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseFormatType.swift; sourceTree = "<group>"; };
 		BBB7C7552C31F92B00BEDD07 /* OAIChatCompletionRequestResponseFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionRequestResponseFormat.swift; sourceTree = "<group>"; };
@@ -407,6 +411,7 @@
 				BBAD0AF62C4EBB7C0005A418 /* LoadingChatView.swift */,
 				BB57C2CC2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift */,
 				BBAD0AEA2C4D62400005A418 /* GenerateCodeFCChatFileMiniView.swift */,
+				BBAD0AFA2C52C4B10005A418 /* DiscussionPopup.swift */,
 			);
 			path = Discussion;
 			sourceTree = "<group>";
@@ -713,6 +718,7 @@
 				BB617C4D2C36D29200263D3F /* TokenCalculator.swift */,
 				BB1405E32C362A1E0036CFE8 /* UserDefaultsHelper.swift */,
 				BB1405DD2C35ACF00036CFE8 /* View+FocusEffectDisabledVersionCheck.swift */,
+				BBAD0AF82C52BABA0005A418 /* GenerateCodeFCApplier.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -934,6 +940,7 @@
 				BBB7C7622C32571200BEDD07 /* CodeGeneratorControlsView.swift in Sources */,
 				BB85618C2C2F2D6D001C11F8 /* BlankRequest.swift in Sources */,
 				BB85618A2C2F2D49001C11F8 /* RegisterUserResponse.swift in Sources */,
+				BBAD0AFB2C52C4B10005A418 /* DiscussionPopup.swift in Sources */,
 				BB57C2C02C4ADC50008ED9F6 /* GenerateCodeFC.swift in Sources */,
 				BB57C2572C480F83008ED9F6 /* OpenAIKeyEntryView.swift in Sources */,
 				BB617C742C39CE1B00263D3F /* CodeGenerationTask.swift in Sources */,
@@ -1054,6 +1061,7 @@
 				BBEA62032C41A1470078B4C4 /* PlanStepPreviewView.swift in Sources */,
 				BBEA62052C41A5680078B4C4 /* ApprovePlanView.swift in Sources */,
 				BB57C2CD2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift in Sources */,
+				BBAD0AF92C52BABA0005A418 /* GenerateCodeFCApplier.swift in Sources */,
 				BBBD40B12C3C28E5008917CC /* AIProjectCreatorView.swift in Sources */,
 				BB8561252C2CD30A001C11F8 /* NarrowScopeControlButton.swift in Sources */,
 				BB57C2502C45CA74008ED9F6 /* Subscriptions.swift in Sources */,

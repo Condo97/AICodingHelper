@@ -23,14 +23,7 @@ struct ChatViewContainer: View {
                 Button(action: {
                     // Apply changes
                     if let message = chat.message as? GenerateCodeFC {
-                        for file in message.output_files {
-                            let relativeFilepath = file.filepath.replacingOccurrences(of: rootFilepath, with: "")
-                            let fullFilepath = URL(fileURLWithPath: rootFilepath).appendingPathComponent(relativeFilepath, conformingTo: .text).path
-                            
-                            FileCreator.createFile(
-                                filepath: fullFilepath,
-                                content: file.content)
-                        }
+                        GenerateCodeFCApplier.apply(message, rootFilepath: rootFilepath)
                     }
                     
                     // Set isApplied to true

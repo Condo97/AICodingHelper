@@ -17,7 +17,7 @@ struct AIProjectCreatorContainer: View {
     @EnvironmentObject private var activeSubscriptionUpdater: ActiveSubscriptionUpdater
     @EnvironmentObject private var remainingUpdater: RemainingUpdater
     
-    private static let generatePlanBaseInstructions: String = "Create a plan to create and code a project for the specified requirements."
+    private static let generateProjectInitialChatBaseInstructions: String = "Generate a project per the user's prompt."
     private static let createProjectSystemMessage: String = "You are an AI coding helper service in an IDE so you must format all your responses in code that would be valid in an IDE. Do not include ```LanguageName or ``` to denote code. You only respond with code that is valid in that language. You only respond to the one requested file. All files will be provided in turn, so therefore you will respond to each individually to preserve correct formatting to the IDE since it is looking to receive one file. You may include messages in comments if the langauge supports comments."// "You are creating a project in code for the specified language formatted for an IDE."
     private static let additionalTokensForEstimationPerFile: Int = Constants.Additional.additionalTokensForEstimationPerFile
     
@@ -27,13 +27,11 @@ struct AIProjectCreatorContainer: View {
     @State private var language: String = ""
     @State private var userPrompt: String = ""
     
-//    @State private var plan: CodeGenerationPlan?
-//    @State private var createProjectEstimatedTokens: Int?
-    @State private var currentCodeGenerationPlan: CodeGenerationPlan?
-    @State private var currentCodeGenerationPlanTokenEstimation: Int?
+    @State private var currentDiscussion: Discussion?
     
-    @State private var isLoadingPlanProject: Bool = false
-    @State private var isLoadingCreateProject: Bool = false
+    @State private var isLoadingDiscussion: Bool = false
+    
+    @State private var isShowingDiscussionView: Bool = false
     
     @State private var alertShowingConfirmCodeGeneration: Bool = false
     
@@ -54,16 +52,16 @@ struct AIProjectCreatorContainer: View {
             },
             onSubmit: {
                 Task {
-                    // Defer setting isLoadingPlanProject to false
+                    // Defer setting isLoadingDiscussion to false
                     defer {
                         DispatchQueue.main.async {
-                            self.isLoadingPlanProject = false
+                            self.isLoadingDiscussion = false
                         }
                     }
                     
                     // Set isLoadingPlanProject to true
                     await MainActor.run {
-                        isLoadingPlanProject = true
+                        isLoadingDiscussion = true
                     }
                     
                     // Ensure authToken
@@ -80,162 +78,67 @@ struct AIProjectCreatorContainer: View {
                     let openAIKey = activeSubscriptionUpdater.openAIKeyIsValid ? activeSubscriptionUpdater.openAIKey : nil
                     
                     // Get instructions from generatePlanBaseInstructions + "\nProject Language " + language + "\n" + userPrompt or blank if empty
-                    let instructions = AIProjectCreatorContainer.generatePlanBaseInstructions + "\nProject Language " + language + (userPrompt.isEmpty ? "" : "\n" + userPrompt)
+                    let instructions = AIProjectCreatorContainer.generateProjectInitialChatBaseInstructions + "\nProject Language " + language + (userPrompt.isEmpty ? "" : "\n" + userPrompt)
                     
-                    // Generate plan
-                    let plan: CodeGenerationPlan
-                    do {
-                        guard let createdPlan = try await CodeGenerationPlanner.makePlan(
-                            authToken: authToken,
-                            openAIKey: openAIKey,
-                            model: .GPT4o,
-                            editActionSystemMessage: AIProjectCreatorContainer.createProjectSystemMessage,
-                            instructions: instructions,
-                            rootFilepath: rootFilepath,
-                            selectedFilepaths: referenceFilepaths,
-                            copyCurrentFilesToTempFiles: false) else {
-                            // TODO: Handle Errors
-                            print("Could not unwrap plan after generating in AIProjectCreatorContainer!")
-                            return
-                        }
-                        
-                        plan = createdPlan
-                    } catch {
-                        // TODO: Handle Errors
-                        print("Error making plan in AIProjectCreatorContainer... \(error)")
-                        return
-                    }
+                    // Create userChat from instructions
+                    let userChat = Chat(
+                        role: .user,
+                        message: instructions)
                     
-                    // Get estimated tokens
-                    let estimatedTokens = await TokenCalculator.getEstimatedTokens(
-                        authToken: authToken,
-                        codeGenerationPlan: plan)
+                    // Create Discussion with userChat and set to currentDiscussion
+                    currentDiscussion = Discussion(chats: [userChat])
                     
-                    DispatchQueue.main.async {
-                        // Set planFC and createProjectEstimatedTokens and show confirm code generation alert
-                        self.currentCodeGenerationPlan = plan
-                        self.currentCodeGenerationPlanTokenEstimation = estimatedTokens
-                        self.alertShowingConfirmCodeGeneration = true
-                    }
-                    
+                    // Set isShowingDiscussionView to true
+                    isShowingDiscussionView = true
                 }
             })
-        .disabled(isLoadingCreateProject || isLoadingPlanProject)
+        .disabled(isLoadingDiscussion)
+        .discussionPopup(
+            discussion: $currentDiscussion,
+            rootFilepath: $rootFilepath,
+            isLoading: $isLoadingDiscussion,
+            generateOnAppear: true,
+            onResetDiscussion: {
+                
+            })
+//        .sheet(isPresented: $isShowingDiscussionView) {
+//            if let currentDiscussion = currentDiscussion {
+//                VStack {
+//                    DiscussionView(
+//                        rootFilepath: $rootFilepath,
+//                        discussion: currentDiscussion,
+//                        isLoading: $isLoadingDiscussion,
+//                        generateOnAppear: true,
+//                        onResetDiscussion: {
+//                            
+//                        })
+//                    
+//                    HStack {
+//                        Spacer()
+//                        
+//                        Button("Close") {
+//                            isShowingDiscussionView = false
+//                        }
+//                    }
+//                }
+//                .padding()
+//                .frame(idealWidth: 1050.0, idealHeight: 800.0)
+//            }
+//        }
         .overlay {
-            if isLoadingCreateProject || isLoadingPlanProject {
+            if isLoadingDiscussion {
                 ZStack {
                     Colors.foreground
                         .opacity(0.4)
                     
                     VStack {
-                        if isLoadingPlanProject {
-                            Text("Generating AI Project Plan...")
-                        } else if isLoadingCreateProject {
-                            Text("Creating AI Project...")
-                        } else {
-                            Text("Loading...")
-                        }
+                        Text("Loading...")
                         
                         ProgressView()
                             .tint(Colors.foregroundText)
                     }
                 }
             }
-        }
-        .sheet(isPresented: $alertShowingConfirmCodeGeneration) {
-            var currentCodeGenerationPlanUnwrappedBinding: Binding<CodeGenerationPlan> {
-                Binding(
-                    get: {
-                        currentCodeGenerationPlan ?? CodeGenerationPlan(
-                            model: .GPT4o,
-                            rootFilepath: "///--!!!!",
-                            editActionSystemMessage: "",
-                            instructions: "",
-                            copyCurrentFilesToTempFiles: true,
-                            planFC: PlanCodeGenerationFC(steps: []))
-                    },
-                    set: { value in
-                        currentCodeGenerationPlan = value
-                    })
-            }
-            ApprovePlanView(
-                plan: currentCodeGenerationPlanUnwrappedBinding,
-                tokenEstimation: $currentCodeGenerationPlanTokenEstimation,
-                onCancel: {
-                    // Set current code generation plan and its token estimation to nil
-                    currentCodeGenerationPlan = nil
-                    currentCodeGenerationPlanTokenEstimation = nil
-                    
-                    // Dismiss
-                    alertShowingConfirmCodeGeneration = false
-                },
-                onStart: {
-                    Task {
-                        // Create project
-                        await createProject()
-                    }
-                    
-                    // Dismiss
-                    alertShowingConfirmCodeGeneration = false
-                })
-        }
-    }
-    
-    
-    func createProject() async {
-        guard let currentCodeGenerationPlan = currentCodeGenerationPlan,
-              let currentCodeGenerationPlanTokenEstimation = currentCodeGenerationPlanTokenEstimation else {
-            // TODO: Handle Errors
-            print("Could not unwrap plan or createProjectEstimatedTokens in AIProjectCreatorContainer!")
-            return
-        }
-        
-        guard currentCodeGenerationPlanTokenEstimation + AIProjectCreatorContainer.additionalTokensForEstimationPerFile < remainingUpdater.remaining else {
-            // TODO: Handle Errors
-            print("Current code generation plan token estimation plus additional tokens for estimation per file exceeds remaining tokens!")
-            return
-        }
-        
-        // Defer setting isLoadingCreateProject to false
-        defer {
-            DispatchQueue.main.async {
-                self.isLoadingCreateProject = false
-            }
-        }
-        
-        // Set isLoadingCreateProject to true
-        await MainActor.run {
-            isLoadingCreateProject = true
-        }
-        
-        // Ensure authToken
-        let authToken: String
-        do {
-            authToken = try await AuthHelper.ensure()
-        } catch {
-            // TODO: Handle Errors
-            print("Error ensuring authToken in MainView... \(error)")
-            return
-        }
-        
-        // Get openAIKey
-        let openAIKey = activeSubscriptionUpdater.openAIKeyIsValid ? activeSubscriptionUpdater.openAIKey : nil
-        
-        // Generate and refactor
-        do {
-            try await CodeGenerationPlanExecutor().generateAndRefactor(
-                authToken: authToken,
-                openAIKey: openAIKey,
-                plan: currentCodeGenerationPlan,
-                progressTracker: progressTracker)
-        } catch {
-            // TODO: Handle Errors
-            print("Error generating and refactoring code in AIProjectCreatorContainer... \(error)")
-        }
-        
-        // Dismiss
-        await MainActor.run {
-            isPresented = false
         }
     }
     

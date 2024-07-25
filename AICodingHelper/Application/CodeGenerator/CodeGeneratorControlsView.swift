@@ -209,14 +209,14 @@ struct CodeGeneratorControlsView: View {
                     Divider()
                         .padding(8)
                     
-                    // Create temporary files instead of rewriting TODO: Add option to NarrowScopeControlsView
-                    CodeGeneratorControlSwitch(
-                        isOn: generateOptionCopyCurrentFilesToTempFile,
-                        title: .constant(Text("Save to Temp File")),
-                        subtitle: generateOptionCopyCurrentFilesToTempFile.wrappedValue ? .constant(Text("Will not overwrite your files.")) : .constant(Text("***Will overwrite***").foregroundColor(Color(NSColor.systemRed)) + Text(" your files.")),
-                        hoverDescription: .constant("Use all files to give AI more context to what it is coding."),
-                        foregroundColor: .foreground)
-                    .offset(x: -8)
+//                    // Create temporary files instead of rewriting TODO: Add option to NarrowScopeControlsView
+//                    CodeGeneratorControlSwitch(
+//                        isOn: generateOptionCopyCurrentFilesToTempFile,
+//                        title: .constant(Text("Save to Temp File")),
+//                        subtitle: generateOptionCopyCurrentFilesToTempFile.wrappedValue ? .constant(Text("Will not overwrite your files.")) : .constant(Text("***Will overwrite***").foregroundColor(Color(NSColor.systemRed)) + Text(" your files.")),
+//                        hoverDescription: .constant("Use all files to give AI more context to what it is coding."),
+//                        foregroundColor: .foreground)
+//                    .offset(x: -8)
                     
                     //                                // Use entire project as context TODO: Maybe make this a three option switch where it can either be no added context, selected files as context, project as context.. TODO: Add option to NarrowScopeControlsView
                     //                                CodeGeneratorControlSwitch(
