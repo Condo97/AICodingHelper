@@ -22,7 +22,7 @@ struct CodeEditorLanguageSelector: View {
         }) {
             Text("Language:")
         }
-        .frame(width: 140.0)
+        .frame(width: 200.0)
         .menuStyle(.automatic)
     }
     

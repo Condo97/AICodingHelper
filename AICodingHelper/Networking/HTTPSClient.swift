@@ -14,7 +14,7 @@ class HTTPSClient {
     
     init() {
         // Get the shared URL Session
-        session = URLSession.shared
+        session = URLSession(configuration: .default)
         isValid = true
     }
     
@@ -44,9 +44,16 @@ class HTTPSClient {
         
         // Get the shared URL Session
 //        let session = URLSession.shared
-        let (data, response) = try await session.data(for: request)
+//        let (data, response) = try await session.data(for: request)
+        let (stream, response) = try await session.bytes(for: request)
+        var responseData = Data()
         
-        return (data, response)
+        for try await chunk in stream {
+            responseData.append(chunk)
+        }
+        
+//        return (data, response)
+        return (responseData, response)
     }
     
     

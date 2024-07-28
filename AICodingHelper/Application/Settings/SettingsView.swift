@@ -25,6 +25,7 @@ struct SettingsView: View {
                             .tag(theme)
                     }
                 }
+                .frame(maxWidth: 250.0)
                 Spacer()
             }
         }

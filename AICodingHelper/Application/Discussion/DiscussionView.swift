@@ -116,96 +116,10 @@ struct DiscussionView: View {
             
             Spacer()
             
-            VStack {
-                ZStack(alignment: .topLeading) {
-                    TextEditor(text: $newInput)
-                        .scrollContentBackground(.hidden)
-                        .focused($focused)
-                        .frame(height: 80.0)
-                    
-                    Text("Enter Message...")
-                        .opacity(focused ? 0.0 : 0.4)
-                        .onTapGesture {
-                            focused = true
-                        }
-                }
-                
-                HStack(alignment: .bottom) {
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Text("Files")
-                                .font(.subheadline)
-                                .bold()
-                            
-                            Button("\(Image(systemName: "plus"))") {
-                                isShowingDirectoryImporter = true
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                        .padding(.top, 2)
-                        
-                        VStack(alignment: .leading) {
-                            ForEach(newFilepaths, id: \.self) { filepath in
-                                Text(filepath)
-                                    .lineLimit(1)
-                                    .truncationMode(.head)
-                                    .font(.system(size: 9.0))
-                                    .opacity(0.6)
-                            }
-                            
-                            Text("Drag Files Here")
-                                .font(.subheadline)
-                                .opacity(isLoading ? 0.2 : 0.6)
-                        }
-                        .padding()
-                        .background(RoundedRectangle(cornerRadius: 8.0)
-                            .stroke(Color.background.opacity(isLoading ? 0.2 : 0.6), style: StrokeStyle(dash: [5, 3])))
-                        .onDrop(of: [.text], isTargeted: nil, perform: { providers in
-                            if let provider = providers.first {
-                                provider.loadObject(ofClass: NSString.self, completionHandler: { providerReading, error in
-                                    if let filepath = providerReading as? String {
-                                        if !newFilepaths.contains(where: {$0 == filepath}) {
-                                            newFilepaths.append(filepath)
-                                        }
-                                    }
-                                })
-                            }
-                            
-                            return true
-                        })
-                    }
-                    
-                    Spacer()
-                    
-                    VStack(alignment: .leading) {
-                        Button("Build Code") {
-                            doBuildCodeGeneration()
-                        }
-                        .help("Build Code - command+shift+return")
-                        
-                        Button(action: {
-                            doChatGeneration()
-                        }) {
-                            HStack {
-                                Text("Chat")
-                                HStack(spacing: 0.0) {
-                                    Image(systemName: "command")
-                                        .imageScale(.small)
-                                    Image(systemName: "return")
-                                        .imageScale(.small)
-                                }
-                            }
-                        }
-                        .help("Chat - command+return")
-                        .keyboardShortcut(.defaultAction)
-                        .disabled(newInput.isEmpty && newFilepaths.isEmpty)
-                    }
-                }
-                .disabled(isLoading)
-            }
-            .padding()
-            .background(RoundedRectangle(cornerRadius: 4.0)
-                .stroke(focused ? Colors.element : Colors.background, lineWidth: focused ? 2.0 : 1.0))
+            ChatInputView(
+                newInput: $newInput,
+                doBuildCodeGeneration: doBuildCodeGeneration,
+                doChatGeneration: doChatGeneration)
         }
         .overlay(alignment: .topTrailing) {
             Button(action: {

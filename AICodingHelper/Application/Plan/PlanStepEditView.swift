@@ -51,7 +51,7 @@ struct PlanStepEditView: View {
                     Text(PlanCodeGenerationFC.Step.ActionType.edit.rawValue.capitalized)
                         .tag(PlanCodeGenerationFC.Step.ActionType.edit)
                 })
-                .frame(maxWidth: 150.0)
+                .frame(maxWidth: 200.0)
                 
                 if step.action == .create {
                     PlanStepFilepathEditView(

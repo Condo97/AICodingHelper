@@ -125,6 +125,7 @@
 		BBAD0AF72C4EBB7C0005A418 /* LoadingChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AF62C4EBB7C0005A418 /* LoadingChatView.swift */; };
 		BBAD0AF92C52BABA0005A418 /* GenerateCodeFCApplier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AF82C52BABA0005A418 /* GenerateCodeFCApplier.swift */; };
 		BBAD0AFB2C52C4B10005A418 /* DiscussionPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AFA2C52C4B10005A418 /* DiscussionPopup.swift */; };
+		BBAD0AFD2C57024C0005A418 /* ChatInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAD0AFC2C57024C0005A418 /* ChatInputView.swift */; };
 		BBB7C74E2C30E94800BEDD07 /* CodeEditor in Frameworks */ = {isa = PBXBuildFile; productRef = BBB7C74D2C30E94800BEDD07 /* CodeEditor */; };
 		BBB7C7522C31B13500BEDD07 /* FileMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7512C31B13500BEDD07 /* FileMonitor.swift */; };
 		BBB7C7542C31F52D00BEDD07 /* ResponseFormatType.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB7C7532C31F52D00BEDD07 /* ResponseFormatType.swift */; };
@@ -305,6 +306,7 @@
 		BBAD0AF62C4EBB7C0005A418 /* LoadingChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingChatView.swift; sourceTree = "<group>"; };
 		BBAD0AF82C52BABA0005A418 /* GenerateCodeFCApplier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCodeFCApplier.swift; sourceTree = "<group>"; };
 		BBAD0AFA2C52C4B10005A418 /* DiscussionPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionPopup.swift; sourceTree = "<group>"; };
+		BBAD0AFC2C57024C0005A418 /* ChatInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInputView.swift; sourceTree = "<group>"; };
 		BBB7C7512C31B13500BEDD07 /* FileMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMonitor.swift; sourceTree = "<group>"; };
 		BBB7C7532C31F52D00BEDD07 /* ResponseFormatType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseFormatType.swift; sourceTree = "<group>"; };
 		BBB7C7552C31F92B00BEDD07 /* OAIChatCompletionRequestResponseFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionRequestResponseFormat.swift; sourceTree = "<group>"; };
@@ -404,6 +406,7 @@
 			isa = PBXGroup;
 			children = (
 				BB57C2C82C4BE5B2008ED9F6 /* Chat.swift */,
+				BBAD0AFC2C57024C0005A418 /* ChatInputView.swift */,
 				BB57C2CA2C4BE9ED008ED9F6 /* ChatView.swift */,
 				BBAD0AEE2C4D6EA30005A418 /* ChatViewContainer.swift */,
 				BB57C2C62C4BE537008ED9F6 /* Discussion.swift */,
@@ -1025,6 +1028,7 @@
 				BB8561532C2F0EEF001C11F8 /* OAIChatCompletionRequestMessage.swift in Sources */,
 				BBEA61FB2C41988D0078B4C4 /* PlanStepFilepathEditView.swift in Sources */,
 				BB1405E42C362A1E0036CFE8 /* UserDefaultsHelper.swift in Sources */,
+				BBAD0AFD2C57024C0005A418 /* ChatInputView.swift in Sources */,
 				BBB7C7682C330ABE00BEDD07 /* FileCopier.swift in Sources */,
 				BB8561742C2F20AD001C11F8 /* ChatCompletionUsage.swift in Sources */,
 				BB85616E2C2F2071001C11F8 /* ChatCompletionChoice.swift in Sources */,

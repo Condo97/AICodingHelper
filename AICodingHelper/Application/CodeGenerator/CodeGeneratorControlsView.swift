@@ -11,9 +11,7 @@ import SwiftUI
 
 struct CodeGeneratorControlsView: View {
     
-    @Binding var scope: Scope
     @Binding var rootFilepath: String
-    @ObservedObject var focusViewModel: FocusViewModel
     @Binding var selectedFilepaths: [String]
     var onSubmit: (_ actionType: ActionType, _ userInput: String,  _ referenceFilepaths: [String], _ generateOptions: GenerateOptions/*TODO: , _ userInput: String?*/) -> Void
     
@@ -54,6 +52,10 @@ struct CodeGeneratorControlsView: View {
         return generateOptions
     }
     
+    private var multipleFilesSelected: Bool {
+        selectedFilepaths.count != 1
+    }
+    
     
     var body: some View {
         HStack {
@@ -70,8 +72,8 @@ struct CodeGeneratorControlsView: View {
                                 .font(.system(size: 100.0))
                                 .minimumScaleFactor(0.01),
                             title: .constant(Text("Comment").fontWeight(.medium)),
-                            subtitle: .constant("Smart comments \(focusViewModel.focus == .editor ? "in Current " : "for your ")\(scope.name.capitalized.lowercased())."),
-                            hoverDescription: Binding(get: {"AI creates smart comments \(focusViewModel.focus == .editor ? "in Current " : "for your ")\(scope.name.capitalized)"}, set: {_ in}),
+                            subtitle: .constant("Smart comments for your file\(multipleFilesSelected ? "s" : "")."),
+                            hoverDescription: Binding(get: {"AI creates smart comments for your file\(multipleFilesSelected ? "s" : "")"}, set: {_ in}),
                             foregroundColor: .foreground,
                             action: { onSubmit(.comment, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
                         
@@ -81,8 +83,8 @@ struct CodeGeneratorControlsView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit),
                             title: .constant(Text("Bug Fix").fontWeight(.medium)),
-                            subtitle: .constant("Smart fix bugs \(focusViewModel.focus == .editor ? "in Current " : "for your ")\(scope.name.capitalized.lowercased())"),
-                            hoverDescription: Binding(get: {"AI fixes bugs in \(focusViewModel.focus == .editor ? "in Current " : "for your ")\(scope.name.capitalized)"}, set: {_ in}),
+                            subtitle: .constant("Smart fix bugs for your file\(multipleFilesSelected ? "s" : "")"),
+                            hoverDescription: Binding(get: {"AI fixes bugs in for your file\(multipleFilesSelected ? "s" : "")"}, set: {_ in}),
                             foregroundColor: .foreground,
                             action: { onSubmit(.bugFix, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
                         
@@ -92,8 +94,8 @@ struct CodeGeneratorControlsView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit),
                             title: .constant(Text("Split").fontWeight(.medium)),
-                            subtitle: .constant("Split classes \(focusViewModel.focus == .editor ? "in Current " : "for your ")\(scope.name.capitalized.lowercased())"),
-                            hoverDescription: Binding(get: {"AI separates large classes and structures \(focusViewModel.focus == .editor ? "in Current " : "for your ")\(scope.name.capitalized)"}, set: {_ in}),
+                            subtitle: .constant("Split classes for your file\(multipleFilesSelected ? "s" : "")"),
+                            hoverDescription: Binding(get: {"AI separates large classes and structures for your file\(multipleFilesSelected ? "s" : "")"}, set: {_ in}),
                             foregroundColor: .foreground,
                             action: { onSubmit(.split, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
                         
@@ -103,8 +105,8 @@ struct CodeGeneratorControlsView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit),
                             title: .constant(Text("Simplify").fontWeight(.medium)),
-                            subtitle: .constant("Simplify code \(focusViewModel.focus == .editor ? "in Current " : "for your ")\(scope.name.capitalized.lowercased())"),
-                            hoverDescription: Binding(get: {"AI simplifies complex code \(focusViewModel.focus == .editor ? "in Current " : "for your ")\(scope.name.capitalized)."}, set: {_ in}),
+                            subtitle: .constant("Simplify code for your file\(multipleFilesSelected ? "s" : "")"),
+                            hoverDescription: Binding(get: {"AI simplifies complex code for your file\(multipleFilesSelected ? "s" : "")."}, set: {_ in}),
                             foregroundColor: .foreground,
                             action: { onSubmit(.simplify, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
                         
@@ -114,8 +116,8 @@ struct CodeGeneratorControlsView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit),
                             title: .constant(Text("Create Tests").fontWeight(.medium)),
-                            subtitle: .constant("Create tests  \(focusViewModel.focus == .editor ? "in Current " : "for your ")\(scope.name.capitalized.lowercased())"),
-                            hoverDescription: Binding(get: {"AI creates tests \(focusViewModel.focus == .editor ? "in Current " : "for your ")\(scope.name.capitalized)"}, set: {_ in}),
+                            subtitle: .constant("Create tests for your file\(multipleFilesSelected ? "s" : "")"),
+                            hoverDescription: Binding(get: {"AI creates tests for your file\(multipleFilesSelected ? "s" : "")"}, set: {_ in}),
                             foregroundColor: .foreground,
                             action: { onSubmit(.createTests, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
                         
@@ -127,8 +129,8 @@ struct CodeGeneratorControlsView: View {
                                 .foregroundStyle(LinearGradient(colors: [.red, .green, .blue], startPoint: .leading, endPoint: .trailing))
                                 .aspectRatio(contentMode: .fit),
                             title: .constant(Text("Omni").fontWeight(.medium)),
-                            subtitle: .constant("***Your prompt only*** \(focusViewModel.focus == .editor ? "in Current " : "")\(scope.name.capitalized.lowercased())."),
-                            hoverDescription: Binding(get: {"AI executes a task descirbed \(focusViewModel.focus == .editor ? "in Current " : "for your ")\(scope.name.capitalized)"}, set: {_ in}),
+                            subtitle: .constant("***Your prompt only***."),
+                            hoverDescription: Binding(get: {"AI executes a task descirbed in your prompt for your file\(multipleFilesSelected ? "s" : "")"}, set: {_ in}),
                             foregroundColor: .foreground,
                             action: { onSubmit(.custom, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
                     }
@@ -299,9 +301,9 @@ struct CodeGeneratorControlsView: View {
 #Preview {
     
     CodeGeneratorControlsView(
-        scope: .constant(.directory),
+//        scope: .constant(.directory),
         rootFilepath: .constant("~/Downloads/test_dir"),
-        focusViewModel: FocusViewModel(),
+//        focusViewModel: FocusViewModel(),
         selectedFilepaths: .constant(["Test", "Test2"]),
         onSubmit: { actionType, userInput, referenceFilepaths, generateOptions in
             print("Submitted \(actionType)")

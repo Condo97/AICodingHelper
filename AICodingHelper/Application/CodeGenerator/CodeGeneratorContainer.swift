@@ -41,9 +41,7 @@ struct CodeGeneratorContainer: View {
                 .frame(idealWidth: 1050.0)
             } else {
                 CodeGeneratorControlsView(
-                    scope: $scope,
                     rootFilepath: $rootFilepath,
-                    focusViewModel: focusViewModel,
                     selectedFilepaths: $fileBrowserSelectedFilepaths,
                     onSubmit: { actionType, userInput, referenceFilepaths, generateOptions in
                         Task {
