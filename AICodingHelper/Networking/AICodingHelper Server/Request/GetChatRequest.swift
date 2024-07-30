@@ -12,11 +12,13 @@ struct GetChatRequest: Encodable {
     var authToken: String
     var openAIKey: String?
     var chatCompletionRequest: OAIChatCompletionRequest
+    var function: String?
     
     enum CodingKeys: String, CodingKey {
         case authToken
         case openAIKey
         case chatCompletionRequest
+        case function
     }
     
 }

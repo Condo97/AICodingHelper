@@ -10,18 +10,22 @@ import SwiftUI
 
 struct GenerateCodeFCChatMiniView: View {
     
+    @Binding var rootFilepath: String
     @Binding var generateCodeFC: GenerateCodeFC
     
     @FocusState private var focused
     
 //    @State private var isHovering: Bool = false
-    
+    @State private var isApplied: Bool = false
     @State private var isExpanded: Bool = false
+    @State private var isHoveringApplyButton: Bool = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8.0) {
             ForEach($generateCodeFC.output_files) { $file in
-                GenerateCodeFCChatFileMiniView(file: $file)
+                GenerateCodeFCChatFileMiniViewContainer(
+                    rootFilepath: $rootFilepath,
+                    file: $file)
             }
         }
 //        .background(isHovering ? Color.background.opacity(0.2) : .clear)
@@ -35,6 +39,7 @@ struct GenerateCodeFCChatMiniView: View {
 #Preview {
     
     GenerateCodeFCChatMiniView(
+        rootFilepath: .constant("~/Downloads/test_dir"),
         generateCodeFC: .constant(GenerateCodeFC(
             output_files: [
                 GenerateCodeFC.File(

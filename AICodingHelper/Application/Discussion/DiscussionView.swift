@@ -7,25 +7,31 @@
 
 import SwiftUI
 
-struct DiscussionView: View {
+struct DiscussionView<Content: View>: View {
     
+    var title: String = "Discuss Changes"
     @Binding var rootFilepath: String
-    @ObservedObject var discussion: Discussion
-    @Binding var isLoading: Bool
-    @State var generateOnAppear: Bool
+//    @Binding var selectedFilepaths: [String]
+    @ObservedObject var discussionGenerator: DiscussionGenerator
+//    @State var generateOnAppear: Bool
     var onResetDiscussion: () -> Void
+    @ViewBuilder var content: Content
+    
+//    @ObservedObject var discussion: Discussion
+//    @ObservedObject var tabsViewModel: TabsViewModel
+//    @Binding var isLoading: Bool
     
     @EnvironmentObject private var activeSubscriptionUpdater: ActiveSubscriptionUpdater
     
     @FocusState private var focused
     
-    @State private var newInput: String = ""
-    @State private var newFilepaths: [String] = []
+//    @State private var newInput: String = ""
+//    @State private var newFilepaths: [String] = []
     
-    @State private var chatGenerator: ChatGenerator?
-    @State private var generateCodeFCAICodingHelperHTTPSConnector: AICodingHelperHTTPSConnector?
+//    @State private var chatGenerator: ChatGenerator?
+//    @State private var generateCodeFCAICodingHelperHTTPSConnector: AICodingHelperHTTPSConnector?
     
-    @State private var streamingChat: String = ""
+//    @State private var streamingChat: String = ""
     
     @State private var isCancelling: Bool = false
     
@@ -40,7 +46,7 @@ struct DiscussionView: View {
         Binding(
             get: {
                 // Can cancel generation if neither chatGenerator and generateCodeFCAICodingHelperHTTPSConnector are nil
-                chatGenerator != nil || generateCodeFCAICodingHelperHTTPSConnector != nil
+                discussionGenerator.chatGenerator != nil || discussionGenerator.generateCodeFCAICodingHelperHTTPSConnector != nil
             },
             set: { value in
                 // No actions
@@ -50,13 +56,15 @@ struct DiscussionView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Discuss Changes")
+            Text(title)
                 .font(.title)
                 .bold()
             
+            content
+            
             ScrollView {
                 LazyVStack(alignment: .trailing) {
-                    if isLoading {
+                    if discussionGenerator.isLoading {
                         LoadingChatView(
                             canCancel: canCancelGeneration,
                             stopLoading: {
@@ -74,11 +82,11 @@ struct DiscussionView: View {
                                     }
                                     
                                     // Cancel generateCodeFCAICodingHelperHTTPSConnector this one first since it is not async even though I guess it doesn't matter
-                                    generateCodeFCAICodingHelperHTTPSConnector?.cancel()
+                                    discussionGenerator.generateCodeFCAICodingHelperHTTPSConnector?.cancel()
                                     
                                     // Cancel chatGenerator
                                     do {
-                                        try await chatGenerator?.cancel()
+                                        try await discussionGenerator.chatGenerator?.cancel()
                                     } catch {
                                         // TODO: Handle Errors
                                         print("Error cancelling chatGenerator in DiscussionView... \(error)")
@@ -89,22 +97,23 @@ struct DiscussionView: View {
                             .padding(.leading, 4)
                             .rotationEffect(.degrees(180))
                     }
-                    if !streamingChat.isEmpty {
+                    if !discussionGenerator.streamingChat.isEmpty {
                         ChatView(
+                            rootFilepath: $rootFilepath,
                             chat: Chat(
                                 role: .assistant,
-                                message: streamingChat),
+                                message: discussionGenerator.streamingChat),
                             onDelete: {
                                 
                             })
                         .rotationEffect(.degrees(180))
                     }
-                    ForEach(discussion.chats.reversed()) { chat in
+                    ForEach(discussionGenerator.discussion.chats.reversed()) { chat in
                         ChatViewContainer(
                             rootFilepath: $rootFilepath,
                             chat: chat,
                             onDelete: {
-                                discussion.chats.removeAll(where: {$0 === chat})
+                                discussionGenerator.discussion.chats.removeAll(where: {$0 === chat})
                             })
                         .rotationEffect(.degrees(180))
                         .padding(.vertical, 8)
@@ -117,9 +126,18 @@ struct DiscussionView: View {
             Spacer()
             
             ChatInputView(
-                newInput: $newInput,
-                doBuildCodeGeneration: doBuildCodeGeneration,
-                doChatGeneration: doChatGeneration)
+                newInput: $discussionGenerator.newInput,
+                newFilepaths: $discussionGenerator.newFilepaths,
+                doBuildCodeGeneration: {
+                    discussionGenerator.doBuildCodeGeneration(
+                        activeSubscriptionUpdater: activeSubscriptionUpdater,
+                        rootFilepath: rootFilepath)
+                },
+                doChatGeneration: {
+                    discussionGenerator.doChatGeneration(
+                        activeSubscriptionUpdater: activeSubscriptionUpdater,
+                        rootFilepath: rootFilepath)
+                })
         }
         .overlay(alignment: .topTrailing) {
             Button(action: {
@@ -145,7 +163,9 @@ struct DiscussionView: View {
             if !commandReturnEventMonitorCreated {
                 NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
                     if event.modifierFlags.contains(.command) && event.keyCode == 36 { // Return key code is
-                        doChatGeneration()
+                        discussionGenerator.doChatGeneration(
+                            activeSubscriptionUpdater: activeSubscriptionUpdater,
+                            rootFilepath: rootFilepath)
                     }
                     
                     return event
@@ -154,16 +174,16 @@ struct DiscussionView: View {
                 commandReturnEventMonitorCreated = true
             }
         }
-        .onAppear {
-            if generateOnAppear {
-                doBuildCodeGeneration()
-            }
-        }
+//        .onAppear {
+//            if generateOnAppear {
+//                doBuildCodeGeneration()
+//            }
+//        }
         .onChange(of: directoryImporterNewFilepath) { newValue in
             // Append newValue to newFilepaths if it is not empty and newFilepaths does not contain it
             if !newValue.isEmpty,
-               !newFilepaths.contains(where: {$0 == newValue}) {
-                newFilepaths.append(newValue)
+               !discussionGenerator.newFilepaths.contains(where: {$0 == newValue}) {
+                discussionGenerator.newFilepaths.append(newValue)
             }
             
             // Reset directoryImporterNewFilepath
@@ -171,340 +191,52 @@ struct DiscussionView: View {
         }
     }
     
-    
-    func doBuildCodeGeneration() {
-        // Ensure is not loading, otherwise return
-        guard !isLoading else {
-            // TODO: Handle Errors
-            return
-        }
-        
-        // Create chat with newInput and newFilepaths and append to discussion chats if not empty
-        if !newInput.isEmpty || !newFilepaths.isEmpty {
-            discussion.chats.append(
-                Chat(
-                    role: .user,
-                    message: newInput,
-                    referenceFilepaths: newFilepaths.isEmpty ? nil : newFilepaths)
-            )
-        }
-        
-        // Reset newInput and newFilepaths
-        newInput = ""
-        newFilepaths = []
-        
-        // Generate geneate code FC chat
-        Task {
-            await generateGenerateCodeFCChat()
-        }
-    }
-    
-    func doChatGeneration() {
-        // Ensure is not loading otherwise return
-        guard !isLoading else {
-            // TODO: Handle Errors
-            return
-        }
-        
-        // Ensure either newInput or newFilepaths are not empty, otherwise return
-        guard !newInput.isEmpty || !newFilepaths.isEmpty else {
-            // TODO: Handle Errors
-            return
-        }
-        
-        // Create chat with newInput and newFilepaths and append to discussion
-        discussion.chats.append(
-            Chat(
-                role: .user,
-                message: newInput,
-                referenceFilepaths: newFilepaths.isEmpty ? nil : newFilepaths)
-        )
-        
-        // Reset newInput and newFilepaths
-        newInput = ""
-        newFilepaths = []
-        
-        // Generate string chat
-        Task {
-            await generateStringChat()
-        }
-    }
-    
-    func generateStringChat() async {
-        // Ensure not isLoading
-        guard !isLoading else {
-            // TODO: Handle Errors
-            return
-        }
-        
-        // Defer setting isLoading to false
-        defer {
-            DispatchQueue.main.async {
-                self.isLoading = false
-            }
-        }
-        
-        // Set isLoading to true
-        await MainActor.run {
-            isLoading = true
-        }
-        
-        // Ensure unwrap authToken
-        let authToken: String
-        do {
-            authToken = try await AuthHelper.ensure()
-        } catch {
-            // TODO: Handle Errors
-            print("Error ensuring authToken in DiscussionView... \(error)")
-            return
-        }
-        
-        // Transform discussion chats to messages
-        let messages: [OAIChatCompletionRequestMessage]
-        do {
-            messages = try discussion.chats.compactMap({
-                // Transform reference filepaths into a string for the message
-                let referenceFilepathsString: String? = $0.referenceFilepaths?.compactMap({
-                    FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)
-                }).joined(separator: "\n\n")
-                
-                // If message is GenerateCodeFC transform and return
-                if let message = $0.message as? GenerateCodeFC,
-                   let messageString = String(data: try JSONEncoder().encode(message), encoding: .utf8) {
-                    let finalMessage = messageString + (referenceFilepathsString == nil ? "" : ("\n\n" + referenceFilepathsString!))
-                    
-                    return OAIChatCompletionRequestMessage(
-                        role: $0.role,
-                        content: [
-                            .text(OAIChatCompletionRequestMessageContentText(text: finalMessage))
-                        ])
-                }
-                
-                // If message is String transform and return
-                if let message = $0.message as? String {
-                    let finalMessage = message + (referenceFilepathsString == nil ? "" : ("\n\n" + referenceFilepathsString!))
-                    
-                    return OAIChatCompletionRequestMessage(
-                        role: $0.role,
-                        content: [
-                            .text(OAIChatCompletionRequestMessageContentText(text: finalMessage))
-                        ])
-                }
-                
-                return nil
-            })
-        } catch {
-            // TODO: Handle Errors
-            print("Error transforming discussion chats to messages in DiscussionView... \(error)")
-            return
-        }
-        
-        // Build getChatRequest
-        let getChatRequest = GetChatRequest(
-            authToken: authToken,
-            chatCompletionRequest: OAIChatCompletionRequest(
-                model: GPTModels.GPT4o.rawValue,
-                stream: true,
-                messages: messages))
-        
-        // Reset streamingChat
-        await MainActor.run {
-            streamingChat = ""
-        }
-        
-        // Stream chat and set chatGenerator
-        do {
-            let chatGenerator = ChatGenerator()
-            await MainActor.run {
-                self.chatGenerator = chatGenerator
-            }
-            try await chatGenerator.streamChat(
-                getChatRequest: getChatRequest,
-                stream: { getChatResponse in
-                    if let responseMessageDelta = getChatResponse.body.oaiResponse.choices[safe: 0]?.delta.content {
-                        streamingChat += responseMessageDelta
-                    }
-                })
-        } catch {
-            // TODO: Handle Errors
-            print("Error streaming chat in DiscussionView... \(error)")
-        }
-        
-        // Create new chat and append to discussion and reset streamingChat
-        await MainActor.run {
-            let chat = Chat(
-                role: .assistant,
-                message: streamingChat)
-            discussion.chats.append(chat)
-            streamingChat = ""
-        }
-    }
-    
-    func generateGenerateCodeFCChat() async {
-        // Ensure not isLoading
-        guard !isLoading else {
-            // TODO: Handle Errors
-            return
-        }
-        
-        // Defer setting isLoading to false
-        defer {
-            DispatchQueue.main.async {
-                self.isLoading = false
-            }
-        }
-        
-        // Set isLoading to true
-        await MainActor.run {
-            isLoading = true
-        }
-        
-        // Ensure unwrap authToken
-        let authToken: String
-        do {
-            authToken = try await AuthHelper.ensure()
-        } catch {
-            // TODO: Handle Errors
-            print("Error ensuring authToken in DiscussionView... \(error)")
-            return
-        }
-        
-        // Transform discussion chats to messages
-        let messages: [OAIChatCompletionRequestMessage]
-        do {
-            messages = try discussion.chats.compactMap({
-                // Transform reference filepaths into a string for the message
-                let referenceFilepathsString: String? = $0.referenceFilepaths?.compactMap({
-                    FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)
-                }).joined(separator: "\n\n")
-                
-                // If message is GenerateCodeFC transform and return
-                if let message = $0.message as? GenerateCodeFC,
-                   let messageString = String(data: try JSONEncoder().encode(message), encoding: .utf8) {
-                    let finalMessage = messageString + (referenceFilepathsString == nil ? "" : ("\n\n" + referenceFilepathsString!))
-                    
-                    return OAIChatCompletionRequestMessage(
-                        role: $0.role,
-                        content: [
-                            .text(OAIChatCompletionRequestMessageContentText(text: finalMessage))
-                        ])
-                }
-                
-                // If message is String transform and return
-                if let message = $0.message as? String {
-                    let finalMessage = message + (referenceFilepathsString == nil ? "" : ("\n\n" + referenceFilepathsString!))
-                    
-                    return OAIChatCompletionRequestMessage(
-                        role: $0.role,
-                        content: [
-                            .text(OAIChatCompletionRequestMessageContentText(text: finalMessage))
-                        ])
-                }
-                
-                return nil
-            })
-        } catch {
-            // TODO: Handle Errors
-            print("Error transforming discussion chats to messages in DiscussionView... \(error)")
-            return
-        }
-        
-        // Get openAIKey
-        let openAIKey = activeSubscriptionUpdater.openAIKeyIsValid ? activeSubscriptionUpdater.openAIKey : nil
-        
-        // Bulid functionCallRequest
-        let functionCallRequest = FunctionCallRequest(
-            authToken: authToken,
-            openAIKey: openAIKey,
-            model: .GPT4o,
-            messages: messages)
-        
-        // Get oaiCompletionResponse and set generateCodeFCAICodingHelperHTTPSConnector
-        let oaiCompletionResponse: OAICompletionResponse
-        do {
-            let generateCodeFCAICodingHelperHTTPSConnector = AICodingHelperHTTPSConnector()
-            await MainActor.run {
-                self.generateCodeFCAICodingHelperHTTPSConnector = generateCodeFCAICodingHelperHTTPSConnector
-            }
-            oaiCompletionResponse = try await generateCodeFCAICodingHelperHTTPSConnector.functionCallRequest(
-                endpoint: Constants.Networking.HTTPS.Endpoints.generateCode,
-                request: functionCallRequest)
-        } catch {
-            // TODO: Handle Errors
-            print("Error getting function call response in DiscussionView... \(error)")
-            return
-        }
-        
-        // Ensure unwrap tool and toolData from oaiCompletionResponse
-        guard let tool = oaiCompletionResponse.body.response.choices[safe: 0]?.message.toolCalls[safe: 0]?.function.arguments,
-              let toolData = tool.data(using: .utf8) else {
-            // TODO: Handle Errors
-            print("Could not unwrap tool or toolData in DiscussionView!")
-            return
-        }
-        
-        // Parse GenerateCodeFC
-        let generateCodeFC: GenerateCodeFC
-        do {
-            generateCodeFC = try JSONDecoder().decode(GenerateCodeFC.self, from: toolData)
-        } catch {
-            // TODO: Handle Errors
-            print("Error decoding generateCodeFC in DiscussionView... \(error)")
-            return
-        }
-        
-        // Create chat and add to discussion chats
-        let chat = Chat(
-            role: .assistant,
-            message: generateCodeFC)
-        
-        discussion.chats.append(chat)
-    }
-    
 }
 
 #Preview {
     
     DiscussionView(
-        rootFilepath: .constant("~/Downloads/test_dir"),
-        discussion: Discussion(
-            chats: [
-                Chat(
-                    role: .user,
-                    message: "Hi can u make it so that my code works thank you!"),
-                Chat(
-                    role: .assistant,
-                    message: GenerateCodeFC(
-                        output_files: [GenerateCodeFC.File(
-                            filepath: "Test/Filepath",
-                        	content: "Test File Content")])
-                ),
-                Chat(
-                    role: .user,
-                    message: "Okay now do some more stuff"),
-                Chat(
-                    role: .assistant,
-                    message: GenerateCodeFC(
-                        output_files: [
-                            GenerateCodeFC.File(
-                                filepath: "~/Downloads/test_dir/file.txt",
-                                content: "This is the content of the file"),
-                            GenerateCodeFC.File(
-                                filepath: "~/Downloads/test_dir/anotherfile.txt",
-                                content: "This is the content of the second file")
-                        ]))
-            ]
-        ),
-        isLoading: .constant(false),
-        generateOnAppear: true,
+//        selectedFilepaths: .constant([]),,
+        rootFilepath: .constant(""),
+        discussionGenerator: DiscussionGenerator(
+            discussion: Discussion(
+                chats: [
+                    Chat(
+                        role: .user,
+                        message: "Hi can u make it so that my code works thank you!"),
+                    Chat(
+                        role: .assistant,
+                        message: GenerateCodeFC(
+                            output_files: [GenerateCodeFC.File(
+                                filepath: "Test/Filepath",
+                                content: "Test File Content")])
+                    ),
+                    Chat(
+                        role: .user,
+                        message: "Okay now do some more stuff"),
+                    Chat(
+                        role: .assistant,
+                        message: GenerateCodeFC(
+                            output_files: [
+                                GenerateCodeFC.File(
+                                    filepath: "~/Downloads/test_dir/file.txt",
+                                    content: "This is the content of the file"),
+                                GenerateCodeFC.File(
+                                    filepath: "~/Downloads/test_dir/anotherfile.txt",
+                                    content: "This is the content of the second file")
+                            ]))
+                ]
+            )),
         onResetDiscussion: {
+            
+        },
+        content: {
             
         }
     )
     .padding()
     .background(Color.foreground)
     .frame(width: 550.0, height: 500.0)
-    .environmentObject(ActiveSubscriptionUpdater())
     .environmentObject(CodeEditorSettingsViewModel())
     
 }

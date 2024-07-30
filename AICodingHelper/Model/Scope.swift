@@ -12,7 +12,7 @@ enum Scope {
     case multifile
     case directory
     case file
-    case highlight
+//    case highlight
 }
 
 extension Scope {
@@ -23,7 +23,7 @@ extension Scope {
         case .multifile: "files"
         case .directory: "folder"
         case .file: "file"
-        case .highlight: "highlight"
+//        case .highlight: "highlight"
         }
     }
     

@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ChatView: View {
     
+    @Binding var rootFilepath: String
     @ObservedObject var chat: Chat
     var onDelete: () -> Void
     
@@ -46,7 +47,9 @@ struct ChatView: View {
                         })
                 }
                 HStack {
-                    GenerateCodeFCChatMiniView(generateCodeFC: messageBinding)
+                    GenerateCodeFCChatMiniView(
+                        rootFilepath: $rootFilepath,
+                        generateCodeFC: messageBinding)
                         .focused($focused)
                 }
             } else {
@@ -90,6 +93,7 @@ struct ChatView: View {
 #Preview {
     
     ChatView(
+        rootFilepath: .constant("~/Downloads/test_dir"),
         chat: Chat(
             role: .user,
             message: GenerateCodeFC(output_files: [GenerateCodeFC.File(

@@ -15,7 +15,7 @@ struct ContentView: View {
                 Text("Total Tokens: \(totalTokens)")
                     .font(.largeTitle)
             }
-        }
+        }asdfaaa
         .padding()
         .task {
             await calculateTotalTokens()

@@ -60,40 +60,35 @@ struct MainView: View {
     private var currentScope: Binding<Scope> {
         Binding(
             get: {
-                if focusViewModel.focus == .editor {
-                    // If code view has selection return highlight, otherwise return file
-                    return codeViewHasSelection ? .highlight : .file
-                } else {
-                    if fileBrowserSelectedFilepaths.count == 1 {
-                        if let firstFileBrowserSelectedFilepath = fileBrowserSelectedFilepaths[safe: 0] {
-                            // If the first selected filepath is the project root file return project
-                            if firstFileBrowserSelectedFilepath == directory {
-                                return .project
-                            }
-                            
-                            // Directory if only one file selected and it is a directory
-                            var isDirectory: ObjCBool = false
-                            if FileManager.default.fileExists(atPath: firstFileBrowserSelectedFilepath, isDirectory: &isDirectory) {
-                                if isDirectory.boolValue {
-                                    return .directory
-                                }
-                            }
-                        }
-                        
-                        // File otherwise if only one selected
-                        return .file
-                    } else if fileBrowserSelectedFilepaths.count > 1 {
-                        // If the project is selected return project
-                        if fileBrowserSelectedFilepaths.contains(where: {$0 == directory}) {
+                if fileBrowserSelectedFilepaths.count == 1 {
+                    if let firstFileBrowserSelectedFilepath = fileBrowserSelectedFilepaths[safe: 0] {
+                        // If the first selected filepath is the project root file return project
+                        if firstFileBrowserSelectedFilepath == directory {
                             return .project
                         }
                         
-                        // Multifile if multiple selected
-                        return .multifile
-                    } else {
-                        // Project if none selected
+                        // Directory if only one file selected and it is a directory
+                        var isDirectory: ObjCBool = false
+                        if FileManager.default.fileExists(atPath: firstFileBrowserSelectedFilepath, isDirectory: &isDirectory) {
+                            if isDirectory.boolValue {
+                                return .directory
+                            }
+                        }
+                    }
+                    
+                    // File otherwise if only one selected
+                    return .file
+                } else if fileBrowserSelectedFilepaths.count > 1 {
+                    // If the project is selected return project
+                    if fileBrowserSelectedFilepaths.contains(where: {$0 == directory}) {
                         return .project
                     }
+                    
+                    // Multifile if multiple selected
+                    return .multifile
+                } else {
+                    // Project if none selected
+                    return .project
                 }
             },
             set: { value in
@@ -166,15 +161,19 @@ struct MainView: View {
                                 HStack {
                                     Spacer()
                                     VStack {
+                                        Spacer()
                                         if directory.isEmpty {
                                             Text("No Project Selected")
+                                            Button("Open Project \(Image(systemName: "folder"))") {
+                                                popupShowingOpenProject = true
+                                            }
                                         } else {
                                             Text("Double-Click a File to Open")
+                                            Button("Go Home \(Image(systemName: "house"))") {
+                                                popupShowingOpenProject = true
+                                            }
                                         }
-                                        
-                                        Button("Open Project \(Image(systemName: "folder"))") {
-                                            popupShowingOpenProject = true
-                                        }
+                                        Spacer()
                                     }
                                     Spacer()
                                 }
@@ -183,10 +182,7 @@ struct MainView: View {
                         .frame(maxHeight: .infinity)
                         
                         CodeGeneratorContainer(
-                            scope: currentScope,
                             rootFilepath: $directory,
-                            progressTracker: progressTracker,
-                            focusViewModel: focusViewModel,
                             tabsViewModel: tabsViewModel,
                             fileBrowserSelectedFilepaths: $fileBrowserSelectedFilepaths,
                             isLoading: $isLoadingCodeGeneration)

@@ -10,12 +10,13 @@ import SwiftUI
 struct AIFileCreatorView: View {
     
     @Binding var newFileName: String
-    @Binding var referenceFilepaths: [String]
     @Binding var userPrompt: String
     var onCancel: () -> Void
     var onSubmit: () -> Void
     
     @State private var isFileImporterPresented = false
+    
+    @State private var referenceFilepaths: [String] = []
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -67,7 +68,7 @@ struct AIFileCreatorView: View {
                                         }
                                     }
                                 }
-                                    
+                                
                                 Image(systemName: "xmark.circle")
                                     .onTapGesture {
                                         if let index = referenceFilepaths.firstIndex(of: path) {
@@ -143,7 +144,6 @@ struct AIFileCreatorView: View {
     ZStack {
         AIFileCreatorView(
             newFileName: .constant(""),
-            referenceFilepaths: .constant([]),
             userPrompt: .constant(""),
             onCancel: {},
             onSubmit: {}

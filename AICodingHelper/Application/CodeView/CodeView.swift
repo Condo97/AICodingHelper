@@ -51,6 +51,26 @@ struct CodeView: View {
             })
     }
     
+    private var undoCacheSavingCodeEditorFileText: Binding<String> {
+        Binding(
+            get: {
+                codeViewModel.openedFileText
+            },
+            set: { value in
+                // Handle undo char delay stuff
+                if value != cachedCodeEditorContainerFileTextForUndo,
+                   let undoManager = undoManager {
+                    codeViewModel.saveUndo(
+                        undoManager: undoManager,
+                        oldFileText: codeViewModel.openedFileText,
+                        oldFileTextSelection: codeViewModel.openedFileTextSelection)
+                   cachedCodeEditorContainerFileTextForUndo = value
+                }
+                
+                codeViewModel.openedFileText = value
+            })
+    }
+    
     private var undoSavingCodeEditorContainerFileTextSelection: Binding<Range<String.Index>> {
         Binding(
             get: {
@@ -60,7 +80,10 @@ struct CodeView: View {
                 // Handle undo char delay stuff
                 if codeViewModel.openedFileText != cachedCodeEditorContainerFileTextForUndo,
                    let undoManager = undoManager {
-                    codeViewModel.saveUndo(undoManager: undoManager)
+                    codeViewModel.saveUndo(
+                        undoManager: undoManager,
+                        oldFileText: codeViewModel.openedFileText,
+                        oldFileTextSelection: value)
                    cachedCodeEditorContainerFileTextForUndo = codeViewModel.openedFileText
                 }
                 
@@ -81,8 +104,8 @@ struct CodeView: View {
         ZStack {
             // Code Editor Container
             CodeEditorContainer(
-                fileText: $codeViewModel.openedFileText,
-                fileSelection: undoSavingCodeEditorContainerFileTextSelection,
+                fileText: undoCacheSavingCodeEditorFileText,
+                fileSelection: $codeViewModel.openedFileTextSelection,
                 fileLanguage: $codeViewModel.openedFileLanguage)
             .disabled(isCodeEditorEditingDisabled.wrappedValue)
 //            .onChange(of: glitchyFix_fileText) {

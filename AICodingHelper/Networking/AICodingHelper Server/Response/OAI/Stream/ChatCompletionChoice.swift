@@ -11,7 +11,7 @@ import Foundation
 struct ChatCompletionChoice: Codable {
     
     let index: Int
-    let delta: ChatCompletionDelta
+    let delta: ChatCompletionChoiceDelta
     let finishReason: String?
 
     private enum CodingKeys: String, CodingKey {

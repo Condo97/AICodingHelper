@@ -11,7 +11,7 @@ struct AIFileCreatorContainer: View {
     
     @Binding var isPresented: Bool
     @State var rootFilepath: String
-    @State var referenceFilepaths: [String] // This is a state because if it is changed it should not propogate to the parent
+//    @State var referenceFilepaths: [String] // This is a state because if it is changed it should not propogate to the parent
     @ObservedObject var progressTracker: ProgressTracker
     
     
@@ -22,7 +22,8 @@ struct AIFileCreatorContainer: View {
     @EnvironmentObject private var activeSubscriptionUpdater: ActiveSubscriptionUpdater
     @EnvironmentObject private var remainingUpdater: RemainingUpdater
     
-    @State private var currentDiscussion: Discussion?
+//    @State private var currentDiscussion: Discussion?
+    @StateObject private var discussionGenerator: DiscussionGenerator = DiscussionGenerator(discussion: Discussion(chats: []))
     
     @State private var isLoadingDiscussion: Bool = false
     
@@ -35,7 +36,6 @@ struct AIFileCreatorContainer: View {
     var body: some View {
         AIFileCreatorView(
             newFileName: $newFileName,
-            referenceFilepaths: $referenceFilepaths,
             userPrompt: $userPrompt,
             onCancel: {
                 // Dismiss
@@ -78,18 +78,17 @@ struct AIFileCreatorContainer: View {
                         role: .user,
                         message: instructions)
                     
-                    // Create Discussion with userChat and set to currentDiscussion
-                    currentDiscussion = Discussion(chats: [userChat])
+                    // Append userChat to discussionGenerator discussion chats
+                    discussionGenerator.discussion.chats.append(userChat)
                     
                     // Set isShowingDiscussionView to true
                     isShowingDiscussionView = true
                 }
             })
         .discussionPopup(
-            discussion: $currentDiscussion,
+            isPresented: $isShowingDiscussionView,
             rootFilepath: $rootFilepath,
-            isLoading: $isLoadingDiscussion,
-            generateOnAppear: true,
+            discussionGenerator: discussionGenerator,
             onResetDiscussion: {
                 
             })
@@ -121,7 +120,6 @@ extension View {
                 AIFileCreatorContainer(
                     isPresented: isPresented,
                     rootFilepath: rootFilepath,
-                    referenceFilepaths: referenceFilepaths,
                     progressTracker: ProgressTracker())
             }
     }
@@ -134,7 +132,6 @@ extension View {
     AIFileCreatorContainer(
         isPresented: .constant(true),
         rootFilepath: "~/Downloads/test_dir",
-        referenceFilepaths: [],
         progressTracker: ProgressTracker()
     )
     

@@ -13,7 +13,8 @@ struct CodeGeneratorControlsView: View {
     
     @Binding var rootFilepath: String
     @Binding var selectedFilepaths: [String]
-    var onSubmit: (_ actionType: ActionType, _ userInput: String,  _ referenceFilepaths: [String], _ generateOptions: GenerateOptions/*TODO: , _ userInput: String?*/) -> Void
+    @ObservedObject var tabsViewModel: TabsViewModel
+    var onSubmit: (_ actionType: ActionType, _ generateOptions: GenerateOptions/*TODO: , _ userInput: String?*/) -> Void
     
     
     private static let additionalPromptTitleMatchedGeometryEffectID = "additionalPromptTitle"
@@ -22,11 +23,13 @@ struct CodeGeneratorControlsView: View {
     
     @Namespace private var namespace
     
-    @State private var additionalPromptText: String = ""
+    @EnvironmentObject private var focusViewModel: FocusViewModel
     
-    @State private var additionalReferenceFilepaths: [String] = []
+//    @State private var additionalPromptText: String = ""
     
-    @State private var isDisplayingAdditionalPrompt: Bool = false
+//    @State private var additionalReferenceFilepaths: [String] = []
+    
+//    @State private var isDisplayingAdditionalPrompt: Bool = false
     @State private var isDisplayingControls: Bool = false
     
     @State private var isShowingAddAdditionalReferenceFileOrFolderDirectoryImporter: Bool = false
@@ -61,10 +64,7 @@ struct CodeGeneratorControlsView: View {
         HStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16.0) {
-                    Text("AI Task")
-                        .font(.title)
-                        .bold()
-                    
+                    Spacer()
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]) {
                         // Comment
                         CodeGeneratorControlButton(
@@ -75,7 +75,7 @@ struct CodeGeneratorControlsView: View {
                             subtitle: .constant("Smart comments for your file\(multipleFilesSelected ? "s" : "")."),
                             hoverDescription: Binding(get: {"AI creates smart comments for your file\(multipleFilesSelected ? "s" : "")"}, set: {_ in}),
                             foregroundColor: .foreground,
-                            action: { onSubmit(.comment, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
+                            action: { onSubmit(.comment, enabledGenerateOptions) })
                         
                         // Bug Fix
                         CodeGeneratorControlButton(
@@ -86,7 +86,7 @@ struct CodeGeneratorControlsView: View {
                             subtitle: .constant("Smart fix bugs for your file\(multipleFilesSelected ? "s" : "")"),
                             hoverDescription: Binding(get: {"AI fixes bugs in for your file\(multipleFilesSelected ? "s" : "")"}, set: {_ in}),
                             foregroundColor: .foreground,
-                            action: { onSubmit(.bugFix, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
+                            action: { onSubmit(.bugFix, enabledGenerateOptions) })
                         
                         // Split
                         CodeGeneratorControlButton(
@@ -97,7 +97,7 @@ struct CodeGeneratorControlsView: View {
                             subtitle: .constant("Split classes for your file\(multipleFilesSelected ? "s" : "")"),
                             hoverDescription: Binding(get: {"AI separates large classes and structures for your file\(multipleFilesSelected ? "s" : "")"}, set: {_ in}),
                             foregroundColor: .foreground,
-                            action: { onSubmit(.split, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
+                            action: { onSubmit(.split, enabledGenerateOptions) })
                         
                         // Simplify
                         CodeGeneratorControlButton(
@@ -108,7 +108,7 @@ struct CodeGeneratorControlsView: View {
                             subtitle: .constant("Simplify code for your file\(multipleFilesSelected ? "s" : "")"),
                             hoverDescription: Binding(get: {"AI simplifies complex code for your file\(multipleFilesSelected ? "s" : "")."}, set: {_ in}),
                             foregroundColor: .foreground,
-                            action: { onSubmit(.simplify, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
+                            action: { onSubmit(.simplify, enabledGenerateOptions) })
                         
                         // Test
                         CodeGeneratorControlButton(
@@ -119,7 +119,7 @@ struct CodeGeneratorControlsView: View {
                             subtitle: .constant("Create tests for your file\(multipleFilesSelected ? "s" : "")"),
                             hoverDescription: Binding(get: {"AI creates tests for your file\(multipleFilesSelected ? "s" : "")"}, set: {_ in}),
                             foregroundColor: .foreground,
-                            action: { onSubmit(.createTests, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
+                            action: { onSubmit(.createTests, enabledGenerateOptions) })
                         
                         //                        // Custom
                         CodeGeneratorControlButton(
@@ -132,113 +132,40 @@ struct CodeGeneratorControlsView: View {
                             subtitle: .constant("***Your prompt only***."),
                             hoverDescription: Binding(get: {"AI executes a task descirbed in your prompt for your file\(multipleFilesSelected ? "s" : "")"}, set: {_ in}),
                             foregroundColor: .foreground,
-                            action: { onSubmit(.custom, additionalPromptText, selectedFilepaths + additionalReferenceFilepaths, enabledGenerateOptions) })
+                            action: { onSubmit(.custom, enabledGenerateOptions) })
                     }
                     
-                    // Additional Prompt Entry or Popup or Show Button or Something
-                    if !isDisplayingAdditionalPrompt {
-                        Text("Additional Prompt")
-                            .bold()
-                        ZStack {
-                            TextField("Type Prompt...", text: $additionalPromptText, axis: .vertical)
-                                .frame(height: 100.0, alignment: .top)
-                                .textFieldStyle(.plain)
-                                .padding(4)
-                                .background(Color.background.opacity(0.1))
-                                .clipShape(RoundedRectangle(cornerRadius: 2.0))
-                            //                                    TextEditor(text: $additionalPromptText)
-                            //                                        .frame(height: 100)
-                            //                                        .scrollContentBackground(.hidden)
-                            //                                        .padding()
-                            //                                        .background(Color.background.opacity(0.1))
-                            //                                        .clipShape(RoundedRectangle(cornerRadius: 8.0))
-                            
-                            HStack {
-                                Spacer()
-                                VStack {
-                                    Spacer()
-                                    Button(action: {
-                                        withAnimation(.bouncy(duration: 0.28)) {
-                                            isDisplayingAdditionalPrompt = true
-                                        }
-                                    }) {
-                                        VStack {
-                                            Text("Expand \(Image(systemName: "chevron.right"))")
-                                                .matchedGeometryEffect(id: CodeGeneratorControlsView.additionalPromptTitleMatchedGeometryEffectID, in: namespace)
-                                        }
-                                    }
-                                    .padding(8)
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Selected and Additional Reference Files
+                    // Selected Files
                     VStack(alignment: .leading) {
-                        Text("Selected Filepaths")
-                            .bold()
-                        ForEach(selectedFilepaths, id: \.self) { selectedFilepath in
-                            Text((selectedFilepath as NSString).lastPathComponent)
+                        if focusViewModel.focus == .editor,
+                           let openTabFilepath = tabsViewModel.openTab?.filepath as? NSString {
+                            Text("Open File")
+                                .bold()
+                            Text(openTabFilepath.lastPathComponent)
                                 .font(.subheadline)
                                 .opacity(0.6)
-                        }
-                        if selectedFilepaths.isEmpty {
-                            Text("Nothing selected in sidebar.")
-                                .font(.subheadline)
-                                .italic()
-                                .opacity(0.6)
-                        }
-                        
-                        Text("Additional Filepaths")
-                            .bold()
-                            .padding(.top, 2)
-                        ForEach(additionalReferenceFilepaths, id: \.self) { additionalReferenceFilepath in
-                            HStack {
-                                Button("\(Image(systemName: "xmark"))") {
-                                    additionalReferenceFilepaths.removeAll(where: {$0 == additionalReferenceFilepath})
-                                }
-                                
-                                Text((additionalReferenceFilepath as NSString).lastPathComponent)
+                        } else if focusViewModel.focus == .browser {
+                            Text("Selected File\(selectedFilepaths.count == 1 ? "" : "s")")
+                                .bold()
+                            ForEach(selectedFilepaths, id: \.self) { selectedFilepath in
+                                Text((selectedFilepath as NSString).lastPathComponent)
                                     .font(.subheadline)
                                     .opacity(0.6)
                             }
                         }
-                        Button("\(Image(systemName: "plus")) Add Reference Files or Folders") {
-                            isShowingAddAdditionalReferenceFileOrFolderDirectoryImporter = true
+                        
+                        if selectedFilepaths.isEmpty {
+                            Text("Nothing selected in sidebar, using entire project.")
+                                .font(.subheadline)
+                                .italic()
+                                .opacity(0.6)
                         }
                     }
-                    
-                    Divider()
-                        .padding(8)
-                    
-//                    // Create temporary files instead of rewriting TODO: Add option to NarrowScopeControlsView
-//                    CodeGeneratorControlSwitch(
-//                        isOn: generateOptionCopyCurrentFilesToTempFile,
-//                        title: .constant(Text("Save to Temp File")),
-//                        subtitle: generateOptionCopyCurrentFilesToTempFile.wrappedValue ? .constant(Text("Will not overwrite your files.")) : .constant(Text("***Will overwrite***").foregroundColor(Color(NSColor.systemRed)) + Text(" your files.")),
-//                        hoverDescription: .constant("Use all files to give AI more context to what it is coding."),
-//                        foregroundColor: .foreground)
-//                    .offset(x: -8)
-                    
-                    //                                // Use entire project as context TODO: Maybe make this a three option switch where it can either be no added context, selected files as context, project as context.. TODO: Add option to NarrowScopeControlsView
-                    //                                CodeGeneratorControlSwitch(
-                    //                                    isOn: generateOptionUseEntireProjectAsContext,
-                    //                                    title: .constant(Text("Project as Context")),
-                    //                                    subtitle: generateOptionUseEntireProjectAsContext.wrappedValue ? .constant(Text("More accuracy and cost.")) : .constant(Text("Let AI see your entire project. May increase cost.")),
-                    //                                    hoverDescription: .constant("Use all files to give AI more context to what it is coding."),
-                    //                                    foregroundColor: .foreground)
-                    //                                .offset(x: -8)
-                    
-                    // TODO: Add files to directory
-                    
-                    
-                    
-                    Spacer()
                 }
-                .frame(width: 350.0)//, height: 800.0)
+//                .frame(width: 350.0)//, height: 800.0)
                 //                            .padding(.bottom)
                 //                            .padding([.leading, .trailing])
-                .padding()
+//                .padding()
             }
             .overlay {
                 VStack {
@@ -247,51 +174,6 @@ struct CodeGeneratorControlsView: View {
                         .fill(LinearGradient(colors: [Colors.foreground, .clear], startPoint: .bottom, endPoint: .top))
                         .frame(height: 16.0)
                 }
-            }
-            
-            if isDisplayingAdditionalPrompt {
-                Divider()
-                
-                VStack(alignment: .leading) {
-                    // Title
-                    Text("Additional Prompt")
-                        .font(.system(size: 17.0, weight: .medium))
-                        .padding(.top)
-                    //                                    .matchedGeometryEffect(id: CodeGeneratorControlsView.additionalPromptTitleMatchedGeometryEffectID, in: namespace)
-                    
-                    // Text
-                    TextEditor(text: $additionalPromptText)
-                        .padding()
-                        .scrollContentBackground(.hidden)
-                        .background(Color.background.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 8.0))
-                    //                                    .matchedGeometryEffect(id: CodeGeneratorControlsView.additionalPromptTextMatchedGeometryEffectID, in: namespace)
-                    
-                    // Hide Button
-                    Button(action: {
-                        withAnimation(.bouncy(duration: 0.28)) {
-                            isDisplayingAdditionalPrompt = false
-                        }
-                    }) {
-                        HStack {
-                            Spacer()
-                            Text("\(Image(systemName: "chevron.left")) Hide")
-                            Spacer()
-                        }
-                        .padding(8)
-                    }
-                }
-                .frame(width: 320.0)
-                .padding(.bottom)
-            }
-        }
-        .grantedPermissionsDirectoryImporter(
-            isPresented: $isShowingAddAdditionalReferenceFileOrFolderDirectoryImporter,
-            filepath: $addAdditionalReferenceFileOrFolderFilepath)
-        .onChange(of: addAdditionalReferenceFileOrFolderFilepath) { newValue in
-            if !newValue.isEmpty,
-               !additionalReferenceFilepaths.contains(newValue) {
-                additionalReferenceFilepaths.append(newValue)
             }
         }
     }
@@ -305,7 +187,8 @@ struct CodeGeneratorControlsView: View {
         rootFilepath: .constant("~/Downloads/test_dir"),
 //        focusViewModel: FocusViewModel(),
         selectedFilepaths: .constant(["Test", "Test2"]),
-        onSubmit: { actionType, userInput, referenceFilepaths, generateOptions in
+        tabsViewModel: TabsViewModel(),
+        onSubmit: { actionType, generateOptions in
             print("Submitted \(actionType)")
         }
     )

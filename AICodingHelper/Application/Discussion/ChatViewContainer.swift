@@ -13,13 +13,23 @@ struct ChatViewContainer: View {
     @ObservedObject var chat: Chat
     var onDelete: () -> Void
     
+    @Environment(\.undoManager) private var undoManager
+    
     @State private var isApplied: Bool = false
     
     @State private var isHoveringApplyButton: Bool = false
     
     var body: some View {
-        HStack {
-            if chat.message is GenerateCodeFC {
+        VStack {
+            // Chat View
+            ChatView(
+                rootFilepath: $rootFilepath,
+                chat: chat,
+                onDelete: onDelete)
+            
+            // Apply All Button
+            if let message = chat.message as? GenerateCodeFC,
+               message.output_files.count > 1 {
                 Button(action: {
                     // Apply changes
                     if let message = chat.message as? GenerateCodeFC {
@@ -34,18 +44,19 @@ struct ChatViewContainer: View {
                             .stroke(Color.background)
                             .opacity(isHoveringApplyButton ? 1.0 : 0.0)
                         
-                        VStack {
+                        HStack {
                             Image(systemName: isApplied ? "checkmark" : "chevron.left.2")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 20.0)
-                            Text(isApplied ? "Applied" : "Apply")
+                            Text(isApplied ? "Applied" : "Apply All")
                                 .font(.subheadline)
+                            Spacer()
                         }
                         .foregroundStyle(isApplied ? Color(.systemGreen) : Color.foregroundText)
                     }
-                    .frame(width: 50.0)
-                    .frame(maxHeight: .infinity)
+//                    .frame(width: 50.0)
+//                    .frame(maxHeight: .infinity)
                     .onHover { hovering in
                         withAnimation(.bouncy(duration: 0.5)) {
                             isHoveringApplyButton = hovering
@@ -54,10 +65,6 @@ struct ChatViewContainer: View {
                 }
                 .buttonStyle(PlainButtonStyle())
             }
-            
-            ChatView(
-                chat: chat,
-                onDelete: onDelete)
         }
     }
     

@@ -10,13 +10,15 @@ import SwiftUI
 struct ChatInputView: View {
     
     @Binding var newInput: String
+    @Binding var newFilepaths: [String]
+    @State var buildCodeGenerationText: LocalizedStringKey = "Build Code"
+    @State var chatText: LocalizedStringKey = "Chat"
     var doBuildCodeGeneration: () -> Void
     var doChatGeneration: () -> Void
     
     @FocusState private var focused
     
     @State private var isShowingDirectoryImporter: Bool = false
-    @State private var newFilepaths: [String] = []
     @State private var isLoading: Bool = false
     
     var body: some View {
@@ -82,7 +84,7 @@ struct ChatInputView: View {
                 Spacer()
                 
                 VStack(alignment: .leading) {
-                    Button("Build Code") {
+                    Button(buildCodeGenerationText) {
                         doBuildCodeGeneration()
                     }
                     .help("Build Code - command+shift+return")
@@ -91,7 +93,7 @@ struct ChatInputView: View {
                         doChatGeneration()
                     }) {
                         HStack {
-                            Text("Chat")
+                            Text(chatText)
                             HStack(spacing: 0.0) {
                                 Image(systemName: "command")
                                     .imageScale(.small)
@@ -118,6 +120,7 @@ struct ChatInputView: View {
     
     ChatInputView(
         newInput: .constant(""),
+        newFilepaths: .constant([]),
         doBuildCodeGeneration: {
             
         },

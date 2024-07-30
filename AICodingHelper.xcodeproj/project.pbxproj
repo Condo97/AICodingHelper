@@ -19,6 +19,11 @@
 		BB1405EE2C36CBF00036CFE8 /* CalculateTokensResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405ED2C36CBF00036CFE8 /* CalculateTokensResponse.swift */; };
 		BB1405F02C36CC560036CFE8 /* CalculateTokensRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405EF2C36CC560036CFE8 /* CalculateTokensRequest.swift */; };
 		BB1405F32C36CE330036CFE8 /* GenerationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1405F22C36CE330036CFE8 /* GenerationError.swift */; };
+		BB52BE622C57DB5000593A1D /* DiscussionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB52BE612C57DB5000593A1D /* DiscussionGenerator.swift */; };
+		BB52BE662C57DDC900593A1D /* InitialActionDiscussionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB52BE652C57DDC900593A1D /* InitialActionDiscussionView.swift */; };
+		BB52BE682C580DC800593A1D /* ChatCompletionChoiceDeltaFunctionCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB52BE672C580DC800593A1D /* ChatCompletionChoiceDeltaFunctionCall.swift */; };
+		BB52BE6A2C580E6200593A1D /* ChatCompletionChoiceDeltaToolCallFunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB52BE692C580E6200593A1D /* ChatCompletionChoiceDeltaToolCallFunction.swift */; };
+		BB52BE6C2C58168C00593A1D /* GenerateCodeFCChatFileMiniViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB52BE6B2C58168C00593A1D /* GenerateCodeFCChatFileMiniViewContainer.swift */; };
 		BB53E33A2C4180BF003FC84E /* ConstantsUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB53E3392C4180BF003FC84E /* ConstantsUpdater.swift */; };
 		BB53E33C2C418125003FC84E /* GetImportantConstantsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB53E33B2C418125003FC84E /* GetImportantConstantsResponse.swift */; };
 		BB53E33F2C418E33003FC84E /* PlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB53E33E2C418E33003FC84E /* PlanView.swift */; };
@@ -90,7 +95,7 @@
 		BB8561652C2F1944001C11F8 /* OAIChatCompletionRequestMessageContentImageURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561642C2F1944001C11F8 /* OAIChatCompletionRequestMessageContentImageURL.swift */; };
 		BB85616C2C2F205E001C11F8 /* ChatCompletionChunk.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB85616B2C2F205E001C11F8 /* ChatCompletionChunk.swift */; };
 		BB85616E2C2F2071001C11F8 /* ChatCompletionChoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB85616D2C2F2071001C11F8 /* ChatCompletionChoice.swift */; };
-		BB8561702C2F2080001C11F8 /* ChatCompletionDelta.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB85616F2C2F2080001C11F8 /* ChatCompletionDelta.swift */; };
+		BB8561702C2F2080001C11F8 /* ChatCompletionChoiceDelta.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB85616F2C2F2080001C11F8 /* ChatCompletionChoiceDelta.swift */; };
 		BB8561742C2F20AD001C11F8 /* ChatCompletionUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561732C2F20AD001C11F8 /* ChatCompletionUsage.swift */; };
 		BB8561762C2F20C1001C11F8 /* GetChatResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561752C2F20C1001C11F8 /* GetChatResponse.swift */; };
 		BB8561782C2F2161001C11F8 /* ChatGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8561772C2F2161001C11F8 /* ChatGenerator.swift */; };
@@ -195,6 +200,11 @@
 		BB1405ED2C36CBF00036CFE8 /* CalculateTokensResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculateTokensResponse.swift; sourceTree = "<group>"; };
 		BB1405EF2C36CC560036CFE8 /* CalculateTokensRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculateTokensRequest.swift; sourceTree = "<group>"; };
 		BB1405F22C36CE330036CFE8 /* GenerationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationError.swift; sourceTree = "<group>"; };
+		BB52BE612C57DB5000593A1D /* DiscussionGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionGenerator.swift; sourceTree = "<group>"; };
+		BB52BE652C57DDC900593A1D /* InitialActionDiscussionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialActionDiscussionView.swift; sourceTree = "<group>"; };
+		BB52BE672C580DC800593A1D /* ChatCompletionChoiceDeltaFunctionCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCompletionChoiceDeltaFunctionCall.swift; sourceTree = "<group>"; };
+		BB52BE692C580E6200593A1D /* ChatCompletionChoiceDeltaToolCallFunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCompletionChoiceDeltaToolCallFunction.swift; sourceTree = "<group>"; };
+		BB52BE6B2C58168C00593A1D /* GenerateCodeFCChatFileMiniViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCodeFCChatFileMiniViewContainer.swift; sourceTree = "<group>"; };
 		BB53E3392C4180BF003FC84E /* ConstantsUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstantsUpdater.swift; sourceTree = "<group>"; };
 		BB53E33B2C418125003FC84E /* GetImportantConstantsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetImportantConstantsResponse.swift; sourceTree = "<group>"; };
 		BB53E33E2C418E33003FC84E /* PlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanView.swift; sourceTree = "<group>"; };
@@ -271,7 +281,7 @@
 		BB8561642C2F1944001C11F8 /* OAIChatCompletionRequestMessageContentImageURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAIChatCompletionRequestMessageContentImageURL.swift; sourceTree = "<group>"; };
 		BB85616B2C2F205E001C11F8 /* ChatCompletionChunk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCompletionChunk.swift; sourceTree = "<group>"; };
 		BB85616D2C2F2071001C11F8 /* ChatCompletionChoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCompletionChoice.swift; sourceTree = "<group>"; };
-		BB85616F2C2F2080001C11F8 /* ChatCompletionDelta.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCompletionDelta.swift; sourceTree = "<group>"; };
+		BB85616F2C2F2080001C11F8 /* ChatCompletionChoiceDelta.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCompletionChoiceDelta.swift; sourceTree = "<group>"; };
 		BB8561732C2F20AD001C11F8 /* ChatCompletionUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCompletionUsage.swift; sourceTree = "<group>"; };
 		BB8561752C2F20C1001C11F8 /* GetChatResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetChatResponse.swift; sourceTree = "<group>"; };
 		BB8561772C2F2161001C11F8 /* ChatGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGenerator.swift; sourceTree = "<group>"; };
@@ -410,11 +420,14 @@
 				BB57C2CA2C4BE9ED008ED9F6 /* ChatView.swift */,
 				BBAD0AEE2C4D6EA30005A418 /* ChatViewContainer.swift */,
 				BB57C2C62C4BE537008ED9F6 /* Discussion.swift */,
-				BB57C2C42C4BE4EB008ED9F6 /* DiscussionView.swift */,
-				BBAD0AF62C4EBB7C0005A418 /* LoadingChatView.swift */,
-				BB57C2CC2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift */,
-				BBAD0AEA2C4D62400005A418 /* GenerateCodeFCChatFileMiniView.swift */,
+				BB52BE612C57DB5000593A1D /* DiscussionGenerator.swift */,
 				BBAD0AFA2C52C4B10005A418 /* DiscussionPopup.swift */,
+				BB57C2C42C4BE4EB008ED9F6 /* DiscussionView.swift */,
+				BBAD0AEA2C4D62400005A418 /* GenerateCodeFCChatFileMiniView.swift */,
+				BB57C2CC2C4C53EC008ED9F6 /* GenerateCodeFCChatMiniView.swift */,
+				BB52BE6B2C58168C00593A1D /* GenerateCodeFCChatFileMiniViewContainer.swift */,
+				BB52BE652C57DDC900593A1D /* InitialActionDiscussionView.swift */,
+				BBAD0AF62C4EBB7C0005A418 /* LoadingChatView.swift */,
 			);
 			path = Discussion;
 			sourceTree = "<group>";
@@ -432,7 +445,9 @@
 			children = (
 				BB85616B2C2F205E001C11F8 /* ChatCompletionChunk.swift */,
 				BB85616D2C2F2071001C11F8 /* ChatCompletionChoice.swift */,
-				BB85616F2C2F2080001C11F8 /* ChatCompletionDelta.swift */,
+				BB85616F2C2F2080001C11F8 /* ChatCompletionChoiceDelta.swift */,
+				BB52BE672C580DC800593A1D /* ChatCompletionChoiceDeltaFunctionCall.swift */,
+				BB52BE692C580E6200593A1D /* ChatCompletionChoiceDeltaToolCallFunction.swift */,
 				BB8561732C2F20AD001C11F8 /* ChatCompletionUsage.swift */,
 			);
 			path = Stream;
@@ -953,6 +968,7 @@
 				BBAD0AED2C4D63730005A418 /* ResizableTextEditor.swift in Sources */,
 				BB57C2C22C4ADD68008ED9F6 /* CodeGenerator.swift in Sources */,
 				BB57C2C92C4BE5B2008ED9F6 /* Chat.swift in Sources */,
+				BB52BE6C2C58168C00593A1D /* GenerateCodeFCChatFileMiniViewContainer.swift in Sources */,
 				BB1405E22C360D180036CFE8 /* FileCounter.swift in Sources */,
 				BB57C2522C45CB35008ED9F6 /* ActiveSubscriptionUpdater.swift in Sources */,
 				BB8561762C2F20C1001C11F8 /* GetChatResponse.swift in Sources */,
@@ -978,7 +994,7 @@
 				BBB7C75C2C31FEAE00BEDD07 /* FileSystemGenerator.swift in Sources */,
 				BB85616C2C2F205E001C11F8 /* ChatCompletionChunk.swift in Sources */,
 				BB85618E2C2F32CC001C11F8 /* Collection+Safe.swift in Sources */,
-				BB8561702C2F2080001C11F8 /* ChatCompletionDelta.swift in Sources */,
+				BB8561702C2F2080001C11F8 /* ChatCompletionChoiceDelta.swift in Sources */,
 				BB85611D2C2CCE7B001C11F8 /* NarrowScopeControlsView.swift in Sources */,
 				BB85617E2C2F2392001C11F8 /* AICodingHelperWebSocketConnector.swift in Sources */,
 				BB85617A2C2F234B001C11F8 /* WebSocketClient.swift in Sources */,
@@ -996,6 +1012,7 @@
 				BB617C652C39C3D300263D3F /* OAIChatCompletionResponseChoice.swift in Sources */,
 				BB617C722C39CDCE00263D3F /* CodeGenerationPlanGenerator.swift in Sources */,
 				BB8561112C2CB78D001C11F8 /* CodeEditorContainer.swift in Sources */,
+				BB52BE6A2C580E6200593A1D /* ChatCompletionChoiceDeltaToolCallFunction.swift in Sources */,
 				BBBD40A62C3B2383008917CC /* FolderCreatorPopup.swift in Sources */,
 				BBB7C7642C325AE200BEDD07 /* CodeGeneratorControlButton.swift in Sources */,
 				BBBD40B32C3C44B9008917CC /* AIProjectCreatorPopup.swift in Sources */,
@@ -1022,6 +1039,7 @@
 				BBAD0AF72C4EBB7C0005A418 /* LoadingChatView.swift in Sources */,
 				BBAD0AEF2C4D6EA30005A418 /* ChatViewContainer.swift in Sources */,
 				BB8E17CA2C3599D800E3F463 /* FocusableContent.swift in Sources */,
+				BB52BE622C57DB5000593A1D /* DiscussionGenerator.swift in Sources */,
 				BBBD40A82C3B4F96008917CC /* AICodingHelperAppCommands.swift in Sources */,
 				BB57C2542C480DEB008ED9F6 /* ValidateOpenAIKeyResponse.swift in Sources */,
 				BBBD40A22C3B12FB008917CC /* AIFileCreatorContainer.swift in Sources */,
@@ -1033,6 +1051,7 @@
 				BB8561742C2F20AD001C11F8 /* ChatCompletionUsage.swift in Sources */,
 				BB85616E2C2F2071001C11F8 /* ChatCompletionChoice.swift in Sources */,
 				BB8561AC2C30526C001C11F8 /* TabsView.swift in Sources */,
+				BB52BE662C57DDC900593A1D /* InitialActionDiscussionView.swift in Sources */,
 				BB8561A92C304C7E001C11F8 /* TabAddingFileSystemView.swift in Sources */,
 				BB8561612C2F1518001C11F8 /* InputImageDetail.swift in Sources */,
 				BBB7C7542C31F52D00BEDD07 /* ResponseFormatType.swift in Sources */,
@@ -1077,6 +1096,7 @@
 				BB57C2C72C4BE537008ED9F6 /* Discussion.swift in Sources */,
 				BB8561992C2F846C001C11F8 /* CodeView.swift in Sources */,
 				BB8561822C2F2BC7001C11F8 /* AuthHelper.swift in Sources */,
+				BB52BE682C580DC800593A1D /* ChatCompletionChoiceDeltaFunctionCall.swift in Sources */,
 				BBBD40B52C3CA588008917CC /* BookmarkHelper.swift in Sources */,
 				BB7FF84D2C2CADE2000B60C3 /* FileNode.swift in Sources */,
 				BBBD40C92C3D6954008917CC /* UltraView.swift in Sources */,
