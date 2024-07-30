@@ -53,6 +53,7 @@ struct ChatViewContainer: View {
                                 .font(.subheadline)
                             Spacer()
                         }
+                        .padding()
                         .foregroundStyle(isApplied ? Color(.systemGreen) : Color.foregroundText)
                     }
 //                    .frame(width: 50.0)

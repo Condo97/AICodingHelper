@@ -49,13 +49,11 @@ class DiscussionGenerator: ObservableObject {
         
         // Generate geneate code FC chat
         Task {
-            await generateGenerateCodeFCChat(
-                activeSubscriptionUpdater: activeSubscriptionUpdater,
-                rootFilepath: rootFilepath)
+            await generateGenerateCodeFCChat(activeSubscriptionUpdater: activeSubscriptionUpdater)
         }
     }
     
-    func doChatGeneration(activeSubscriptionUpdater: ActiveSubscriptionUpdater, rootFilepath: String) {
+    func doChatGeneration(activeSubscriptionUpdater: ActiveSubscriptionUpdater) {
         // Ensure is not loading otherwise return
         guard !isLoading else {
             // TODO: Handle Errors
@@ -82,13 +80,11 @@ class DiscussionGenerator: ObservableObject {
         
         // Generate string chat
         Task {
-            await generateStringChat(
-                activeSubscriptionUpdater: activeSubscriptionUpdater,
-                rootFilepath: rootFilepath)
+            await generateStringChat(activeSubscriptionUpdater: activeSubscriptionUpdater)
         }
     }
     
-    func generateStringChat(activeSubscriptionUpdater: ActiveSubscriptionUpdater, rootFilepath: String) async {
+    func generateStringChat(activeSubscriptionUpdater: ActiveSubscriptionUpdater) async {
         // Ensure not isLoading
         guard !isLoading else {
             // TODO: Handle Errors
@@ -123,7 +119,7 @@ class DiscussionGenerator: ObservableObject {
             messages = try discussion.chats.compactMap({
                 // Transform reference filepaths into a string for the message
                 let referenceFilepathsString: String? = $0.referenceFilepaths?.compactMap({
-                    FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)
+                    FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: nil)
                 }).joined(separator: "\n\n")
                 
                 // If message is GenerateCodeFC transform and return
@@ -202,7 +198,7 @@ class DiscussionGenerator: ObservableObject {
         }
     }
     
-    func generateGenerateCodeFCChat(activeSubscriptionUpdater: ActiveSubscriptionUpdater, rootFilepath: String) async {
+    func generateGenerateCodeFCChat(activeSubscriptionUpdater: ActiveSubscriptionUpdater) async {
         // Ensure not isLoading
         guard !isLoading else {
             // TODO: Handle Errors
@@ -237,7 +233,7 @@ class DiscussionGenerator: ObservableObject {
             messages = try discussion.chats.compactMap({
                 // Transform reference filepaths into a string for the message
                 let referenceFilepathsString: String? = $0.referenceFilepaths?.compactMap({
-                    FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: rootFilepath)
+                    FilePrettyPrinter.getFileContent(relativeFilepath: $0, rootFilepath: nil)
                 }).joined(separator: "\n\n")
                 
                 // If message is GenerateCodeFC transform and return

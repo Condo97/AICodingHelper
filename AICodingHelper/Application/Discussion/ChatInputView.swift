@@ -52,11 +52,17 @@ struct ChatInputView: View {
                     
                     VStack(alignment: .leading) {
                         ForEach(newFilepaths, id: \.self) { filepath in
-                            Text(filepath)
-                                .lineLimit(1)
-                                .truncationMode(.head)
-                                .font(.system(size: 9.0))
-                                .opacity(0.6)
+                            HStack {
+                                Button("\(Image(systemName: "xmark"))") {
+                                    newFilepaths.removeAll(where: {$0 == filepath})
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                Text(filepath)
+                                    .lineLimit(1)
+                                    .truncationMode(.head)
+                                    .font(.system(size: 9.0))
+                                    .opacity(0.6)
+                            }
                         }
                         
                         Text("Drag Files Here")
@@ -104,7 +110,6 @@ struct ChatInputView: View {
                     }
                     .help("Chat - command+return")
                     .keyboardShortcut(.defaultAction)
-                    .disabled(newInput.isEmpty && newFilepaths.isEmpty)
                 }
             }
             .disabled(isLoading)

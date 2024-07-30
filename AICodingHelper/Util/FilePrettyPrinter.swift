@@ -10,11 +10,11 @@ import Foundation
 
 class FilePrettyPrinter {
     
-    static func getFileContent(relativeFilepath: String, rootFilepath: String) -> String {
+    static func getFileContent(relativeFilepath: String, rootFilepath: String?) -> String {
         var result = ""
         let fileManager = FileManager.default
         
-        let fullFilepath = rootFilepath + (relativeFilepath.hasPrefix("/") ? "" : "/") + relativeFilepath
+        let fullFilepath = rootFilepath == nil ? relativeFilepath : (rootFilepath! + (relativeFilepath.hasPrefix("/") ? "" : "/") + relativeFilepath)
 
         // Check if the given path is a directory
         var isDirectory: ObjCBool = false

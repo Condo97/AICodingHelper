@@ -134,9 +134,7 @@ struct DiscussionView<Content: View>: View {
                         rootFilepath: rootFilepath)
                 },
                 doChatGeneration: {
-                    discussionGenerator.doChatGeneration(
-                        activeSubscriptionUpdater: activeSubscriptionUpdater,
-                        rootFilepath: rootFilepath)
+                    discussionGenerator.doChatGeneration(activeSubscriptionUpdater: activeSubscriptionUpdater)
                 })
         }
         .overlay(alignment: .topTrailing) {
@@ -163,9 +161,7 @@ struct DiscussionView<Content: View>: View {
             if !commandReturnEventMonitorCreated {
                 NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
                     if event.modifierFlags.contains(.command) && event.keyCode == 36 { // Return key code is
-                        discussionGenerator.doChatGeneration(
-                            activeSubscriptionUpdater: activeSubscriptionUpdater,
-                            rootFilepath: rootFilepath)
+                        discussionGenerator.doChatGeneration(activeSubscriptionUpdater: activeSubscriptionUpdater)
                     }
                     
                     return event

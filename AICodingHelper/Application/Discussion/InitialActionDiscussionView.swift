@@ -36,7 +36,7 @@ struct InitialActionDiscussionView: View {
                                     let instructions = actionType.aiPrompt + (discussionGenerator.newInput.isEmpty ? "" : "\n" + discussionGenerator.newInput)
                                     
                                     // Get referenceFilepaths from selectedFilepaths or if empty array with contents of rootFilepath
-                                    let referenceFilepaths: [String] = selectedFilepaths.isEmpty ? try FileManager.default.contentsOfDirectory(atPath: rootFilepath) : selectedFilepaths
+                                    let referenceFilepaths: [String] = selectedFilepaths.isEmpty ? try FileManager.default.contentsOfDirectory(atPath: rootFilepath).map({URL(fileURLWithPath: rootFilepath).appendingPathComponent($0, conformingTo: .fileURL).path}) : selectedFilepaths.map({URL(fileURLWithPath: rootFilepath).appendingPathComponent($0, conformingTo: .fileURL).path})
                                     
                                     // Get relativeReferenceFilepaths from referenceFilepaths
                                     let relativeReferenceFilepaths: [String] = referenceFilepaths.map({$0.replacingOccurrences(of: rootFilepath, with: "")})

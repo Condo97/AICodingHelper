@@ -70,9 +70,22 @@ struct ChatView: View {
             if let referenceFilepaths = chat.referenceFilepaths {
                 VStack(alignment: .leading) {
                     ForEach(referenceFilepaths, id: \.self) { referenceFilepath in
-                        Text(referenceFilepath)
-                            .font(.subheadline)
-                            .bold()
+                        HStack(spacing: 0.0) {
+                            if isHovering {
+                                Button(action: {
+                                    chat.referenceFilepaths?.removeAll(where: {$0 == referenceFilepath})
+                                }) {
+                                    Image(systemName: "xmark")
+                                        .imageScale(.medium)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                            Text(referenceFilepath)
+                                .lineLimit(1)
+                                .truncationMode(.head)
+                                .font(.system(size: 9.0))
+                                .opacity(0.6)
+                        }
                     }
                 }
             }
@@ -98,7 +111,8 @@ struct ChatView: View {
             role: .user,
             message: GenerateCodeFC(output_files: [GenerateCodeFC.File(
                 filepath: "~/Downloads/test_dir",
-                content: "This is the new content for the file.")])),
+                content: "This is the new content for the file.")]),
+                referenceFilepaths: ["Test Filepath 1", "Test Filepath 2", "Test Filepath 3"]),
 //            message: "This is the user string message"),
         onDelete: {
             
